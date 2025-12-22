@@ -1,13 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-
 import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/router/app_router.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
-import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
+import 'package:centabit/shared/widgets/transaction_tile.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 /// Dashboard page - main screen after login
 class DashboardPage extends StatelessWidget {
@@ -15,10 +14,7 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<TransactionListCubit>(),
-      child: const _DashboardView(),
-    );
+    return BlocProvider(create: (_) => getIt<TransactionListCubit>(), child: const _DashboardView());
   }
 }
 
@@ -35,9 +31,7 @@ class _DashboardView extends StatelessWidget {
       appBar: AppBar(
         toolbarHeight: 96,
         title: DefaultTextStyle(
-          style: theme.textTheme.headlineLarge!.copyWith(
-            color: colorScheme.onSurface,
-          ),
+          style: theme.textTheme.headlineLarge!.copyWith(color: colorScheme.onSurface),
           child: Row(
             children: [
               _buildWavingHand(),
@@ -57,7 +51,7 @@ class _DashboardView extends StatelessWidget {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(spacing.md),
+        padding: EdgeInsets.symmetric(horizontal: spacing.md),
         child: BlocBuilder<TransactionListCubit, TransactionListState>(
           builder: (context, state) {
             return state.when(
@@ -68,9 +62,7 @@ class _DashboardView extends StatelessWidget {
                   return Center(
                     child: Text(
                       'No transactions yet',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.5),
-                      ),
+                      style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.5)),
                     ),
                   );
                 }
@@ -94,12 +86,7 @@ class _DashboardView extends StatelessWidget {
                 );
               },
               error: (message) => Center(
-                child: Text(
-                  'Error: $message',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.error,
-                  ),
-                ),
+                child: Text('Error: $message', style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.error)),
               ),
             );
           },

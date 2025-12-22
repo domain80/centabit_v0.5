@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/data/services/category_service.dart';
 import 'package:centabit/data/services/transaction_service.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
@@ -17,6 +18,7 @@ Future<void> configureDependencies() async {
   );
 
   // Register Cubits (factories - new instance each time)
+  getIt.registerFactory<NavCubit>(() => NavCubit());
   getIt.registerFactory<TransactionListCubit>(
     () => TransactionListCubit(
       getIt<TransactionService>(),
