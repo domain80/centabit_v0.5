@@ -1,4 +1,5 @@
 import 'package:centabit/core/theme/tabler_icons.dart';
+import 'package:centabit/shared/widgets/shared_app_bar.dart';
 import 'package:flutter/material.dart';
 
 /// Budgets page - placeholder for budget management features
@@ -8,9 +9,7 @@ class BudgetsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Budgets'),
-      ),
+      appBar: sharedAppBar(context, title: const Text('Budgets')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -18,9 +17,9 @@ class BudgetsPage extends StatelessWidget {
             Icon(
               TablerIcons.chartPie,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(
-                    alpha: 0.5,
-                  ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -31,10 +30,10 @@ class BudgetsPage extends StatelessWidget {
             Text(
               'Budget management features will be available soon',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(
-                          alpha: 0.6,
-                        ),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
               textAlign: TextAlign.center,
             ),
           ],

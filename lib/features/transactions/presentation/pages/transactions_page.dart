@@ -2,6 +2,7 @@ import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
+import 'package:centabit/shared/widgets/shared_app_bar.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,7 +16,7 @@ class TransactionsPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => getIt<TransactionListCubit>(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Transactions')),
+        appBar: sharedAppBar(context, title: const Text('Transactions')),
         body: BlocBuilder<TransactionListCubit, TransactionListState>(
           builder: (context, state) {
             return state.when(
@@ -29,7 +30,7 @@ class TransactionsPage extends StatelessWidget {
                 final spacing = Theme.of(context).extension<AppSpacing>()!;
 
                 return ListView.builder(
-                  padding: EdgeInsets.all(spacing.lg),
+                  padding: EdgeInsets.symmetric(horizontal: spacing.lg),
                   itemCount: transactions.length,
                   itemBuilder: (context, index) => TransactionTile(
                     transaction: transactions[index],

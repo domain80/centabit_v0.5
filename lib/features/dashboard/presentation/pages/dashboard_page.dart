@@ -1,12 +1,11 @@
 import 'package:centabit/core/di/injection.dart';
-import 'package:centabit/core/router/app_router.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
+import 'package:centabit/shared/widgets/shared_app_bar.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 /// Dashboard page - main screen after login
 class DashboardPage extends StatelessWidget {
@@ -31,29 +30,15 @@ class _DashboardView extends StatelessWidget {
     final spacing = theme.extension<AppSpacing>()!;
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 96,
-        title: DefaultTextStyle(
-          style: theme.textTheme.headlineLarge!.copyWith(
-            color: colorScheme.onSurface,
-          ),
-          child: Row(
-            children: [
-              _buildWavingHand(),
-              SizedBox(width: spacing.sm),
-              const Text('Hi David'),
-            ],
-          ),
+      appBar: sharedAppBar(
+        context,
+        title: Row(
+          children: [
+            _buildWavingHand(),
+            SizedBox(width: spacing.sm),
+            const Text('Hi David'),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () {
-              context.go(AppRouter.login);
-            },
-            tooltip: 'Logout',
-          ),
-        ],
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: spacing.lg),
