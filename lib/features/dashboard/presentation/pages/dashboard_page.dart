@@ -1,4 +1,5 @@
 import 'package:centabit/core/di/injection.dart';
+import 'package:centabit/core/router/navigation/nav_scroll_behavior.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
@@ -40,8 +41,7 @@ class _DashboardView extends StatelessWidget {
           ],
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+      body: NavScrollWrapper(
         child: BlocBuilder<TransactionListCubit, TransactionListState>(
           builder: (context, state) {
             return state.when(
@@ -49,34 +49,55 @@ class _DashboardView extends StatelessWidget {
               loading: () => const Center(child: CircularProgressIndicator()),
               success: (transactions, currentPage, hasMore) {
                 if (transactions.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No transactions yet',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                  return RefreshIndicator(
+                    onRefresh: () {
+                      context.read<TransactionListCubit>().refresh();
+                      return Future<void>.delayed(
+                        const Duration(milliseconds: 300),
+                      );
+                    },
+                    child: Center(
+                      child: Text(
+                        'No transactions yet',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                   );
                 }
-                return ListView.builder(
-                  itemCount: transactions.length,
-                  itemBuilder: (context, index) {
-                    final transaction = transactions[index];
-                    return TransactionTile(
-                      transaction: transaction,
-                      onEdit: () {
-                        // TODO: Navigate to edit transaction
-                      },
-                      onDelete: () {
-                        context.read<TransactionListCubit>().deleteTransaction(
-                          transaction.id,
-                        );
-                      },
-                      onCopy: () {
-                        // TODO: Copy transaction
-                      },
+                return RefreshIndicator(
+                  onRefresh: () {
+                    context.read<TransactionListCubit>().refresh();
+                    return Future<void>.delayed(
+                      const Duration(milliseconds: 300),
                     );
                   },
+                  child: ListView.builder(
+                    padding: EdgeInsets.only(
+                      left: spacing.lg,
+                      right: spacing.lg,
+                      bottom: 120,
+                    ),
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      return TransactionTile(
+                        transaction: transaction,
+                        onEdit: () {
+                          // TODO: Navigate to edit transaction
+                        },
+                        onDelete: () {
+                          context.read<TransactionListCubit>().deleteTransaction(
+                            transaction.id,
+                          );
+                        },
+                        onCopy: () {
+                          // TODO: Copy transaction
+                        },
+                      );
+                    },
+                  ),
                 );
               },
               error: (message) => Center(
@@ -94,7 +115,7 @@ class _DashboardView extends StatelessWidget {
     );
   }
 
-  TweenAnimationBuilder<double> _buildWavingHand() {
+  static TweenAnimationBuilder<double> _buildWavingHand() {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(seconds: 2), // 2 waves total

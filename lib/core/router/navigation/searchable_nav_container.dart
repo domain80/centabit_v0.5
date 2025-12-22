@@ -98,7 +98,7 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
             // Search Bar (top layer)
             if (navState.isSearching)
               Positioned(
-                top: 0,
+                bottom: spacing.xl6,
                 left: spacing.md,
                 right: spacing.md,
                 child: AnimatedOpacity(
@@ -114,7 +114,7 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
               )
             else
               Positioned(
-                top: 0,
+                bottom: spacing.xl6,
                 left: spacing.md,
                 right: spacing.md,
                 child: AnimatedOpacity(
