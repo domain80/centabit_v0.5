@@ -16,15 +16,15 @@ class CategoryService {
   void _initializeDefaultCategories() {
     final defaults = [
       CategoryModel.create(name: 'Groceries', iconName: 'basket'),
-      CategoryModel.create(name: 'Entertainment', iconName: 'device_tv'),
+      CategoryModel.create(name: 'Entertainment', iconName: 'deviceTv'),
       CategoryModel.create(name: 'Transport', iconName: 'car'),
       CategoryModel.create(name: 'Utilities', iconName: 'bolt'),
-      CategoryModel.create(name: 'Healthcare', iconName: 'pill'),
+      CategoryModel.create(name: 'Healthcare', iconName: 'heart'),
       CategoryModel.create(name: 'Education', iconName: 'book'),
-      CategoryModel.create(name: 'Dining', iconName: 'utensils'),
-      CategoryModel.create(name: 'Shopping', iconName: 'shopping_bag'),
+      CategoryModel.create(name: 'Dining', iconName: 'mug'),
+      CategoryModel.create(name: 'Shopping', iconName: 'shoppingBag'),
       CategoryModel.create(name: 'Coffee', iconName: 'coffee'),
-      CategoryModel.create(name: 'Gas & Fuel', iconName: 'fuel'),
+      CategoryModel.create(name: 'Gas & Fuel', iconName: 'flame'),
     ];
     _categories.addAll(defaults);
     _emitCategories();

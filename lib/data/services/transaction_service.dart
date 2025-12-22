@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'package:centabit/data/models/transaction_model.dart';
+import 'package:centabit/data/services/category_service.dart';
 
 class TransactionService {
   final List<TransactionModel> _transactions = [];
   final _transactionsController = StreamController<List<TransactionModel>>.broadcast();
+  final CategoryService _categoryService;
 
   Stream<List<TransactionModel>> get transactionsStream => _transactionsController.stream;
 
   List<TransactionModel> get transactions => List.unmodifiable(_transactions);
 
-  TransactionService() {
+  TransactionService(this._categoryService) {
     _initializeSampleTransactions();
   }
 
@@ -18,13 +20,23 @@ class TransactionService {
     final yesterday = now.subtract(const Duration(days: 1));
     final twoDaysAgo = now.subtract(const Duration(days: 2));
 
+    // Get category IDs from the service
+    final categories = _categoryService.categories;
+    final groceriesId = categories.firstWhere((c) => c.name == 'Groceries').id;
+    final entertainmentId = categories.firstWhere((c) => c.name == 'Entertainment').id;
+    final transportId = categories.firstWhere((c) => c.name == 'Transport').id;
+    final healthcareId = categories.firstWhere((c) => c.name == 'Healthcare').id;
+    final diningId = categories.firstWhere((c) => c.name == 'Dining').id;
+    final coffeeId = categories.firstWhere((c) => c.name == 'Coffee').id;
+    final gasId = categories.firstWhere((c) => c.name == 'Gas & Fuel').id;
+
     final samples = [
       TransactionModel(
         id: '1',
         name: 'Whole Foods',
         amount: 45.99,
         type: TransactionType.debit,
-        categoryId: '1', // Groceries
+        categoryId: groceriesId,
         budgetId: null,
         transactionDate: now.copyWith(hour: 10, minute: 30),
         notes: null,
@@ -36,7 +48,7 @@ class TransactionService {
         name: 'Uber Ride',
         amount: 12.50,
         type: TransactionType.debit,
-        categoryId: '3', // Transport
+        categoryId: transportId,
         budgetId: null,
         transactionDate: now.copyWith(hour: 14, minute: 15),
         notes: 'Trip to office',
@@ -48,7 +60,7 @@ class TransactionService {
         name: 'Netflix Subscription',
         amount: 15.99,
         type: TransactionType.debit,
-        categoryId: '2', // Entertainment
+        categoryId: entertainmentId,
         budgetId: null,
         transactionDate: yesterday.copyWith(hour: 9, minute: 0),
         notes: 'Monthly subscription',
@@ -60,7 +72,7 @@ class TransactionService {
         name: 'Coffee at Starbucks',
         amount: 5.75,
         type: TransactionType.debit,
-        categoryId: '9', // Coffee
+        categoryId: coffeeId,
         budgetId: null,
         transactionDate: yesterday.copyWith(hour: 8, minute: 30),
         notes: null,
@@ -72,7 +84,7 @@ class TransactionService {
         name: 'Doctor Appointment',
         amount: 85.00,
         type: TransactionType.debit,
-        categoryId: '5', // Healthcare
+        categoryId: healthcareId,
         budgetId: null,
         transactionDate: twoDaysAgo.copyWith(hour: 11, minute: 0),
         notes: 'Checkup',
@@ -96,7 +108,7 @@ class TransactionService {
         name: 'Dinner at Restaurant',
         amount: 52.30,
         type: TransactionType.debit,
-        categoryId: '7', // Dining
+        categoryId: diningId,
         budgetId: null,
         transactionDate: now.copyWith(hour: 19, minute: 45),
         notes: 'Date night',
@@ -108,7 +120,7 @@ class TransactionService {
         name: 'Gas Station',
         amount: 45.00,
         type: TransactionType.debit,
-        categoryId: '10', // Gas & Fuel
+        categoryId: gasId,
         budgetId: null,
         transactionDate: yesterday.copyWith(hour: 17, minute: 30),
         notes: null,

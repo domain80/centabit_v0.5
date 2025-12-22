@@ -12,7 +12,9 @@ final getIt = GetIt.instance;
 Future<void> configureDependencies() async {
   // Register services (singletons - same instance everywhere)
   getIt.registerLazySingleton<CategoryService>(() => CategoryService());
-  getIt.registerLazySingleton<TransactionService>(() => TransactionService());
+  getIt.registerLazySingleton<TransactionService>(
+    () => TransactionService(getIt<CategoryService>()),
+  );
 
   // Register Cubits (factories - new instance each time)
   getIt.registerFactory<TransactionListCubit>(
