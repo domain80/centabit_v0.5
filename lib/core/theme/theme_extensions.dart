@@ -93,20 +93,38 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
   /// Extra small spacing (4px)
   final double xs;
 
-  /// Small spacing (8px)
+  /// Small radius (8px)
   final double sm;
 
-  /// Medium spacing (16px)
+  /// Medium radius (12px)
   final double md;
 
-  /// Large spacing (24px)
+  /// Large radius (16px)
   final double lg;
 
-  /// Extra large spacing (32px)
+  /// Extra large radius (24px)
   final double xl;
 
-  /// Extra extra large spacing (48px)
-  final double xxl;
+  /// Extra large radius 2 (32px)
+  final double xl2;
+
+  /// Extra large radius 3 (40px)
+  final double xl3;
+
+  /// Extra large radius 4 (48px)
+  final double xl4;
+
+  /// Extra large radius 5 (56px)
+  final double xl5;
+
+  /// Extra large radius 6 (64px)
+  final double xl6;
+
+  /// Pill radius (28px) - for buttons
+  final double pill;
+
+  /// Full circle radius (999px)
+  final double circle;
 
   const AppSpacing({
     required this.xs,
@@ -114,17 +132,29 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     required this.md,
     required this.lg,
     required this.xl,
-    required this.xxl,
+    required this.xl2,
+    required this.xl3,
+    required this.xl4,
+    required this.xl5,
+    required this.xl6,
+    required this.pill,
+    required this.circle,
   });
 
-  /// Default spacing scale
+  /// Default radius scale
   static const AppSpacing standard = AppSpacing(
     xs: 4.0,
     sm: 8.0,
-    md: 16.0,
-    lg: 24.0,
-    xl: 32.0,
-    xxl: 48.0,
+    md: 12.0,
+    lg: 16.0,
+    xl: 24.0,
+    xl2: 32.0,
+    xl3: 40.0,
+    xl4: 48.0,
+    xl5: 56.0,
+    xl6: 64.0,
+    pill: 28.0,
+    circle: 999.0,
   );
 
   @override
@@ -134,7 +164,13 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     double? md,
     double? lg,
     double? xl,
-    double? xxl,
+    double? xl2,
+    double? xl3,
+    double? xl4,
+    double? xl5,
+    double? xl6,
+    double? pill,
+    double? circle,
   }) {
     return AppSpacing(
       xs: xs ?? this.xs,
@@ -142,7 +178,13 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       md: md ?? this.md,
       lg: lg ?? this.lg,
       xl: xl ?? this.xl,
-      xxl: xxl ?? this.xxl,
+      xl2: xl2 ?? this.xl2,
+      xl3: xl3 ?? this.xl3,
+      xl4: xl4 ?? this.xl4,
+      xl5: xl5 ?? this.xl5,
+      xl6: xl6 ?? this.xl6,
+      pill: pill ?? this.pill,
+      circle: circle ?? this.circle,
     );
   }
 
@@ -161,7 +203,13 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       md: lerpDouble(md, other.md, t)!,
       lg: lerpDouble(lg, other.lg, t)!,
       xl: lerpDouble(xl, other.xl, t)!,
-      xxl: lerpDouble(xxl, other.xxl, t)!,
+      xl2: lerpDouble(xl2, other.xl2, t)!,
+      xl3: lerpDouble(xl3, other.xl3, t)!,
+      xl4: lerpDouble(xl4, other.xl4, t)!,
+      xl5: lerpDouble(xl5, other.xl5, t)!,
+      xl6: lerpDouble(xl6, other.xl6, t)!,
+      pill: lerpDouble(pill, other.pill, t)!,
+      circle: lerpDouble(circle, other.circle, t)!,
     );
   }
 }

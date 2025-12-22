@@ -12,13 +12,20 @@ class TransactionTile extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onCopy;
 
-  const TransactionTile({super.key, required this.transaction, this.onEdit, this.onDelete, this.onCopy});
+  const TransactionTile({
+    super.key,
+    required this.transaction,
+    this.onEdit,
+    this.onDelete,
+    this.onCopy,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final spacing = theme.extension<AppSpacing>()!;
+    final radius = theme.extension<AppRadius>()!;
     final isCredit = transaction.type == TransactionType.credit;
 
     return Dismissible(
@@ -30,16 +37,24 @@ class TransactionTile extends StatelessWidget {
           type: ToastificationType.error,
           title: const Text("Transaction deleted"),
           style: ToastificationStyle.simple,
-          closeButton: const ToastCloseButton(showType: CloseButtonShowType.none),
+          closeButton: const ToastCloseButton(
+            showType: CloseButtonShowType.none,
+          ),
           closeOnClick: true,
-          padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.xs),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.lg,
+            vertical: spacing.xs,
+          ),
           autoCloseDuration: const Duration(seconds: 5),
           backgroundColor: colorScheme.surface,
           foregroundColor: colorScheme.onSurface,
           dragToClose: true,
           borderRadius: BorderRadius.circular(400),
           applyBlurEffect: true,
-          borderSide: BorderSide(color: colorScheme.secondary.withValues(alpha: 0.5), width: 1),
+          borderSide: BorderSide(
+            color: colorScheme.secondary.withValues(alpha: 0.5),
+            width: 1,
+          ),
           context: context,
         );
       },
@@ -50,15 +65,23 @@ class TransactionTile extends StatelessWidget {
             builder: (context) {
               return AlertDialog(
                 title: const Text('Delete Transaction'),
-                content: const Text('Are you sure you want to delete this transaction?'),
+                content: const Text(
+                  'Are you sure you want to delete this transaction?',
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text('Cancel', style: TextStyle(color: colorScheme.onSurface)),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: colorScheme.onSurface),
+                    ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: Text('Delete', style: TextStyle(color: colorScheme.error)),
+                    child: Text(
+                      'Delete',
+                      style: TextStyle(color: colorScheme.error),
+                    ),
                   ),
                 ],
               );
@@ -68,7 +91,7 @@ class TransactionTile extends StatelessWidget {
         return Future.value(false);
       },
       background: Padding(
-        padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+        padding: EdgeInsets.symmetric(horizontal: spacing.xs),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -79,8 +102,13 @@ class TransactionTile extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onEdit,
+        // radius: radius.lg,
+        borderRadius: BorderRadius.circular(radius.sm),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: spacing.md, horizontal: spacing.xs),
+          padding: EdgeInsets.symmetric(
+            vertical: spacing.md,
+            // horizontal: spacing.xs,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -104,6 +132,7 @@ class TransactionTile extends StatelessWidget {
                   child: Icon(
                     _getTablerIcon(transaction.categoryIconName),
                     color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    size: spacing.lg + 2,
                   ),
                 ),
               ),
@@ -115,9 +144,12 @@ class TransactionTile extends StatelessWidget {
                   children: [
                     Text(
                       transaction.formattedDate,
-                      style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.7)),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 12,
+                        color: colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                     ),
-                    Text(transaction.name, style: theme.textTheme.bodyMedium),
+                    Text(transaction.name),
                   ],
                 ),
               ),
@@ -125,7 +157,7 @@ class TransactionTile extends StatelessWidget {
               // Amount with +/- prefix
               Text(
                 "${isCredit ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}",
-                style: theme.textTheme.titleMedium?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colorScheme.onSurface.withValues(alpha: 0.8),
                 ),

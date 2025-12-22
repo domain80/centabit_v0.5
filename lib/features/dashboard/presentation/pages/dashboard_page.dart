@@ -14,7 +14,10 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (_) => getIt<TransactionListCubit>(), child: const _DashboardView());
+    return BlocProvider(
+      create: (_) => getIt<TransactionListCubit>(),
+      child: const _DashboardView(),
+    );
   }
 }
 
@@ -31,7 +34,9 @@ class _DashboardView extends StatelessWidget {
       appBar: AppBar(
         toolbarHeight: 96,
         title: DefaultTextStyle(
-          style: theme.textTheme.headlineLarge!.copyWith(color: colorScheme.onSurface),
+          style: theme.textTheme.headlineLarge!.copyWith(
+            color: colorScheme.onSurface,
+          ),
           child: Row(
             children: [
               _buildWavingHand(),
@@ -51,7 +56,7 @@ class _DashboardView extends StatelessWidget {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: spacing.md),
+        padding: EdgeInsets.symmetric(horizontal: spacing.lg),
         child: BlocBuilder<TransactionListCubit, TransactionListState>(
           builder: (context, state) {
             return state.when(
@@ -62,7 +67,9 @@ class _DashboardView extends StatelessWidget {
                   return Center(
                     child: Text(
                       'No transactions yet',
-                      style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.5)),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
                     ),
                   );
                 }
@@ -76,7 +83,9 @@ class _DashboardView extends StatelessWidget {
                         // TODO: Navigate to edit transaction
                       },
                       onDelete: () {
-                        context.read<TransactionListCubit>().deleteTransaction(transaction.id);
+                        context.read<TransactionListCubit>().deleteTransaction(
+                          transaction.id,
+                        );
                       },
                       onCopy: () {
                         // TODO: Copy transaction
@@ -86,7 +95,12 @@ class _DashboardView extends StatelessWidget {
                 );
               },
               error: (message) => Center(
-                child: Text('Error: $message', style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.error)),
+                child: Text(
+                  'Error: $message',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.error,
+                  ),
+                ),
               ),
             );
           },
@@ -103,9 +117,15 @@ class _DashboardView extends StatelessWidget {
       builder: (context, value, child) {
         // creates back-forth-back-forth
         final wave = (value * 4);
-        final t = wave <= 2 ? (wave <= 1 ? wave : 2 - wave) : (wave <= 3 ? wave - 2 : 4 - wave);
+        final t = wave <= 2
+            ? (wave <= 1 ? wave : 2 - wave)
+            : (wave <= 3 ? wave - 2 : 4 - wave);
 
-        return Transform.rotate(angle: 0.3 * t, origin: const Offset(12, 0), child: child);
+        return Transform.rotate(
+          angle: 0.3 * t,
+          origin: const Offset(12, 0),
+          child: child,
+        );
       },
       child: const Text("👋"),
     );

@@ -22,7 +22,7 @@ class NavActionButton extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius.lg),
+        borderRadius: BorderRadius.circular(radius.xl3),
         border: Border.all(
           color: colorScheme.outline.withValues(alpha: 0.1),
           width: 1,
@@ -36,7 +36,7 @@ class NavActionButton extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius.lg),
+        borderRadius: BorderRadius.circular(radius.xl2),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 0.5, sigmaY: 2.0),
           child: Material(
@@ -44,11 +44,11 @@ class NavActionButton extends StatelessWidget {
             child: InkWell(
               onTap: () => _handleAction(context, actionType),
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Icon(
                   _getIconForAction(actionType),
                   color: colorScheme.onPrimary,
-                  size: 24,
+                  size: 20,
                 ),
               ),
             ),

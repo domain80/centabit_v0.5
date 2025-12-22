@@ -15,27 +15,21 @@ class TransactionsPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => getIt<TransactionListCubit>(),
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Transactions'),
-        ),
+        appBar: AppBar(title: const Text('Transactions')),
         body: BlocBuilder<TransactionListCubit, TransactionListState>(
           builder: (context, state) {
             return state.when(
               initial: () => const SizedBox(),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               success: (transactions, _, __) {
                 if (transactions.isEmpty) {
-                  return const Center(
-                    child: Text('No transactions yet'),
-                  );
+                  return const Center(child: Text('No transactions yet'));
                 }
 
                 final spacing = Theme.of(context).extension<AppSpacing>()!;
 
                 return ListView.builder(
-                  padding: EdgeInsets.all(spacing.md),
+                  padding: EdgeInsets.all(spacing.lg),
                   itemCount: transactions.length,
                   itemBuilder: (context, index) => TransactionTile(
                     transaction: transactions[index],
@@ -51,9 +45,7 @@ class TransactionsPage extends StatelessWidget {
                   ),
                 );
               },
-              error: (message) => Center(
-                child: Text('Error: $message'),
-              ),
+              error: (message) => Center(child: Text('Error: $message')),
             );
           },
         ),

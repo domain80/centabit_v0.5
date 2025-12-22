@@ -1,5 +1,5 @@
-import 'package:centabit/core/router/navigation/shared_nav_bar.dart';
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
+import 'package:centabit/core/router/navigation/shared_nav_bar.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,10 +42,7 @@ class AppNavShell extends StatelessWidget {
       child: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.only(
-              top: spacing.md,
-              bottom: spacing.md + (MediaQuery.of(context).padding.bottom),
-            ),
+            padding: EdgeInsets.only(top: spacing.md, bottom: 32),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

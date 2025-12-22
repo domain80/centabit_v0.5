@@ -67,14 +67,12 @@ class SharedNavBar extends StatelessWidget {
                   onTabChange: (index) => _onTabChange(context, index),
                   tabBorderRadius: radius.xl2,
                   duration: const Duration(milliseconds: 200),
+                  iconSize: 20,
                   gap: 2,
                   color: colorScheme.onSurface.withValues(alpha: 0.5),
                   activeColor: colorScheme.onSecondaryContainer,
                   tabBackgroundColor: colorScheme.secondaryContainer,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.md,
-                    vertical: spacing.md,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   tabs: [
                     GButton(icon: TablerIcons.home),
                     GButton(icon: TablerIcons.arrowsUpDown),
