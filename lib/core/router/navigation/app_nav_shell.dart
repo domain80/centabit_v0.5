@@ -1,5 +1,5 @@
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
-import 'package:centabit/core/router/navigation/shared_nav_bar.dart';
+import 'package:centabit/core/router/navigation/searchable_nav_container.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +9,9 @@ import 'package:go_router/go_router.dart';
 ///
 /// Provides semantic layout with:
 /// - Content area that extends behind the nav bar
-/// - Bottom navigation bar with tabs and action button
+/// - Bottom navigation bar supporting two variants:
+///   1. Simple Nav (no search capability)
+///   2. Searchable Nav (with animated search mode)
 /// - Proper spacing and padding
 ///
 /// Follows v0.4 semantic patterns for clean, composable architecture.
@@ -31,7 +33,7 @@ class AppNavShell extends StatelessWidget {
     );
   }
 
-  /// Build styled nav bar with glassmorphic effect
+  /// Build styled nav bar with glasmorphic effect and search support
   Widget _buildStyledNavBar(BuildContext context, NavState state) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -42,15 +44,12 @@ class AppNavShell extends StatelessWidget {
       child: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.only(top: spacing.md, bottom: 32),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SharedNavBar(
-                  navigationShell: navigationShell,
-                  actionType: state.actionType,
-                ),
-              ],
+            padding: EdgeInsets.only(
+              top: state.searchEnabled ? spacing.md : 0,
+              bottom: 32,
+            ),
+            child: SearchableNavContainer(
+              navigationShell: navigationShell,
             ),
           ),
         ],
