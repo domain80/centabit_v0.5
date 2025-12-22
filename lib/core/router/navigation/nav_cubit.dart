@@ -24,6 +24,9 @@ class NavState {
   /// Context for search placeholder (e.g., "transactions", "dashboard")
   final String searchScope;
 
+  /// Whether the navigation bar is visible (for auto-hide on scroll)
+  final bool isNavBarVisible;
+
   const NavState({
     required this.selectedIndex,
     required this.actionType,
@@ -31,6 +34,7 @@ class NavState {
     this.isSearching = false,
     this.searchQuery = '',
     this.searchScope = '',
+    this.isNavBarVisible = true,
   });
 
   /// Create a copy of this state with optional field replacements
@@ -41,6 +45,7 @@ class NavState {
     bool? isSearching,
     String? searchQuery,
     String? searchScope,
+    bool? isNavBarVisible,
   }) {
     return NavState(
       selectedIndex: selectedIndex ?? this.selectedIndex,
@@ -49,6 +54,7 @@ class NavState {
       isSearching: isSearching ?? this.isSearching,
       searchQuery: searchQuery ?? this.searchQuery,
       searchScope: searchScope ?? this.searchScope,
+      isNavBarVisible: isNavBarVisible ?? this.isNavBarVisible,
     );
   }
 }
@@ -78,13 +84,22 @@ class NavCubit extends Cubit<NavState> {
       _ => NavActionType.none,
     };
 
-    // Clear search when switching tabs
+    // Determine search config based on tab
+    final (searchEnabled, searchScope) = switch (index) {
+      1 => (true, 'transactions'), // Transactions page has search
+      _ => (false, ''), // Other pages don't have search
+    };
+
+    // Update all nav state when switching tabs
     emit(
       state.copyWith(
         selectedIndex: index,
         actionType: actionType,
+        searchEnabled: searchEnabled,
         isSearching: false,
         searchQuery: '',
+        searchScope: searchScope,
+        isNavBarVisible: true, // Always show nav bar when changing tabs
       ),
     );
   }
@@ -108,5 +123,12 @@ class NavCubit extends Cubit<NavState> {
   /// Clear search and return to navigation mode
   void clearSearch() {
     emit(state.copyWith(isSearching: false, searchQuery: ''));
+  }
+
+  /// Set navigation bar visibility (for auto-hide on scroll)
+  void setNavBarVisible(bool visible) {
+    // Early return prevents unnecessary emissions
+    if (state.isNavBarVisible == visible) return;
+    emit(state.copyWith(isNavBarVisible: visible));
   }
 }

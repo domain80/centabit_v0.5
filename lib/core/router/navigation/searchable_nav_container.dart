@@ -1,7 +1,6 @@
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/router/navigation/shared_nav_bar.dart';
-import 'package:centabit/core/router/navigation/widgets/minimized_search_bar.dart';
-import 'package:centabit/core/router/navigation/widgets/search_input.dart';
+import 'package:centabit/core/router/navigation/widgets/nav_search_bar.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,6 +51,58 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
 
     return BlocBuilder<NavCubit, NavState>(
       builder: (context, navState) {
+        return Container(
+          child: Column(
+            spacing: spacing.xs,
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Search bar - always present, scales to 0 when not enabled
+              GestureDetector(
+                onTap: navState.isSearching
+                    ? null
+                    : () => context.read<NavCubit>().toggleSearchMode(),
+                child: AbsorbPointer(
+                  absorbing: !navState.isSearching,
+                  child: AnimatedScale(
+                    scale: navState.searchEnabled
+                        ? (navState.isSearching ? 1.0 : 0.45)
+                        : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.center,
+                    child: SizedBox(width: 300, child: NavSearchBar()),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: navState.isSearching
+                    ? () => context.read<NavCubit>().toggleSearchMode()
+                    : null,
+                child: AbsorbPointer(
+                  absorbing: navState.isSearching,
+                  child: AnimatedScale(
+                    scale: navState.isSearching ? 0.45 : 1.0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.center,
+                    child: SharedNavBar(
+                      navigationShell: widget.navigationShell,
+                      actionType: navState.actionType,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/*
         // Variant 1: Simple Nav (no search capability)
         if (!navState.searchEnabled) {
           return Padding(
@@ -105,7 +156,7 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
                   opacity: navState.isSearching ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: AnimatedScale(
-                    scale: navState.isSearching ? 1.0 : 0.85,
+                    scale: navState.isSearching ? 1.0 : 0.75,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                     child: SearchInput(focusNode: _searchFocusNode),
@@ -114,14 +165,14 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
               )
             else
               Positioned(
-                bottom: spacing.xl6,
+                bottom: spacing.xl * 3,
                 left: spacing.md,
                 right: spacing.md,
                 child: AnimatedOpacity(
                   opacity: navState.isSearching ? 0.0 : 1.0,
                   duration: const Duration(milliseconds: 300),
                   child: AnimatedScale(
-                    scale: navState.isSearching ? 0.85 : 1.0,
+                    scale: navState.isSearching ? 0.75 : 1.0,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                     child: MinimizedSearchBar(),
@@ -130,7 +181,4 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
               ),
           ],
         );
-      },
-    );
-  }
-}
+*/
