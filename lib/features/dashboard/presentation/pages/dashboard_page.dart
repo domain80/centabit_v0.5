@@ -1,34 +1,97 @@
 import 'package:centabit/core/di/injection.dart';
-import 'package:centabit/core/router/navigation/nav_scroll_behavior.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
-import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
-import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
+import 'package:centabit/features/dashboard/presentation/cubits/dashboard_cubit.dart';
+import 'package:centabit/features/dashboard/presentation/cubits/date_filter_cubit.dart';
+import 'package:centabit/features/dashboard/presentation/widgets/budget_report_section.dart';
+import 'package:centabit/features/dashboard/presentation/widgets/daily_transactions_section.dart';
 import 'package:centabit/shared/widgets/shared_app_bar.dart';
-import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Dashboard page - main screen after login
+/// Dashboard page - main screen displaying budget reports and daily transactions.
+///
+/// **Ported from v0.4 with complete feature set**:
+/// - Budget Report Section: BAR metrics, charts, multiple budget support
+/// - Daily Transactions Section: Date filtering with infinite scroller
+/// - Pull-to-refresh functionality
+/// - Waving hand animation in app bar
+///
+/// **Architecture**:
+/// - Provides two cubits: DashboardCubit and DateFilterCubit
+/// - DashboardCubit: Aggregates budget data from 4 services
+/// - DateFilterCubit: Filters transactions by selected date
+/// - Both cubits react to service changes via stream subscriptions
+///
+/// **Layout**:
+/// ```
+/// ┌──────────────────────────────────┐
+/// │ 👋 Hi David                      │  <- App bar with waving hand
+/// ├──────────────────────────────────┤
+/// │ ┌────────────────────────────┐   │
+/// │ │ Active Budget: Dec 2025    │   │  <- Budget Report Section
+/// │ │ BAR ?            0.850     │   │     (330px height)
+/// │ │ [===============      ]    │   │
+/// │ │ 📊 Chart with bars         │   │
+/// │ │        ● ━━ ●              │   │
+/// │ └────────────────────────────┘   │
+/// │                                  │
+/// │ ┌────────────────────────────┐   │
+/// │ │ Transactions         📅    │   │  <- Daily Transactions Section
+/// │ ├────────────────────────────┤   │
+/// │ │  Mon Tue Wed Thu Fri Sat   │   │     (Date scroller)
+/// │ ├────────────────────────────┤   │
+/// │ │ 🛒 Groceries    -$45.23    │   │     (Transaction tiles)
+/// │ │ 🍔 Dining       -$28.50    │   │
+/// │ └────────────────────────────┘   │
+/// │                                  │
+/// │              [120px bottom pad]  │  <- Space for nav bar
+/// └──────────────────────────────────┘
+/// ```
+///
+/// **Migration Notes**:
+/// - v0.4 used Provider + Command pattern
+/// - v0.5 uses BLoC + Cubit pattern
+/// - All business logic ported from DashboardViewModel
+/// - BAR calculation preserved exactly from v0.4
+/// - Chart data building preserved from v0.4
+/// - Date filtering logic follows TransactionListCubit pattern
+///
+/// **Usage**:
+/// ```dart
+/// // In router configuration
+/// GoRoute(
+///   path: '/',
+///   builder: (context, state) => const DashboardPage(),
+/// )
+/// ```
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<TransactionListCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<DashboardCubit>()),
+        BlocProvider(create: (_) => getIt<DateFilterCubit>()),
+      ],
       child: const _DashboardView(),
     );
   }
 }
 
+/// Internal dashboard view with scaffold and content.
+///
+/// **Responsibilities**:
+/// - App bar with waving hand animation
+/// - Pull-to-refresh wrapper
+/// - ScrollView with budget and transaction sections
+/// - Bottom padding for navigation bar clearance
 class _DashboardView extends StatelessWidget {
   const _DashboardView();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final spacing = theme.extension<AppSpacing>()!;
+    final spacing = Theme.of(context).extension<AppSpacing>()!;
 
     return Scaffold(
       appBar: sharedAppBar(
@@ -37,99 +100,69 @@ class _DashboardView extends StatelessWidget {
           children: [
             _buildWavingHand(),
             SizedBox(width: spacing.sm),
-            const Text('Hi David'),
+            const Text('Hi David'), // TODO: User name from settings
           ],
         ),
       ),
-      body: NavScrollWrapper(
-        child: BlocBuilder<TransactionListCubit, TransactionListState>(
-          builder: (context, state) {
-            return state.when(
-              initial: () => const SizedBox(),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              success: (transactions, currentPage, hasMore) {
-                if (transactions.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: () {
-                      context.read<TransactionListCubit>().refresh();
-                      return Future<void>.delayed(
-                        const Duration(milliseconds: 300),
-                      );
-                    },
-                    child: Center(
-                      child: Text(
-                        'No transactions yet',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return RefreshIndicator(
-                  onRefresh: () {
-                    context.read<TransactionListCubit>().refresh();
-                    return Future<void>.delayed(
-                      const Duration(milliseconds: 300),
-                    );
-                  },
-                  child: ListView.builder(
-                    padding: EdgeInsets.only(
-                      left: spacing.lg,
-                      right: spacing.lg,
-                      bottom: 120,
-                    ),
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final transaction = transactions[index];
-                      return TransactionTile(
-                        transaction: transaction,
-                        onEdit: () {
-                          // TODO: Navigate to edit transaction
-                        },
-                        onDelete: () {
-                          context.read<TransactionListCubit>().deleteTransaction(
-                            transaction.id,
-                          );
-                        },
-                        onCopy: () {
-                          // TODO: Copy transaction
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-              error: (message) => Center(
-                child: Text(
-                  'Error: $message',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.error,
-                  ),
-                ),
-              ),
-            );
-          },
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Refresh both cubits
+          context.read<DashboardCubit>().refresh();
+          // DateFilterCubit refreshes automatically via service streams
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Budget Report Section with BAR and charts
+              const BudgetReportSection(),
+
+              SizedBox(height: spacing.lg),
+
+              // Daily Transactions Section with date filtering
+              const DailyTransactionsSection(),
+
+              // Bottom padding for navigation bar
+              const SizedBox(height: 120),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  /// Builds animated waving hand emoji.
+  ///
+  /// **Animation**:
+  /// - Duration: 2 seconds (2 complete waves)
+  /// - Motion: Back-forth-back-forth rotation
+  /// - Angle: 0 to 0.3 radians (~17 degrees)
+  /// - Origin: Offset(12, 0) for natural wrist pivot
+  ///
+  /// **Ported from v0.4**: Original dashboard waving hand animation
+  ///
+  /// **Pattern**: TweenAnimationBuilder for one-time animation on load
+  ///
+  /// **Returns**: Animated Text widget with waving hand emoji
   static TweenAnimationBuilder<double> _buildWavingHand() {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(seconds: 2), // 2 waves total
       curve: Curves.easeInOut,
       builder: (context, value, child) {
-        // creates back-forth-back-forth
+        // Creates back-forth-back-forth motion
+        // value goes 0 -> 1 over 2 seconds
+        // wave: 0 -> 4 (represents 4 half-waves = 2 complete waves)
         final wave = (value * 4);
+
+        // Convert to triangle wave (0 -> 1 -> 0 -> 1 -> 0)
         final t = wave <= 2
-            ? (wave <= 1 ? wave : 2 - wave)
-            : (wave <= 3 ? wave - 2 : 4 - wave);
+            ? (wave <= 1 ? wave : 2 - wave) // First wave: 0 -> 1 -> 0
+            : (wave <= 3 ? wave - 2 : 4 - wave); // Second wave: 0 -> 1 -> 0
 
         return Transform.rotate(
-          angle: 0.3 * t,
-          origin: const Offset(12, 0),
+          angle: 0.3 * t, // Max rotation: ~17 degrees
+          origin: const Offset(12, 0), // Pivot point (wrist)
           child: child,
         );
       },
