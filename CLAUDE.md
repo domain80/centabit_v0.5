@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Flutter mobile/web/desktop application called "centabit" (v0.5). It's currently a minimal Flutter project with a basic "Hello World" implementation.
+Centabit v0.5 is a Flutter budgeting application with comprehensive budget tracking, transaction management, and financial analytics. The app features:
+- **Budget Reports**: BAR (Budget Available Ratio) metrics with interactive charts
+- **Transaction Management**: Date-filtered transaction lists with search
+- **Category-based Budgeting**: Allocations across multiple spending categories
+- **Material 3 Design**: Custom theme with glassmorphic navigation and animations
 
 ## Development Commands
 
@@ -22,6 +26,23 @@ flutter run -d macos          # macOS
 flutter run -d windows        # Windows
 flutter run -d linux          # Linux
 ```
+
+### Code Generation (Freezed & JSON)
+```bash
+# Generate code for @freezed models and JSON serialization
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# Watch mode (auto-regenerate on file changes)
+flutter pub run build_runner watch --delete-conflicting-outputs
+
+# Clean generated files
+flutter pub run build_runner clean
+```
+
+**Important**: Run build_runner after creating or modifying:
+- `@freezed` classes (models, states)
+- `@JsonSerializable` classes
+- Files ending in `.freezed.dart` or `.g.dart` are auto-generated - never edit them manually
 
 ### Testing
 No tests are currently configured in this project. To add tests:
@@ -204,81 +225,108 @@ The application follows the **Model-View-ViewModel (MVVM)** pattern as recommend
 
 - **Package**: `flutter_bloc` (Cubit pattern)
 - **Location**: `lib/features/[feature]/presentation/cubits/`
-- **Pattern**: Each feature has its own Cubit(s) for state management
-- **State Classes**: Define clear state classes (initial, loading, success, error)
-- **Dependency Injection**: Use `get_it` for service location and dependency injection
+- **Pattern**: Stream-based reactive cubits that subscribe to service changes
+- **State Classes**: Use `@freezed` with union types (initial, loading, success, error)
+- **Dependency Injection**: `get_it` service locator (configured in `lib/core/di/injection.dart`)
 
-**Example Cubit Structures**:
+**Key Pattern - Reactive Cubits with Stream Subscriptions**:
 
-Simple case - Cubit calls service directly (no repository needed):
+This app uses a stream-based reactive pattern where cubits subscribe to service streams and automatically reload data when services emit changes:
+
 ```dart
-// lib/features/auth/presentation/cubits/login_cubit.dart
-class LoginCubit extends Cubit<LoginState> {
-  final AuthService _authService;  // Direct service injection
+class DashboardCubit extends Cubit<DashboardState> {
+  final BudgetService _budgetService;
+  final TransactionService _transactionService;
 
-  LoginCubit(this._authService) : super(LoginInitial());
+  StreamSubscription? _budgetSubscription;
+  StreamSubscription? _transactionSubscription;
 
-  Future<void> login(String email, String password) async {
-    emit(LoginLoading());
+  DashboardCubit(this._budgetService, this._transactionService)
+      : super(const DashboardState.initial()) {
+    // Subscribe to service streams for reactive updates
+    _budgetSubscription = _budgetService.budgetsStream.listen((_) => _loadData());
+    _transactionSubscription = _transactionService.transactionsStream.listen((_) => _loadData());
+    _loadData(); // Initial load
+  }
+
+  Future<void> _loadData() async {
+    emit(const DashboardState.loading());
     try {
-      final user = await _authService.login(email, password);
-      emit(LoginSuccess(user));
+      final budgets = _budgetService.getActiveBudgets();
+      final transactions = _transactionService.transactions;
+      // ... build view models, calculate metrics
+      emit(DashboardState.success(data));
     } catch (e) {
-      emit(LoginError(e.toString()));
+      emit(DashboardState.error(e.toString()));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _budgetSubscription?.cancel();
+    _transactionSubscription?.cancel();
+    return super.close();
   }
 }
 ```
 
-Complex case - Cubit uses repository (when coordinating multiple services):
+**Cubit Registration** (`lib/core/di/injection.dart`):
+- **Services**: `registerLazySingleton` (single instance, created on first access)
+- **Cubits**: `registerFactory` (new instance per request)
+
 ```dart
-// lib/features/transactions/presentation/cubits/sync_cubit.dart
-class SyncCubit extends Cubit<SyncState> {
-  final TransactionRepository _repository;  // Repository coordinates services
+// Services (singletons with broadcast streams)
+getIt.registerLazySingleton<BudgetService>(() => BudgetService());
+getIt.registerLazySingleton<TransactionService>(() => TransactionService(getIt()));
 
-  SyncCubit(this._repository) : super(SyncInitial());
+// Cubits (factories - new instance per widget)
+getIt.registerFactory<DashboardCubit>(() => DashboardCubit(
+  getIt<BudgetService>(),
+  getIt<TransactionService>(),
+));
+```
 
-  Future<void> syncTransactions() async {
-    emit(SyncLoading());
-    try {
-      // Repository handles: fetch remote, compare local, merge, save
-      await _repository.syncWithRemote();
-      emit(SyncSuccess());
-    } catch (e) {
-      emit(SyncError(e.toString()));
-    }
-  }
-}
+**Usage in Widgets**:
+```dart
+BlocProvider(
+  create: (_) => getIt<DashboardCubit>(),
+  child: BlocBuilder<DashboardCubit, DashboardState>(
+    builder: (context, state) => state.when(
+      initial: () => const SizedBox.shrink(),
+      loading: () => const CircularProgressIndicator(),
+      success: (data) => YourWidget(data: data),
+      error: (msg) => Text('Error: $msg'),
+    ),
+  ),
+)
 ```
 
 ### Routing/Navigation
 
 - **Package**: `go_router`
 - **Location**: `lib/core/router/`
-- **Features**:
-  - Declarative routing
-  - Deep linking support
-  - Type-safe navigation
-  - Nested navigation support
-  - Guard routes for authentication
+- **Pattern**: StatefulShellRoute with bottom navigation
+- **Navigation State**: Managed by `NavCubit` (handles tab selection, search mode, nav bar visibility)
 
-**Router Configuration**:
-```dart
-// lib/core/router/app_router.dart
-final goRouter = GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const DashboardPage(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginPage(),
-    ),
-    // ... other routes
-  ],
-);
-```
+**Current Routes** (`AppRouter`):
+- `/login` - Login page (unauthenticated)
+- `/` - Dashboard (authenticated, nav index 0)
+- `/transactions` - Transactions list (authenticated, nav index 1, search-enabled)
+- `/budgets` - Budget management (authenticated, nav index 2)
+
+**Navigation Features**:
+- **StatefulShellRoute**: Maintains state across tab switches with indexed stack
+- **Swipe Navigation**: Horizontal swipes between tabs (300px velocity threshold)
+- **Auto-Hide Nav Bar**: Hides on scroll down, shows on scroll up (using `NavScrollWrapper`)
+- **Search Mode**: Animated search bar that scales up from minimized state (300ms transitions)
+- **Searchable Tabs**: Transaction page has integrated search capability
+
+**Key Files**:
+- `app_router.dart` - Route definitions with StatefulShellRoute
+- `nav_cubit.dart` - Navigation state (selected tab, search mode, nav visibility)
+- `app_nav_shell.dart` - Main shell with swipe handling and animated nav bar
+- `searchable_nav_container.dart` - Dual-state nav (normal vs search mode)
+- `nav_scroll_behavior.dart` - Scroll detection for auto-hide behavior
 
 ### Theme System
 
@@ -361,14 +409,132 @@ Container(
 - Converting between different data representations
 - Example: API returns `user_name` but domain uses `username`
 
+### Data Services Pattern
+
+All services follow a consistent broadcast stream pattern for reactive updates:
+
+```dart
+class BudgetService {
+  final List<BudgetModel> _budgets = [];
+  final _budgetsController = StreamController<List<BudgetModel>>.broadcast();
+
+  Stream<List<BudgetModel>> get budgetsStream => _budgetsController.stream;
+  List<BudgetModel> get budgets => List.unmodifiable(_budgets);
+
+  BudgetService() {
+    _initializeDefaults(); // Load sample data
+  }
+
+  Future<void> createBudget(BudgetModel budget) async {
+    _budgets.add(budget);
+    _budgetsController.add(_budgets); // Emit change
+  }
+
+  List<BudgetModel> getActiveBudgets() {
+    final now = DateTime.now();
+    return _budgets.where((b) =>
+      now.isAfter(b.startDate) && now.isBefore(b.endDate)
+    ).toList();
+  }
+}
+```
+
+**Service Dependencies**: Services can depend on other services (constructor injection)
+```dart
+class TransactionService {
+  final CategoryService _categoryService;
+  TransactionService(this._categoryService) { /* ... */ }
+}
+```
+
+**Current Services**:
+- `CategoryService` - Spending categories (no dependencies)
+- `BudgetService` - Budget periods (no dependencies)
+- `TransactionService` - Transactions (depends on CategoryService)
+- `AllocationService` - Budget allocations (depends on Category + Budget)
+
+### Freezed Models
+
+All data models and cubit states use `@freezed` for immutability:
+
+```dart
+@freezed
+class BudgetModel with _$BudgetModel {
+  const factory BudgetModel({
+    required String id,
+    required String name,
+    required double amount,
+    required DateTime startDate,
+    required DateTime endDate,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+  }) = _BudgetModel;
+
+  // Factory constructor for creating new instances
+  factory BudgetModel.create({
+    required String name,
+    required double amount,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    final now = DateTime.now();
+    return BudgetModel(
+      id: const Uuid().v4(),
+      name: name,
+      amount: amount,
+      startDate: startDate,
+      endDate: endDate,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
+  factory BudgetModel.fromJson(Map<String, dynamic> json) =>
+      _$BudgetModelFromJson(json);
+}
+```
+
+**State Union Types**:
+```dart
+@freezed
+class DashboardState with _$DashboardState {
+  const factory DashboardState.initial() = _Initial;
+  const factory DashboardState.loading() = _Loading;
+  const factory DashboardState.success({
+    required List<BudgetPageModel> budgetPages,
+  }) = _Success;
+  const factory DashboardState.error(String message) = _Error;
+}
+```
+
 ### File Naming Conventions
 
 - **Pages**: `[feature_name]_page.dart` (e.g., `login_page.dart`)
-- **Widgets**: `[widget_name]_widget.dart` (e.g., `transaction_card_widget.dart`)
+- **Widgets**: `[widget_name].dart` or `[widget_name]_widget.dart` (e.g., `transaction_tile.dart`)
 - **Cubits**: `[feature_name]_cubit.dart` (e.g., `login_cubit.dart`)
 - **States**: `[feature_name]_state.dart` (e.g., `login_state.dart`)
 - **Models**: `[model_name]_model.dart` (e.g., `user_model.dart`)
-- **Repositories**: `[domain]_repository.dart` (e.g., `auth_repository.dart`)
-- **Services**: `[service_name]_service.dart` (e.g., `api_service.dart`)
-- **DTOs**: `[entity_name]_dto.dart` (e.g., `user_dto.dart`)
+- **Services**: `[service_name]_service.dart` (e.g., `budget_service.dart`)
+- **View Models** (non-freezed): `[entity]_chart_data.dart` (e.g., `transactions_chart_data.dart`)
+
+### Key App-Specific Concepts
+
+**BAR (Budget Available Ratio)**:
+- Financial metric comparing spending rate vs time progression
+- Formula: `(daysRemaining / totalDays) / (budgetRemaining / totalBudget)`
+- Displayed on dashboard with color-coded progress bar
+- Values > 1.0 indicate overspending (shown in error color)
+- Calculated in `DashboardCubit._calculateBAR()`
+
+**Data Denormalization**:
+- Transactions store only `categoryId`, not full category object
+- Cubits denormalize data by joining service data into view models
+- Pattern: `TransactionVModel` includes full category data for display
+- Benefit: Services stay simple, UI gets rich data
+
+**Budget Allocations**:
+- Each budget has multiple allocations (one per category)
+- Tracks planned spending per category
+- Compared against actual transactions in charts
+- Managed by `AllocationService` with Category + Budget dependencies
 
