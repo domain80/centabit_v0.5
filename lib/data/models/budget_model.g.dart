@@ -9,10 +9,9 @@ part of 'budget_model.dart';
 _BudgetModel _$BudgetModelFromJson(Map<String, dynamic> json) => _BudgetModel(
   id: json['id'] as String,
   name: json['name'] as String,
-  total: (json['total'] as num).toDouble(),
-  allocationIds: (json['allocationIds'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  amount: (json['amount'] as num).toDouble(),
+  startDate: DateTime.parse(json['startDate'] as String),
+  endDate: DateTime.parse(json['endDate'] as String),
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
 );
@@ -21,8 +20,9 @@ Map<String, dynamic> _$BudgetModelToJson(_BudgetModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'total': instance.total,
-      'allocationIds': instance.allocationIds,
+      'amount': instance.amount,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };

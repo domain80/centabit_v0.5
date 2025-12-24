@@ -15,7 +15,20 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AllocationModel {
 
- String get id; String get name; String get categoryId; String get budgetId; double get amount; DateTime get createdAt; DateTime get updatedAt;
+/// Unique identifier (UUID v4)
+ String get id;/// Amount allocated to this category in this budget
+///
+/// Should be positive and typically less than the budget's total amount.
+/// Multiple allocations for the same budget should sum to <= budget.amount.
+ double get amount;/// Reference to the category receiving this allocation
+///
+/// Links to [CategoryModel.id].
+ String get categoryId;/// Reference to the parent budget
+///
+/// Links to [BudgetModel.id].
+ String get budgetId;/// Timestamp when allocation was created
+ DateTime get createdAt;/// Timestamp when allocation was last modified
+ DateTime get updatedAt;
 /// Create a copy of AllocationModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +41,16 @@ $AllocationModelCopyWith<AllocationModel> get copyWith => _$AllocationModelCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AllocationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.budgetId, budgetId) || other.budgetId == budgetId)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AllocationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.budgetId, budgetId) || other.budgetId == budgetId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,categoryId,budgetId,amount,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,amount,categoryId,budgetId,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'AllocationModel(id: $id, name: $name, categoryId: $categoryId, budgetId: $budgetId, amount: $amount, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'AllocationModel(id: $id, amount: $amount, categoryId: $categoryId, budgetId: $budgetId, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,7 +61,7 @@ abstract mixin class $AllocationModelCopyWith<$Res>  {
   factory $AllocationModelCopyWith(AllocationModel value, $Res Function(AllocationModel) _then) = _$AllocationModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String categoryId, String budgetId, double amount, DateTime createdAt, DateTime updatedAt
+ String id, double amount, String categoryId, String budgetId, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -65,14 +78,13 @@ class _$AllocationModelCopyWithImpl<$Res>
 
 /// Create a copy of AllocationModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? categoryId = null,Object? budgetId = null,Object? amount = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? amount = null,Object? categoryId = null,Object? budgetId = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
-as String,budgetId: null == budgetId ? _self.budgetId : budgetId // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as double,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as double,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as String,budgetId: null == budgetId ? _self.budgetId : budgetId // ignore: cast_nullable_to_non_nullable
+as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -159,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String categoryId,  String budgetId,  double amount,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  double amount,  String categoryId,  String budgetId,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AllocationModel() when $default != null:
-return $default(_that.id,_that.name,_that.categoryId,_that.budgetId,_that.amount,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.amount,_that.categoryId,_that.budgetId,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -180,10 +192,10 @@ return $default(_that.id,_that.name,_that.categoryId,_that.budgetId,_that.amount
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String categoryId,  String budgetId,  double amount,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  double amount,  String categoryId,  String budgetId,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _AllocationModel():
-return $default(_that.id,_that.name,_that.categoryId,_that.budgetId,_that.amount,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.amount,_that.categoryId,_that.budgetId,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +212,10 @@ return $default(_that.id,_that.name,_that.categoryId,_that.budgetId,_that.amount
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String categoryId,  String budgetId,  double amount,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  double amount,  String categoryId,  String budgetId,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AllocationModel() when $default != null:
-return $default(_that.id,_that.name,_that.categoryId,_that.budgetId,_that.amount,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.amount,_that.categoryId,_that.budgetId,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -215,15 +227,27 @@ return $default(_that.id,_that.name,_that.categoryId,_that.budgetId,_that.amount
 @JsonSerializable()
 
 class _AllocationModel implements AllocationModel {
-  const _AllocationModel({required this.id, required this.name, required this.categoryId, required this.budgetId, required this.amount, required this.createdAt, required this.updatedAt});
+  const _AllocationModel({required this.id, required this.amount, required this.categoryId, required this.budgetId, required this.createdAt, required this.updatedAt});
   factory _AllocationModel.fromJson(Map<String, dynamic> json) => _$AllocationModelFromJson(json);
 
+/// Unique identifier (UUID v4)
 @override final  String id;
-@override final  String name;
-@override final  String categoryId;
-@override final  String budgetId;
+/// Amount allocated to this category in this budget
+///
+/// Should be positive and typically less than the budget's total amount.
+/// Multiple allocations for the same budget should sum to <= budget.amount.
 @override final  double amount;
+/// Reference to the category receiving this allocation
+///
+/// Links to [CategoryModel.id].
+@override final  String categoryId;
+/// Reference to the parent budget
+///
+/// Links to [BudgetModel.id].
+@override final  String budgetId;
+/// Timestamp when allocation was created
 @override final  DateTime createdAt;
+/// Timestamp when allocation was last modified
 @override final  DateTime updatedAt;
 
 /// Create a copy of AllocationModel
@@ -239,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AllocationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.budgetId, budgetId) || other.budgetId == budgetId)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AllocationModel&&(identical(other.id, id) || other.id == id)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.budgetId, budgetId) || other.budgetId == budgetId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,categoryId,budgetId,amount,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,amount,categoryId,budgetId,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'AllocationModel(id: $id, name: $name, categoryId: $categoryId, budgetId: $budgetId, amount: $amount, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'AllocationModel(id: $id, amount: $amount, categoryId: $categoryId, budgetId: $budgetId, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -259,7 +283,7 @@ abstract mixin class _$AllocationModelCopyWith<$Res> implements $AllocationModel
   factory _$AllocationModelCopyWith(_AllocationModel value, $Res Function(_AllocationModel) _then) = __$AllocationModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String categoryId, String budgetId, double amount, DateTime createdAt, DateTime updatedAt
+ String id, double amount, String categoryId, String budgetId, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -276,14 +300,13 @@ class __$AllocationModelCopyWithImpl<$Res>
 
 /// Create a copy of AllocationModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? categoryId = null,Object? budgetId = null,Object? amount = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? amount = null,Object? categoryId = null,Object? budgetId = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_AllocationModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
-as String,budgetId: null == budgetId ? _self.budgetId : budgetId // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as double,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as double,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as String,budgetId: null == budgetId ? _self.budgetId : budgetId // ignore: cast_nullable_to_non_nullable
+as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

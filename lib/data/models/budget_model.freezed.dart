@@ -15,7 +15,23 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BudgetModel {
 
- String get id; String get name; double get total; List<String> get allocationIds; DateTime get createdAt; DateTime get updatedAt;
+/// Unique identifier (UUID v4)
+ String get id;/// Display name (e.g., "December 2025", "Q1 2026 Budget")
+ String get name;/// Total budget amount
+///
+/// This is distributed across categories via [AllocationModel]s.
+/// The sum of allocations may be less than this amount (unallocated funds).
+ double get amount;/// Budget period start date (inclusive)
+///
+/// Used in BAR calculation to determine time elapsed.
+/// Should be at start of day (00:00:00).
+ DateTime get startDate;/// Budget period end date (inclusive)
+///
+/// Used in BAR calculation to determine total period length.
+/// Should be at end of day (23:59:59) or start of next day.
+ DateTime get endDate;/// Timestamp when budget was created
+ DateTime get createdAt;/// Timestamp when budget was last modified
+ DateTime get updatedAt;
 /// Create a copy of BudgetModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +44,16 @@ $BudgetModelCopyWith<BudgetModel> get copyWith => _$BudgetModelCopyWithImpl<Budg
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BudgetModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.total, total) || other.total == total)&&const DeepCollectionEquality().equals(other.allocationIds, allocationIds)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BudgetModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,total,const DeepCollectionEquality().hash(allocationIds),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,amount,startDate,endDate,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'BudgetModel(id: $id, name: $name, total: $total, allocationIds: $allocationIds, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'BudgetModel(id: $id, name: $name, amount: $amount, startDate: $startDate, endDate: $endDate, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,7 +64,7 @@ abstract mixin class $BudgetModelCopyWith<$Res>  {
   factory $BudgetModelCopyWith(BudgetModel value, $Res Function(BudgetModel) _then) = _$BudgetModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, double total, List<String> allocationIds, DateTime createdAt, DateTime updatedAt
+ String id, String name, double amount, DateTime startDate, DateTime endDate, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -65,13 +81,14 @@ class _$BudgetModelCopyWithImpl<$Res>
 
 /// Create a copy of BudgetModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? total = null,Object? allocationIds = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? amount = null,Object? startDate = null,Object? endDate = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as double,allocationIds: null == allocationIds ? _self.allocationIds : allocationIds // ignore: cast_nullable_to_non_nullable
-as List<String>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
+as double,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime,endDate: null == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as DateTime,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -158,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  double total,  List<String> allocationIds,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  double amount,  DateTime startDate,  DateTime endDate,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BudgetModel() when $default != null:
-return $default(_that.id,_that.name,_that.total,_that.allocationIds,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.amount,_that.startDate,_that.endDate,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -179,10 +196,10 @@ return $default(_that.id,_that.name,_that.total,_that.allocationIds,_that.create
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  double total,  List<String> allocationIds,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  double amount,  DateTime startDate,  DateTime endDate,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _BudgetModel():
-return $default(_that.id,_that.name,_that.total,_that.allocationIds,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.amount,_that.startDate,_that.endDate,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +216,10 @@ return $default(_that.id,_that.name,_that.total,_that.allocationIds,_that.create
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  double total,  List<String> allocationIds,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  double amount,  DateTime startDate,  DateTime endDate,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _BudgetModel() when $default != null:
-return $default(_that.id,_that.name,_that.total,_that.allocationIds,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.amount,_that.startDate,_that.endDate,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -214,20 +231,31 @@ return $default(_that.id,_that.name,_that.total,_that.allocationIds,_that.create
 @JsonSerializable()
 
 class _BudgetModel implements BudgetModel {
-  const _BudgetModel({required this.id, required this.name, required this.total, required final  List<String> allocationIds, required this.createdAt, required this.updatedAt}): _allocationIds = allocationIds;
+  const _BudgetModel({required this.id, required this.name, required this.amount, required this.startDate, required this.endDate, required this.createdAt, required this.updatedAt});
   factory _BudgetModel.fromJson(Map<String, dynamic> json) => _$BudgetModelFromJson(json);
 
+/// Unique identifier (UUID v4)
 @override final  String id;
+/// Display name (e.g., "December 2025", "Q1 2026 Budget")
 @override final  String name;
-@override final  double total;
- final  List<String> _allocationIds;
-@override List<String> get allocationIds {
-  if (_allocationIds is EqualUnmodifiableListView) return _allocationIds;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_allocationIds);
-}
-
+/// Total budget amount
+///
+/// This is distributed across categories via [AllocationModel]s.
+/// The sum of allocations may be less than this amount (unallocated funds).
+@override final  double amount;
+/// Budget period start date (inclusive)
+///
+/// Used in BAR calculation to determine time elapsed.
+/// Should be at start of day (00:00:00).
+@override final  DateTime startDate;
+/// Budget period end date (inclusive)
+///
+/// Used in BAR calculation to determine total period length.
+/// Should be at end of day (23:59:59) or start of next day.
+@override final  DateTime endDate;
+/// Timestamp when budget was created
 @override final  DateTime createdAt;
+/// Timestamp when budget was last modified
 @override final  DateTime updatedAt;
 
 /// Create a copy of BudgetModel
@@ -243,16 +271,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BudgetModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.total, total) || other.total == total)&&const DeepCollectionEquality().equals(other._allocationIds, _allocationIds)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BudgetModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,total,const DeepCollectionEquality().hash(_allocationIds),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,amount,startDate,endDate,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'BudgetModel(id: $id, name: $name, total: $total, allocationIds: $allocationIds, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'BudgetModel(id: $id, name: $name, amount: $amount, startDate: $startDate, endDate: $endDate, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -263,7 +291,7 @@ abstract mixin class _$BudgetModelCopyWith<$Res> implements $BudgetModelCopyWith
   factory _$BudgetModelCopyWith(_BudgetModel value, $Res Function(_BudgetModel) _then) = __$BudgetModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, double total, List<String> allocationIds, DateTime createdAt, DateTime updatedAt
+ String id, String name, double amount, DateTime startDate, DateTime endDate, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -280,13 +308,14 @@ class __$BudgetModelCopyWithImpl<$Res>
 
 /// Create a copy of BudgetModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? total = null,Object? allocationIds = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? amount = null,Object? startDate = null,Object? endDate = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_BudgetModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as double,allocationIds: null == allocationIds ? _self._allocationIds : allocationIds // ignore: cast_nullable_to_non_nullable
-as List<String>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
+as double,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime,endDate: null == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as DateTime,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
