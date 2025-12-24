@@ -17,13 +17,16 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   int _currentPage = 0;
   static const int _pageSize = 20;
 
-  TransactionListCubit(this._transactionService, this._categoryService) : super(const TransactionListState.initial()) {
+  TransactionListCubit(this._transactionService, this._categoryService)
+    : super(const TransactionListState.initial()) {
     _subscribeToStreams();
   }
 
   void _subscribeToStreams() {
     // Listen to transaction changes
-    _transactionSubscription = _transactionService.transactionsStream.listen((_) {
+    _transactionSubscription = _transactionService.transactionsStream.listen((
+      _,
+    ) {
       _loadTransactions();
     });
 
@@ -40,7 +43,10 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     emit(const TransactionListState.loading());
 
     try {
-      final transactions = _transactionService.getTransactionsPaginated(page: _currentPage, pageSize: _pageSize);
+      final transactions = _transactionService.getTransactionsPaginated(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
 
       // Denormalize: combine transaction + category data
       final viewItems = transactions.map((transaction) {
@@ -64,7 +70,13 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
       final hasMore = transactions.length == _pageSize;
 
-      emit(TransactionListState.success(transactions: viewItems, currentPage: _currentPage, hasMore: hasMore));
+      emit(
+        TransactionListState.success(
+          transactions: viewItems,
+          currentPage: _currentPage,
+          hasMore: hasMore,
+        ),
+      );
     } catch (e) {
       emit(TransactionListState.error(e.toString()));
     }
@@ -75,9 +87,10 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     _loadTransactions();
   }
 
-  void refresh() {
+  Future<void> refresh() {
     _currentPage = 0;
     _loadTransactions();
+    return Future.value();
   }
 
   Future<void> deleteTransaction(String id) async {

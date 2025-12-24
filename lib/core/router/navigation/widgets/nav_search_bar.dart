@@ -14,7 +14,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 ///   - X clear button on right (inside the pill)
 /// - Circular dark calendar/filter button (separate, on far right)
 class NavSearchBar extends StatefulWidget {
-  const NavSearchBar({super.key});
+  const NavSearchBar({super.key, required this.focusNode});
+  final FocusNode focusNode;
 
   @override
   State<NavSearchBar> createState() => _NavSearchBarState();
@@ -48,105 +49,80 @@ class _NavSearchBarState extends State<NavSearchBar> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final spacing = theme.extension<AppSpacing>()!;
+    final radius = theme.extension<AppRadius>()!;
 
     return BlocBuilder<NavCubit, NavState>(
       builder: (context, navState) {
         return Row(
+          spacing: spacing.md,
           children: [
             // Search input (white pill with X button inside)
-            Expanded(
-              child: Container(
-                height: 48,
-                padding: EdgeInsets.only(
-                  left: spacing.md,
-                  right: spacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Row(
-                  children: [
-                    // Text input
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        onChanged: (value) {
-                          _debounceTimer?.cancel();
-                          _debounceTimer =
-                              Timer(const Duration(milliseconds: 300), () {
-                            context.read<NavCubit>().updateSearchQuery(value);
-                          });
-                          setState(() {});
-                        },
-                        textAlignVertical: TextAlignVertical.center,
-                        expands: true,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                          hintText: navState.searchScope.isNotEmpty
-                              ? 'Search ${navState.searchScope}'
-                              : 'Search',
-                          hintStyle: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 16,
-                          ),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                        ),
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontSize: 16,
-                        ),
+            Flexible(
+              child: SizedBox(
+                height: spacing.xl4,
+                child: TextField(
+                  controller: _controller,
+                  onChanged: (value) {
+                    _debounceTimer?.cancel();
+                    _debounceTimer = Timer(
+                      const Duration(milliseconds: 300),
+                      () {
+                        context.read<NavCubit>().updateSearchQuery(value);
+                      },
+                    );
+                    setState(() {});
+                  },
+                  // textAlignVertical: TextAlignVertical.center,
+                  expands: true,
+                  maxLines: null,
+                  focusNode: widget.focusNode,
+                  decoration: InputDecoration(
+                    hintText: navState.searchScope.isNotEmpty
+                        ? 'Search ${navState.searchScope}'
+                        : 'Search',
+                    hintStyle: .new(fontSize: 14, fontWeight: FontWeight.w400),
+
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(radius.xl3),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(radius.xl3),
+                      borderSide: BorderSide(
+                        color: colorScheme.primary.withAlpha(70),
+                        width: 1,
                       ),
                     ),
-                    // X clear button (inside the pill)
-                    GestureDetector(
-                      onTap: _clearSearch,
-                      child: Icon(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(radius.xl3),
+                      borderSide: BorderSide(
+                        color: colorScheme.primary.withAlpha(70),
+                        width: 1,
+                      ),
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: _clearSearch,
+                      icon: Icon(
                         TablerIcons.x,
                         color: colorScheme.onSurfaceVariant,
                         size: 20,
                       ),
                     ),
-                  ],
+                  ),
+                  style: TextStyle(color: colorScheme.onSurface, fontSize: 14),
                 ),
               ),
             ),
-            SizedBox(width: spacing.md),
             // Calendar filter button (dark circle)
-            GestureDetector(
-              onTap: () {
-                // TODO: Implement filter/calendar functionality
-              },
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurface,
-                  shape: BoxShape.circle,
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      TablerIcons.calendar,
-                      color: colorScheme.surface,
-                      size: 22,
-                    ),
-                    // Code brackets overlay
-                    Positioned(
-                      right: 10,
-                      bottom: 10,
-                      child: Icon(
-                        TablerIcons.code,
-                        color: colorScheme.surface,
-                        size: 12,
-                      ),
-                    ),
-                  ],
-                ),
+            IconButton(
+              style: .new(
+                backgroundColor: WidgetStatePropertyAll(colorScheme.primary),
+                foregroundColor: WidgetStatePropertyAll(colorScheme.onPrimary),
               ),
+              onPressed: () {
+                // todo: Implement filter/calendar functionality
+              },
+              icon: Icon(TablerIcons.calendarCode),
             ),
           ],
         );

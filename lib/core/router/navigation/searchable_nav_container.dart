@@ -51,51 +51,55 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
 
     return BlocBuilder<NavCubit, NavState>(
       builder: (context, navState) {
-        return Container(
-          child: Column(
-            spacing: spacing.xs,
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Search bar - always present, scales to 0 when not enabled
-              GestureDetector(
-                onTap: navState.isSearching
-                    ? null
-                    : () => context.read<NavCubit>().toggleSearchMode(),
-                child: AbsorbPointer(
-                  absorbing: !navState.isSearching,
-                  child: AnimatedScale(
-                    scale: navState.searchEnabled
-                        ? (navState.isSearching ? 1.0 : 0.45)
-                        : 0.0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.center,
-                    child: SizedBox(width: 300, child: NavSearchBar()),
+        return Column(
+          spacing: 0,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Search bar - always present, scales to 0 when not enabled
+            GestureDetector(
+              onTap: navState.isSearching
+                  ? null
+                  : () => context.read<NavCubit>().toggleSearchMode(),
+              child: AbsorbPointer(
+                absorbing: !navState.isSearching,
+                child: AnimatedScale(
+                  scale: navState.searchEnabled
+                      ? (navState.isSearching ? 1.0 : 0.45)
+                      : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: 300,
+                    child: NavSearchBar(focusNode: _searchFocusNode),
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: navState.isSearching
-                    ? () => context.read<NavCubit>().toggleSearchMode()
-                    : null,
-                child: AbsorbPointer(
-                  absorbing: navState.isSearching,
-                  child: AnimatedScale(
-                    scale: navState.isSearching ? 0.45 : 1.0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.center,
-                    child: SharedNavBar(
-                      navigationShell: widget.navigationShell,
-                      actionType: navState.actionType,
-                    ),
+            ),
+            GestureDetector(
+              onTap: navState.isSearching
+                  ? () {
+                      context.read<NavCubit>().toggleSearchMode();
+                      _searchFocusNode.unfocus();
+                    }
+                  : null,
+              child: AbsorbPointer(
+                absorbing: navState.isSearching,
+                child: AnimatedScale(
+                  scale: navState.isSearching ? 0.45 : 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.center,
+                  child: SharedNavBar(
+                    navigationShell: widget.navigationShell,
+                    actionType: navState.actionType,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );

@@ -31,43 +31,43 @@ class AppNavShell extends StatelessWidget {
           prev.isSearching != curr.isSearching ||
           prev.searchEnabled != curr.searchEnabled,
       builder: (context, state) {
-        return GestureDetector(
-          onHorizontalDragEnd: (details) => _handleSwipe(context, state, details),
-          child: Scaffold(
-            body: navigationShell,
-            extendBody: true,
-            bottomNavigationBar: _buildStyledNavBar(context, state),
+        return Scaffold(
+          body: navigationShell,
+          extendBody: true,
+          bottomNavigationBar: Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: _buildStyledNavBar(context, state),
           ),
         );
       },
     );
   }
 
-  void _handleSwipe(
-    BuildContext context,
-    NavState state,
-    DragEndDetails details,
-  ) {
-    final velocity = details.primaryVelocity ?? 0;
-    if (velocity.abs() < 300) return; // Ignore slow swipes
+  // void _handleSwipe(
+  //   BuildContext context,
+  //   NavState state,
+  //   DragEndDetails details,
+  // ) {
+  //   final velocity = details.primaryVelocity ?? 0;
+  //   if (velocity.abs() < 300) return; // Ignore slow swipes
 
-    // Don't swipe during search mode
-    if (state.isSearching) return;
+  //   // Don't swipe during search mode
+  //   if (state.isSearching) return;
 
-    final currentIndex = state.selectedIndex;
-    int newIndex;
+  //   final currentIndex = state.selectedIndex;
+  //   int newIndex;
 
-    if (velocity < 0) {
-      // Swipe left → next tab
-      newIndex = (currentIndex + 1) % 3;
-    } else {
-      // Swipe right → previous tab
-      newIndex = (currentIndex - 1 + 3) % 3;
-    }
+  //   if (velocity < 0) {
+  //     // Swipe left → next tab
+  //     newIndex = (currentIndex + 1) % 3;
+  //   } else {
+  //     // Swipe right → previous tab
+  //     newIndex = (currentIndex - 1 + 3) % 3;
+  //   }
 
-    context.read<NavCubit>().updateTab(newIndex);
-    navigationShell.goBranch(newIndex, initialLocation: false);
-  }
+  //   context.read<NavCubit>().updateTab(newIndex);
+  //   navigationShell.goBranch(newIndex, initialLocation: false);
+  // }
 
   /// Build styled nav bar with glasmorphic effect and search support
   Widget _buildStyledNavBar(BuildContext context, NavState state) {

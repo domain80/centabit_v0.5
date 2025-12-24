@@ -60,7 +60,7 @@ class SharedNavBar extends StatelessWidget {
                 color: colorScheme.surface.withValues(alpha: 0.95),
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.xs,
-                  vertical: spacing.xs,
+                  // vertical: spacing.xs,
                 ),
                 child: GNav(
                   selectedIndex: navigationShell.currentIndex,
