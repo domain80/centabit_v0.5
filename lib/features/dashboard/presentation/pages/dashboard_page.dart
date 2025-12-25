@@ -1,12 +1,17 @@
 import 'package:centabit/core/di/injection.dart';
+import 'package:centabit/core/localizations/app_localizations.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
+import 'package:centabit/data/services/transaction_service.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/dashboard_cubit.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_cubit.dart';
+import 'package:centabit/features/dashboard/presentation/cubits/date_filter_state.dart';
 import 'package:centabit/features/dashboard/presentation/widgets/budget_report_section.dart';
 import 'package:centabit/features/dashboard/presentation/widgets/daily_transactions_section.dart';
 import 'package:centabit/shared/widgets/shared_app_bar.dart';
+import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 /// Dashboard page - main screen displaying budget reports and daily transactions.
 ///
@@ -111,21 +116,126 @@ class _DashboardView extends StatelessWidget {
           // DateFilterCubit refreshes automatically via service streams
           await Future<void>.delayed(const Duration(milliseconds: 300));
         },
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Budget Report Section with BAR and charts
-              const BudgetReportSection(),
+        child: CustomScrollView(
+          slivers: [
+            // Budget Report Section with BAR and charts
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  const BudgetReportSection(),
+                  SizedBox(height: spacing.lg),
+                ],
+              ),
+            ),
 
-              SizedBox(height: spacing.lg),
+            // Daily Transactions Section with sticky header
+            BlocBuilder<DateFilterCubit, DateFilterState>(
+              builder: (context, state) {
+                final screenHeight = MediaQuery.of(context).size.height * 1.3;
 
-              // Daily Transactions Section with date filtering
-              const DailyTransactionsSection(),
+                return SliverStickyHeader(
+                  header: const DailyTransactionsStickyHeader(),
+                  sliver: _buildTransactionSliver(context, state, screenHeight),
+                );
+              },
+            ),
 
-              // Bottom padding for navigation bar
-              const SizedBox(height: 120),
-            ],
+            // Bottom padding for navigation bar
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds the transaction list sliver with minimum height.
+  ///
+  /// **Empty State**: Shows centered message when no transactions exist
+  /// **Transaction List**: Shows list of TransactionTile widgets
+  ///
+  /// **Min Height**: Ensures the section takes at least screen height to prevent
+  /// layout shifts when switching between dates with different transaction counts
+  ///
+  /// **Delete Behavior**:
+  /// - Swipe transaction tile left to reveal delete
+  /// - Calls TransactionService.deleteTransaction()
+  /// - DateFilterCubit automatically reacts to service change
+  ///
+  /// **Parameters**:
+  /// - `context`: Build context
+  /// - `state`: Current date filter state
+  /// - `screenHeight`: Screen height for minimum constraint
+  ///
+  /// **Returns**: Sliver widget showing transactions or empty state
+  Widget _buildTransactionSliver(
+    BuildContext context,
+    DateFilterState state,
+    double screenHeight,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final spacing = theme.extension<AppSpacing>()!;
+
+    // Calculate minimum height (screen height minus some space for header/navbar)
+    final minContentHeight = screenHeight - 400;
+
+    // Empty state: no transactions for selected date
+    if (state.filteredTransactions.isEmpty) {
+      return SliverToBoxAdapter(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: minContentHeight),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.xl,
+              vertical: spacing.lg,
+            ),
+            child: Center(
+              child: Text(
+                l10n.noTransactionsForDate,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
           ),
+        ),
+      );
+    }
+
+    // Transaction list
+    final transactionService = getIt<TransactionService>();
+
+    return SliverPadding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.xl),
+      sliver: SliverConstrainedCrossAxis(
+        maxExtent: double.infinity,
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            // Add minimum height constraint to the list
+            if (index == 0) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(minHeight: minContentHeight),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: state.filteredTransactions
+                      .map(
+                        (transaction) => TransactionTile(
+                          transaction: transaction,
+                          onDelete: () {
+                            transactionService.deleteTransaction(
+                              transaction.id,
+                            );
+                          },
+                          onEdit: null, // TODO: Navigate to edit form
+                          onCopy: null, // TODO: Duplicate transaction
+                        ),
+                      )
+                      .toList(),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }, childCount: 1),
         ),
       ),
     );
