@@ -10,6 +10,7 @@ import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:intl/intl.dart';
 
 /// Transactions page displaying a list of all transactions
 ///
@@ -164,7 +165,7 @@ class _TransactionsView extends StatelessWidget {
 
   /// Builds a sticky date header widget.
   ///
-  /// Displays "Today", "Yesterday", or formatted date (e.g., "Dec 24, 2025").
+  /// Displays "Today", "Yesterday", or formatted date (e.g., "December 24, 2024").
   /// Has a surface background color so it's not transparent when sticking.
   Widget _buildDateHeader(
     BuildContext context,
@@ -184,7 +185,7 @@ class _TransactionsView extends StatelessWidget {
     } else if (date == yesterday) {
       dateLabel = "Yesterday";
     } else {
-      dateLabel = "${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}";
+      dateLabel = DateFormat('MMMM d, y').format(date);
     }
 
     return Container(
