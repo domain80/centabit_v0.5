@@ -91,8 +91,29 @@ class DashboardPage extends StatelessWidget {
 /// - Pull-to-refresh wrapper
 /// - ScrollView with budget and transaction sections
 /// - Bottom padding for navigation bar clearance
-class _DashboardView extends StatelessWidget {
+/// - Scroll position management (resets to top on date change)
+class _DashboardView extends StatefulWidget {
   const _DashboardView();
+
+  @override
+  State<_DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<_DashboardView> {
+  late final ScrollController _scrollController;
+  DateTime? _previousDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,15 +130,30 @@ class _DashboardView extends StatelessWidget {
           ],
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // Refresh both cubits
-          context.read<DashboardCubit>().refresh();
-          // DateFilterCubit refreshes automatically via service streams
-          await Future<void>.delayed(const Duration(milliseconds: 300));
+      body: BlocListener<DateFilterCubit, DateFilterState>(
+        listenWhen: (previous, current) =>
+            previous.selectedDate != current.selectedDate,
+        listener: (context, state) {
+          // Reset scroll position to top when date changes
+          if (_previousDate != null && _previousDate != state.selectedDate) {
+            _scrollController.animateTo(
+              0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+          _previousDate = state.selectedDate;
         },
-        child: CustomScrollView(
-          slivers: [
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // Refresh both cubits
+            context.read<DashboardCubit>().refresh();
+            // DateFilterCubit refreshes automatically via service streams
+            await Future<void>.delayed(const Duration(milliseconds: 300));
+          },
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
             // Budget Report Section with BAR and charts
             SliverToBoxAdapter(
               child: Column(
@@ -143,6 +179,7 @@ class _DashboardView extends StatelessWidget {
             // Bottom padding for navigation bar
             const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
+        ),
         ),
       ),
     );
