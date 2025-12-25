@@ -1,5 +1,6 @@
 import 'package:centabit/core/localizations/app_localizations.dart';
 import 'package:centabit/core/theme/tabler_icons.dart';
+import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/data/models/transactions_chart_data.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/dashboard_cubit.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/dashboard_state.dart';
@@ -128,6 +129,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final spacing = Theme.of(context).extension<AppSpacing>()!;
 
     return BlocBuilder<DashboardCubit, DashboardState>(
       builder: (context, state) {
@@ -139,7 +141,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
           loading: () => Container(
             width: double.infinity,
             height: 330.0,
-            padding: const EdgeInsets.symmetric(horizontal: 26),
+            padding: EdgeInsets.symmetric(horizontal: spacing.sm),
             child: const Center(child: CircularProgressIndicator()),
           ),
 
@@ -148,8 +150,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
             const height = 330.0;
 
             // Empty state: no budgets or no chart data
-            if (budgetPages.isEmpty ||
-                budgetPages.first.chartData.isEmpty) {
+            if (budgetPages.isEmpty || budgetPages.first.chartData.isEmpty) {
               return Container(
                 width: double.infinity,
                 height: height,
@@ -180,7 +181,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
               child: Container(
                 width: double.infinity,
                 height: height,
-                padding: const EdgeInsets.symmetric(horizontal: 26),
+                padding: EdgeInsets.symmetric(horizontal: spacing.xl),
                 child: Column(
                   children: [
                     Expanded(
@@ -213,9 +214,9 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
             child: Center(
               child: Text(
                 'Error: $message',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.error,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: colorScheme.error),
               ),
             ),
           ),
@@ -303,8 +304,10 @@ class _BudgetPageContent extends StatelessWidget {
               const SizedBox(height: 8),
 
               // Higher/Lower explanation
-              Text(l10n.barHigherLowerExplanation,
-                  style: theme.textTheme.bodyMedium),
+              Text(
+                l10n.barHigherLowerExplanation,
+                style: theme.textTheme.bodyMedium,
+              ),
               const SizedBox(height: 12),
 
               // Update frequency
@@ -388,10 +391,7 @@ class _BudgetPageContent extends StatelessWidget {
                 : colorScheme.onSurface;
 
             return TweenAnimationBuilder<Color?>(
-              tween: ColorTween(
-                begin: colorScheme.onSurface,
-                end: targetColor,
-              ),
+              tween: ColorTween(begin: colorScheme.onSurface, end: targetColor),
               duration: const Duration(milliseconds: 400),
               builder: (context, color, _) {
                 return Container(

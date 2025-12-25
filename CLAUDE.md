@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Centabit v0.5 is a Flutter budgeting application with comprehensive budget tracking, transaction management, and financial analytics. The app features:
-- **Budget Reports**: BAR (Budget Available Ratio) metrics with interactive charts
+- **Budget Reports**: BAR (Budget Adherence Ratio) metrics with interactive charts
 - **Transaction Management**: Date-filtered transaction lists with search
 - **Category-based Budgeting**: Allocations across multiple spending categories
 - **Material 3 Design**: Custom theme with glassmorphic navigation and animations
@@ -519,7 +519,7 @@ class DashboardState with _$DashboardState {
 
 ### Key App-Specific Concepts
 
-**BAR (Budget Available Ratio)**:
+**BAR (Budget Adherence Ratio)**:
 - Financial metric comparing spending rate vs time progression
 - Formula: `(daysRemaining / totalDays) / (budgetRemaining / totalBudget)`
 - Displayed on dashboard with color-coded progress bar

@@ -1,6 +1,6 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:centabit/data/models/budget_model.dart';
 import 'package:centabit/data/models/transactions_chart_data.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'dashboard_state.freezed.dart';
 

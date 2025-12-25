@@ -1,13 +1,16 @@
 import 'dart:async';
+
 import 'package:centabit/data/models/transaction_model.dart';
 import 'package:centabit/data/services/category_service.dart';
 
 class TransactionService {
   final List<TransactionModel> _transactions = [];
-  final _transactionsController = StreamController<List<TransactionModel>>.broadcast();
+  final _transactionsController =
+      StreamController<List<TransactionModel>>.broadcast();
   final CategoryService _categoryService;
 
-  Stream<List<TransactionModel>> get transactionsStream => _transactionsController.stream;
+  Stream<List<TransactionModel>> get transactionsStream =>
+      _transactionsController.stream;
 
   List<TransactionModel> get transactions => List.unmodifiable(_transactions);
 
@@ -23,9 +26,13 @@ class TransactionService {
     // Get category IDs from the service
     final categories = _categoryService.categories;
     final groceriesId = categories.firstWhere((c) => c.name == 'Groceries').id;
-    final entertainmentId = categories.firstWhere((c) => c.name == 'Entertainment').id;
+    final entertainmentId = categories
+        .firstWhere((c) => c.name == 'Entertainment')
+        .id;
     final transportId = categories.firstWhere((c) => c.name == 'Transport').id;
-    final healthcareId = categories.firstWhere((c) => c.name == 'Healthcare').id;
+    final healthcareId = categories
+        .firstWhere((c) => c.name == 'Healthcare')
+        .id;
     final diningId = categories.firstWhere((c) => c.name == 'Dining').id;
     final coffeeId = categories.firstWhere((c) => c.name == 'Coffee').id;
     final gasId = categories.firstWhere((c) => c.name == 'Gas & Fuel').id;
@@ -69,6 +76,102 @@ class TransactionService {
       ),
       TransactionModel(
         id: '4',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '34',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '44',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '54',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '64',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '74',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '84',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '94',
+        name: 'Coffee at Starbucks',
+        amount: 5.75,
+        type: TransactionType.debit,
+        categoryId: coffeeId,
+        budgetId: null,
+        transactionDate: yesterday.copyWith(hour: 8, minute: 30),
+        notes: null,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      ),
+      TransactionModel(
+        id: '35',
         name: 'Coffee at Starbucks',
         amount: 5.75,
         type: TransactionType.debit,
@@ -158,7 +261,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: groceriesId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 3)).copyWith(hour: 11, minute: 30),
+        transactionDate: now
+            .subtract(const Duration(days: 3))
+            .copyWith(hour: 11, minute: 30),
         notes: 'Weekly groceries',
         createdAt: now.subtract(const Duration(days: 3)),
         updatedAt: now.subtract(const Duration(days: 3)),
@@ -170,7 +275,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: transportId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 3)).copyWith(hour: 19, minute: 0),
+        transactionDate: now
+            .subtract(const Duration(days: 3))
+            .copyWith(hour: 19, minute: 0),
         notes: 'Airport pickup',
         createdAt: now.subtract(const Duration(days: 3)),
         updatedAt: now.subtract(const Duration(days: 3)),
@@ -182,7 +289,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: coffeeId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 4)).copyWith(hour: 7, minute: 45),
+        transactionDate: now
+            .subtract(const Duration(days: 4))
+            .copyWith(hour: 7, minute: 45),
         notes: null,
         createdAt: now.subtract(const Duration(days: 4)),
         updatedAt: now.subtract(const Duration(days: 4)),
@@ -194,7 +303,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: entertainmentId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 4)).copyWith(hour: 20, minute: 0),
+        transactionDate: now
+            .subtract(const Duration(days: 4))
+            .copyWith(hour: 20, minute: 0),
         notes: '2 tickets',
         createdAt: now.subtract(const Duration(days: 4)),
         updatedAt: now.subtract(const Duration(days: 4)),
@@ -206,7 +317,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: groceriesId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 5)).copyWith(hour: 14, minute: 0),
+        transactionDate: now
+            .subtract(const Duration(days: 5))
+            .copyWith(hour: 14, minute: 0),
         notes: 'Bulk shopping',
         createdAt: now.subtract(const Duration(days: 5)),
         updatedAt: now.subtract(const Duration(days: 5)),
@@ -218,7 +331,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: healthcareId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 5)).copyWith(hour: 10, minute: 30),
+        transactionDate: now
+            .subtract(const Duration(days: 5))
+            .copyWith(hour: 10, minute: 30),
         notes: 'Prescription refill',
         createdAt: now.subtract(const Duration(days: 5)),
         updatedAt: now.subtract(const Duration(days: 5)),
@@ -230,7 +345,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: diningId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 6)).copyWith(hour: 19, minute: 30),
+        transactionDate: now
+            .subtract(const Duration(days: 6))
+            .copyWith(hour: 19, minute: 30),
         notes: 'Lunch with friends',
         createdAt: now.subtract(const Duration(days: 6)),
         updatedAt: now.subtract(const Duration(days: 6)),
@@ -242,7 +359,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: gasId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 6)).copyWith(hour: 8, minute: 0),
+        transactionDate: now
+            .subtract(const Duration(days: 6))
+            .copyWith(hour: 8, minute: 0),
         notes: 'Full tank',
         createdAt: now.subtract(const Duration(days: 6)),
         updatedAt: now.subtract(const Duration(days: 6)),
@@ -254,7 +373,9 @@ class TransactionService {
         type: TransactionType.credit,
         categoryId: null,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 7)).copyWith(hour: 12, minute: 0),
+        transactionDate: now
+            .subtract(const Duration(days: 7))
+            .copyWith(hour: 12, minute: 0),
         notes: 'Website project',
         createdAt: now.subtract(const Duration(days: 7)),
         updatedAt: now.subtract(const Duration(days: 7)),
@@ -266,7 +387,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: entertainmentId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 7)).copyWith(hour: 0, minute: 1),
+        transactionDate: now
+            .subtract(const Duration(days: 7))
+            .copyWith(hour: 0, minute: 1),
         notes: 'Monthly subscription',
         createdAt: now.subtract(const Duration(days: 7)),
         updatedAt: now.subtract(const Duration(days: 7)),
@@ -278,7 +401,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: groceriesId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 8)).copyWith(hour: 15, minute: 45),
+        transactionDate: now
+            .subtract(const Duration(days: 8))
+            .copyWith(hour: 15, minute: 45),
         notes: 'Household items',
         createdAt: now.subtract(const Duration(days: 8)),
         updatedAt: now.subtract(const Duration(days: 8)),
@@ -290,7 +415,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: diningId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 8)).copyWith(hour: 20, minute: 30),
+        transactionDate: now
+            .subtract(const Duration(days: 8))
+            .copyWith(hour: 20, minute: 30),
         notes: 'Late night delivery',
         createdAt: now.subtract(const Duration(days: 8)),
         updatedAt: now.subtract(const Duration(days: 8)),
@@ -302,7 +429,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: coffeeId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 9)).copyWith(hour: 9, minute: 15),
+        transactionDate: now
+            .subtract(const Duration(days: 9))
+            .copyWith(hour: 9, minute: 15),
         notes: null,
         createdAt: now.subtract(const Duration(days: 9)),
         updatedAt: now.subtract(const Duration(days: 9)),
@@ -314,7 +443,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: transportId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 9)).copyWith(hour: 7, minute: 30),
+        transactionDate: now
+            .subtract(const Duration(days: 9))
+            .copyWith(hour: 7, minute: 30),
         notes: 'Monthly pass',
         createdAt: now.subtract(const Duration(days: 9)),
         updatedAt: now.subtract(const Duration(days: 9)),
@@ -326,7 +457,9 @@ class TransactionService {
         type: TransactionType.debit,
         categoryId: entertainmentId,
         budgetId: null,
-        transactionDate: now.subtract(const Duration(days: 10)).copyWith(hour: 10, minute: 0),
+        transactionDate: now
+            .subtract(const Duration(days: 10))
+            .copyWith(hour: 10, minute: 0),
         notes: 'Live music event',
         createdAt: now.subtract(const Duration(days: 10)),
         updatedAt: now.subtract(const Duration(days: 10)),
@@ -378,7 +511,9 @@ class TransactionService {
   }
 
   void _sortTransactions() {
-    _transactions.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+    _transactions.sort(
+      (a, b) => b.transactionDate.compareTo(a.transactionDate),
+    );
   }
 
   void _emitTransactions() {
