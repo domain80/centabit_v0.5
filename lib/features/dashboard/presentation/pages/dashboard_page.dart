@@ -136,7 +136,7 @@ class _DashboardView extends StatelessWidget {
             ),
 
             // Bottom padding for navigation bar
-            // const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         ),
       ),

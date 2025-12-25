@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/router/navigation/nav_scroll_behavior.dart';
@@ -67,13 +69,14 @@ class _TransactionsView extends StatelessWidget {
                           const Duration(milliseconds: 300),
                         );
                       },
-                      child:
-                          const Center(child: Text('No transactions yet')),
+                      child: const Center(child: Text('No transactions yet')),
                     );
                   }
 
                   // Group transactions by date
-                  final groupedTransactions = _groupTransactionsByDate(transactions);
+                  final groupedTransactions = _groupTransactionsByDate(
+                    transactions,
+                  );
 
                   // Sort dates descending (newest first)
                   final sortedDates = groupedTransactions.keys.toList()
@@ -98,32 +101,32 @@ class _TransactionsView extends StatelessWidget {
                                 horizontal: spacing.lg,
                               ),
                               sliver: SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                    return TransactionTile(
-                                      transaction: dateTransactions[index],
-                                      onEdit: () {
-                                        // TODO: Implement edit transaction
-                                      },
-                                      onDelete: () => context
-                                          .read<TransactionListCubit>()
-                                          .deleteTransaction(dateTransactions[index].id),
-                                      onCopy: () {
-                                        // TODO: Implement copy transaction
-                                      },
-                                    );
-                                  },
-                                  childCount: dateTransactions.length,
-                                ),
+                                delegate: SliverChildBuilderDelegate((
+                                  context,
+                                  index,
+                                ) {
+                                  return TransactionTile(
+                                    transaction: dateTransactions[index],
+                                    onEdit: () {
+                                      // TODO: Implement edit transaction
+                                    },
+                                    onDelete: () => context
+                                        .read<TransactionListCubit>()
+                                        .deleteTransaction(
+                                          dateTransactions[index].id,
+                                        ),
+                                    onCopy: () {
+                                      // TODO: Implement copy transaction
+                                    },
+                                  );
+                                }, childCount: dateTransactions.length),
                               ),
                             ),
                           );
                         }),
 
                         // Bottom padding for navigation bar
-                        const SliverToBoxAdapter(
-                          child: SizedBox(height: 120),
-                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 120)),
                       ],
                     ),
                   );
@@ -188,21 +191,46 @@ class _TransactionsView extends StatelessWidget {
       dateLabel = DateFormat('MMMM d, y').format(date);
     }
 
-    return Container(
-      color: colorScheme.surface,
-      padding: EdgeInsets.only(
-        left: spacing.lg,
-        right: spacing.lg,
-        top: spacing.md,
-        bottom: spacing.sm,
-      ),
-      child: Text(
-        dateLabel,
-        style: theme.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: colorScheme.onSurface.withValues(alpha: 0.8),
+    // blur background
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        child: Container(
+          color: colorScheme.surface.withAlpha(200),
+          padding: EdgeInsets.only(
+            left: spacing.lg,
+            right: spacing.lg,
+            top: spacing.md,
+            bottom: spacing.sm,
+          ),
+          child: Text(
+            dateLabel,
+            style: theme.textTheme.bodySmall?.copyWith(
+              // fontWeight: FontWeight.n,
+              color: colorScheme.onSurface.withValues(alpha: 0.8),
+            ),
+          ),
         ),
       ),
     );
   }
 }
+
+//     return Container(
+//       color: colorScheme.surface.withAlpha(100),
+//       padding: EdgeInsets.only(
+//         left: spacing.lg,
+//         right: spacing.lg,
+//         top: spacing.md,
+//         bottom: spacing.sm,
+//       ),
+//       child: Text(
+//         dateLabel,
+//         style: theme.textTheme.bodySmall?.copyWith(
+//           // fontWeight: FontWeight.n,
+//           color: colorScheme.onSurface.withValues(alpha: 0.8),
+//         ),
+//       ),
+//     );
+//   }
+// }
