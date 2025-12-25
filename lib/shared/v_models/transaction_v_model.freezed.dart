@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TransactionVModel {
 
- String get id; String get name; double get amount; TransactionType get type; DateTime get transactionDate; String get formattedDate; String? get categoryId; String? get categoryName; String? get categoryIconName; String? get notes;
+ String get id; String get name; double get amount; TransactionType get type; DateTime get transactionDate; String get formattedDate; String get formattedTime; String? get categoryId; String? get categoryName; String? get categoryIconName; String? get notes;
 /// Create a copy of TransactionVModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $TransactionVModelCopyWith<TransactionVModel> get copyWith => _$TransactionVMode
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionVModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.transactionDate, transactionDate) || other.transactionDate == transactionDate)&&(identical(other.formattedDate, formattedDate) || other.formattedDate == formattedDate)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.categoryIconName, categoryIconName) || other.categoryIconName == categoryIconName)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionVModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.transactionDate, transactionDate) || other.transactionDate == transactionDate)&&(identical(other.formattedDate, formattedDate) || other.formattedDate == formattedDate)&&(identical(other.formattedTime, formattedTime) || other.formattedTime == formattedTime)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.categoryIconName, categoryIconName) || other.categoryIconName == categoryIconName)&&(identical(other.notes, notes) || other.notes == notes));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,amount,type,transactionDate,formattedDate,categoryId,categoryName,categoryIconName,notes);
+int get hashCode => Object.hash(runtimeType,id,name,amount,type,transactionDate,formattedDate,formattedTime,categoryId,categoryName,categoryIconName,notes);
 
 @override
 String toString() {
-  return 'TransactionVModel(id: $id, name: $name, amount: $amount, type: $type, transactionDate: $transactionDate, formattedDate: $formattedDate, categoryId: $categoryId, categoryName: $categoryName, categoryIconName: $categoryIconName, notes: $notes)';
+  return 'TransactionVModel(id: $id, name: $name, amount: $amount, type: $type, transactionDate: $transactionDate, formattedDate: $formattedDate, formattedTime: $formattedTime, categoryId: $categoryId, categoryName: $categoryName, categoryIconName: $categoryIconName, notes: $notes)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $TransactionVModelCopyWith<$Res>  {
   factory $TransactionVModelCopyWith(TransactionVModel value, $Res Function(TransactionVModel) _then) = _$TransactionVModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, double amount, TransactionType type, DateTime transactionDate, String formattedDate, String? categoryId, String? categoryName, String? categoryIconName, String? notes
+ String id, String name, double amount, TransactionType type, DateTime transactionDate, String formattedDate, String formattedTime, String? categoryId, String? categoryName, String? categoryIconName, String? notes
 });
 
 
@@ -62,7 +62,7 @@ class _$TransactionVModelCopyWithImpl<$Res>
 
 /// Create a copy of TransactionVModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? amount = null,Object? type = null,Object? transactionDate = null,Object? formattedDate = null,Object? categoryId = freezed,Object? categoryName = freezed,Object? categoryIconName = freezed,Object? notes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? amount = null,Object? type = null,Object? transactionDate = null,Object? formattedDate = null,Object? formattedTime = null,Object? categoryId = freezed,Object? categoryName = freezed,Object? categoryIconName = freezed,Object? notes = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -70,6 +70,7 @@ as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullabl
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as TransactionType,transactionDate: null == transactionDate ? _self.transactionDate : transactionDate // ignore: cast_nullable_to_non_nullable
 as DateTime,formattedDate: null == formattedDate ? _self.formattedDate : formattedDate // ignore: cast_nullable_to_non_nullable
+as String,formattedTime: null == formattedTime ? _self.formattedTime : formattedTime // ignore: cast_nullable_to_non_nullable
 as String,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String?,categoryName: freezed == categoryName ? _self.categoryName : categoryName // ignore: cast_nullable_to_non_nullable
 as String?,categoryIconName: freezed == categoryIconName ? _self.categoryIconName : categoryIconName // ignore: cast_nullable_to_non_nullable
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  double amount,  TransactionType type,  DateTime transactionDate,  String formattedDate,  String? categoryId,  String? categoryName,  String? categoryIconName,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  double amount,  TransactionType type,  DateTime transactionDate,  String formattedDate,  String formattedTime,  String? categoryId,  String? categoryName,  String? categoryIconName,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransactionVModel() when $default != null:
-return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDate,_that.formattedDate,_that.categoryId,_that.categoryName,_that.categoryIconName,_that.notes);case _:
+return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDate,_that.formattedDate,_that.formattedTime,_that.categoryId,_that.categoryName,_that.categoryIconName,_that.notes);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  double amount,  TransactionType type,  DateTime transactionDate,  String formattedDate,  String? categoryId,  String? categoryName,  String? categoryIconName,  String? notes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  double amount,  TransactionType type,  DateTime transactionDate,  String formattedDate,  String formattedTime,  String? categoryId,  String? categoryName,  String? categoryIconName,  String? notes)  $default,) {final _that = this;
 switch (_that) {
 case _TransactionVModel():
-return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDate,_that.formattedDate,_that.categoryId,_that.categoryName,_that.categoryIconName,_that.notes);case _:
+return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDate,_that.formattedDate,_that.formattedTime,_that.categoryId,_that.categoryName,_that.categoryIconName,_that.notes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  double amount,  TransactionType type,  DateTime transactionDate,  String formattedDate,  String? categoryId,  String? categoryName,  String? categoryIconName,  String? notes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  double amount,  TransactionType type,  DateTime transactionDate,  String formattedDate,  String formattedTime,  String? categoryId,  String? categoryName,  String? categoryIconName,  String? notes)?  $default,) {final _that = this;
 switch (_that) {
 case _TransactionVModel() when $default != null:
-return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDate,_that.formattedDate,_that.categoryId,_that.categoryName,_that.categoryIconName,_that.notes);case _:
+return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDate,_that.formattedDate,_that.formattedTime,_that.categoryId,_that.categoryName,_that.categoryIconName,_that.notes);case _:
   return null;
 
 }
@@ -215,7 +216,7 @@ return $default(_that.id,_that.name,_that.amount,_that.type,_that.transactionDat
 
 
 class _TransactionVModel implements TransactionVModel {
-  const _TransactionVModel({required this.id, required this.name, required this.amount, required this.type, required this.transactionDate, required this.formattedDate, this.categoryId, this.categoryName, this.categoryIconName, this.notes});
+  const _TransactionVModel({required this.id, required this.name, required this.amount, required this.type, required this.transactionDate, required this.formattedDate, required this.formattedTime, this.categoryId, this.categoryName, this.categoryIconName, this.notes});
   
 
 @override final  String id;
@@ -224,6 +225,7 @@ class _TransactionVModel implements TransactionVModel {
 @override final  TransactionType type;
 @override final  DateTime transactionDate;
 @override final  String formattedDate;
+@override final  String formattedTime;
 @override final  String? categoryId;
 @override final  String? categoryName;
 @override final  String? categoryIconName;
@@ -239,16 +241,16 @@ _$TransactionVModelCopyWith<_TransactionVModel> get copyWith => __$TransactionVM
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionVModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.transactionDate, transactionDate) || other.transactionDate == transactionDate)&&(identical(other.formattedDate, formattedDate) || other.formattedDate == formattedDate)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.categoryIconName, categoryIconName) || other.categoryIconName == categoryIconName)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionVModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.transactionDate, transactionDate) || other.transactionDate == transactionDate)&&(identical(other.formattedDate, formattedDate) || other.formattedDate == formattedDate)&&(identical(other.formattedTime, formattedTime) || other.formattedTime == formattedTime)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.categoryName, categoryName) || other.categoryName == categoryName)&&(identical(other.categoryIconName, categoryIconName) || other.categoryIconName == categoryIconName)&&(identical(other.notes, notes) || other.notes == notes));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,amount,type,transactionDate,formattedDate,categoryId,categoryName,categoryIconName,notes);
+int get hashCode => Object.hash(runtimeType,id,name,amount,type,transactionDate,formattedDate,formattedTime,categoryId,categoryName,categoryIconName,notes);
 
 @override
 String toString() {
-  return 'TransactionVModel(id: $id, name: $name, amount: $amount, type: $type, transactionDate: $transactionDate, formattedDate: $formattedDate, categoryId: $categoryId, categoryName: $categoryName, categoryIconName: $categoryIconName, notes: $notes)';
+  return 'TransactionVModel(id: $id, name: $name, amount: $amount, type: $type, transactionDate: $transactionDate, formattedDate: $formattedDate, formattedTime: $formattedTime, categoryId: $categoryId, categoryName: $categoryName, categoryIconName: $categoryIconName, notes: $notes)';
 }
 
 
@@ -259,7 +261,7 @@ abstract mixin class _$TransactionVModelCopyWith<$Res> implements $TransactionVM
   factory _$TransactionVModelCopyWith(_TransactionVModel value, $Res Function(_TransactionVModel) _then) = __$TransactionVModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, double amount, TransactionType type, DateTime transactionDate, String formattedDate, String? categoryId, String? categoryName, String? categoryIconName, String? notes
+ String id, String name, double amount, TransactionType type, DateTime transactionDate, String formattedDate, String formattedTime, String? categoryId, String? categoryName, String? categoryIconName, String? notes
 });
 
 
@@ -276,7 +278,7 @@ class __$TransactionVModelCopyWithImpl<$Res>
 
 /// Create a copy of TransactionVModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? amount = null,Object? type = null,Object? transactionDate = null,Object? formattedDate = null,Object? categoryId = freezed,Object? categoryName = freezed,Object? categoryIconName = freezed,Object? notes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? amount = null,Object? type = null,Object? transactionDate = null,Object? formattedDate = null,Object? formattedTime = null,Object? categoryId = freezed,Object? categoryName = freezed,Object? categoryIconName = freezed,Object? notes = freezed,}) {
   return _then(_TransactionVModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -284,6 +286,7 @@ as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullabl
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as TransactionType,transactionDate: null == transactionDate ? _self.transactionDate : transactionDate // ignore: cast_nullable_to_non_nullable
 as DateTime,formattedDate: null == formattedDate ? _self.formattedDate : formattedDate // ignore: cast_nullable_to_non_nullable
+as String,formattedTime: null == formattedTime ? _self.formattedTime : formattedTime // ignore: cast_nullable_to_non_nullable
 as String,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String?,categoryName: freezed == categoryName ? _self.categoryName : categoryName // ignore: cast_nullable_to_non_nullable
 as String?,categoryIconName: freezed == categoryIconName ? _self.categoryIconName : categoryIconName // ignore: cast_nullable_to_non_nullable

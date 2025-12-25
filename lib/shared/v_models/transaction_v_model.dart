@@ -12,6 +12,7 @@ abstract class TransactionVModel with _$TransactionVModel {
     required TransactionType type,
     required DateTime transactionDate,
     required String formattedDate,
+    required String formattedTime,
     String? categoryId,
     String? categoryName,
     String? categoryIconName,

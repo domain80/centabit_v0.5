@@ -115,29 +115,29 @@ class _DashboardView extends StatelessWidget {
         },
         child: CustomScrollView(
           slivers: [
-              // Budget Report Section with BAR and charts
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    const BudgetReportSection(),
-                    SizedBox(height: spacing.lg),
-                  ],
+            // Budget Report Section with BAR and charts
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  const BudgetReportSection(),
+                  SizedBox(height: spacing.lg),
+                ],
+              ),
+            ),
+
+            // Daily Transactions Section with sticky header
+            SliverStickyHeader(
+              header: const DailyTransactionsStickyHeader(),
+              sliver: SliverToBoxAdapter(
+                child: ScrollableTransactionList(
+                  minHeight: MediaQuery.of(context).size.height * 0.7,
                 ),
               ),
+            ),
 
-              // Daily Transactions Section with sticky header
-              SliverStickyHeader(
-                header: const DailyTransactionsStickyHeader(),
-                sliver: SliverToBoxAdapter(
-                  child: ScrollableTransactionList(
-                    minHeight: MediaQuery.of(context).size.height * 1.1 - 400,
-                  ),
-                ),
-              ),
-
-              // Bottom padding for navigation bar
-              const SliverToBoxAdapter(child: SizedBox(height: 80)),
-            ],
+            // Bottom padding for navigation bar
+            // const SliverToBoxAdapter(child: SizedBox(height: 80)),
+          ],
         ),
       ),
     );

@@ -163,6 +163,7 @@ class DateFilterCubit extends Cubit<DateFilterState> {
         type: transaction.type,
         transactionDate: transaction.transactionDate,
         formattedDate: _formatDate(transaction.transactionDate),
+        formattedTime: _formatTime(transaction.transactionDate),
         categoryId: transaction.categoryId,
         categoryName: category?.name,
         categoryIconName: category?.iconName,
@@ -212,6 +213,10 @@ class DateFilterCubit extends Cubit<DateFilterState> {
     } else {
       return DateFormat('MMM d, yy | hh:mm a').format(date);
     }
+  }
+
+  String _formatTime(DateTime date) {
+    return DateFormat('hh:mm a').format(date);
   }
 
   /// Normalizes date to start of day (00:00:00).

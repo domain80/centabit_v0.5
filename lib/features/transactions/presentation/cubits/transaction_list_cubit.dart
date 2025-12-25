@@ -61,6 +61,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
           type: transaction.type,
           transactionDate: transaction.transactionDate,
           formattedDate: _formatDate(transaction.transactionDate),
+          formattedTime: _formatTime(transaction.transactionDate),
           categoryId: transaction.categoryId,
           categoryName: category?.name,
           categoryIconName: category?.iconName,
@@ -111,6 +112,10 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     } else {
       return DateFormat('MMM d, yy | hh:mm a').format(date);
     }
+  }
+
+  String _formatTime(DateTime date) {
+    return DateFormat('hh:mm a').format(date);
   }
 
   @override

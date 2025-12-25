@@ -137,13 +137,13 @@ class TransactionTile extends StatelessWidget {
                 ),
               ),
               SizedBox(width: spacing.sm),
-              // Transaction name and date
+              // Transaction name and time
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      transaction.formattedDate,
+                      transaction.formattedTime,
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 12,
                         color: colorScheme.onSurface.withValues(alpha: 0.7),
