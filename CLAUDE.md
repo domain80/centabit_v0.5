@@ -320,13 +320,50 @@ BlocProvider(
 - **Auto-Hide Nav Bar**: Hides on scroll down, shows on scroll up (using `NavScrollWrapper`)
 - **Search Mode**: Animated search bar that scales up from minimized state (300ms transitions)
 - **Searchable Tabs**: Transaction page has integrated search capability
+- **Filter Action Widgets**: Pages can register custom widgets (icons, date pickers, etc.) in the search bar
 
 **Key Files**:
 - `app_router.dart` - Route definitions with StatefulShellRoute
-- `nav_cubit.dart` - Navigation state (selected tab, search mode, nav visibility)
+- `nav_cubit.dart` - Navigation state (selected tab, search mode, nav visibility, filter actions)
 - `app_nav_shell.dart` - Main shell with swipe handling and animated nav bar
 - `searchable_nav_container.dart` - Dual-state nav (normal vs search mode)
 - `nav_scroll_behavior.dart` - Scroll detection for auto-hide behavior
+
+**Filter Action Widget Pattern**:
+
+Pages can register custom filter widgets in the navigation search bar using the NavCubit event bus pattern:
+
+```dart
+// In page initState - register filter widget
+WidgetsBinding.instance.addPostFrameCallback((_) {
+  if (mounted) {
+    context.read<NavCubit>().setFilterAction(
+      CustomDatePickerIcon(
+        currentDate: DateTime.now(),
+        onDateChanged: (date) {
+          context.read<TransactionListCubit>().setSelectedDate(date);
+        },
+      ),
+    );
+  }
+});
+
+// In page dispose - clean up filter widget
+@override
+void dispose() {
+  context.read<NavCubit>().setFilterAction(null);
+  super.dispose();
+}
+```
+
+**How it works**:
+1. NavCubit stores a `filterActionWidget` in its state
+2. Pages register widgets via `setFilterAction(Widget?)`
+3. NavSearchBar conditionally renders the widget from NavCubit state
+4. Widgets handle their own interactions (modals, callbacks, etc.)
+5. Auto-cleanup: Filter widgets cleared on tab switch or page disposal
+
+This pattern maintains clean separation between shell layer (NavSearchBar) and page layer (feature pages) while allowing flexible UI customization.
 
 ### Theme System
 
@@ -537,4 +574,11 @@ class DashboardState with _$DashboardState {
 - Tracks planned spending per category
 - Compared against actual transactions in charts
 - Managed by `AllocationService` with Category + Budget dependencies
+
+**Custom Date Pickers**:
+- `CustomDatePicker` (text-based): Uses `CupertinoCalendarPickerButton` for text display with calendar picker
+- `CustomDatePickerIcon` (icon-based): Uses `showCupertinoCalendarPicker()` function with custom IconButton
+- Both widgets maintain same styling and date range constraints
+- Icon-based version used in navigation filter actions for compact UI
+- Text-based version used in content areas where date context is helpful
 
