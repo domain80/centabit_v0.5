@@ -7,7 +7,7 @@ import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
-import 'package:centabit/shared/widgets/custom_date_picker.dart';
+import 'package:centabit/shared/widgets/custom_date_picker_icon.dart';
 import 'package:centabit/shared/widgets/shared_app_bar.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +51,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<NavCubit>().setFilterAction(
-          CustomDatePicker(
+          CustomDatePickerIcon(
             currentDate: DateTime.now(),
             onDateChanged: (date) {
               context.read<TransactionListCubit>().setSelectedDate(date);
