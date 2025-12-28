@@ -32,8 +32,29 @@ class TransactionsPage extends StatelessWidget {
   }
 }
 
-class _TransactionsView extends StatelessWidget {
+class _TransactionsView extends StatefulWidget {
   const _TransactionsView();
+
+  @override
+  State<_TransactionsView> createState() => _TransactionsViewState();
+}
+
+class _TransactionsViewState extends State<_TransactionsView> {
+  final Map<DateTime, GlobalKey> _dateKeys = {};
+
+  void _scrollToDate(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final key = _dateKeys[normalizedDate];
+
+    if (key?.currentContext != null) {
+      Scrollable.ensureVisible(
+        key!.currentContext!,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        alignment: 0.0, // Align header to top
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +68,47 @@ class _TransactionsView extends StatelessWidget {
             return BlocListener<NavCubit, NavState>(
               listenWhen: (prev, curr) => prev.searchQuery != curr.searchQuery,
               listener: (context, navState) {
-                // Page receives search query updates
+                // Page receives search query updates from nav bar
                 if (navState.searchQuery.isNotEmpty) {
-                  // TODO: Implement searchTransactions in TransactionListCubit
-                  // context.read<TransactionListCubit>()
-                  //     .searchTransactions(navState.searchQuery);
+                  context
+                      .read<TransactionListCubit>()
+                      .searchTransactions(navState.searchQuery);
                 } else {
-                  // Reload all transactions when search is cleared
-                  // TODO: Implement in TransactionListCubit if needed
+                  // Clear search when query is empty
+                  context.read<TransactionListCubit>().clearFilters();
                 }
               },
-              child: state.when(
+              child: BlocListener<TransactionListCubit, TransactionListState>(
+                listenWhen: (prev, curr) {
+                  DateTime? prevDate;
+                  DateTime? currDate;
+
+                  prev.maybeWhen(
+                    success: (_, __, ___, ____, date) => prevDate = date,
+                    orElse: () {},
+                  );
+
+                  curr.maybeWhen(
+                    success: (_, __, ___, ____, date) => currDate = date,
+                    orElse: () {},
+                  );
+
+                  return prevDate != currDate;
+                },
+                listener: (context, state) {
+                  state.maybeWhen(
+                    success: (_, __, ___, ____, selectedDate) {
+                      if (selectedDate != null) {
+                        _scrollToDate(selectedDate);
+                      }
+                    },
+                    orElse: () {},
+                  );
+                },
+                child: state.when(
                 initial: () => const SizedBox(),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                success: (transactions, _, _) {
+                success: (transactions, _, __, ___, ____) {
                   if (transactions.isEmpty) {
                     return RefreshIndicator(
                       onRefresh: () {
@@ -133,6 +181,7 @@ class _TransactionsView extends StatelessWidget {
                 },
                 error: (message) => Center(child: Text('Error: $message')),
               ),
+              ),
             );
           },
         ),
@@ -182,6 +231,12 @@ class _TransactionsView extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
 
+    // Normalize date for key lookup
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+
+    // Create or retrieve key for this date
+    _dateKeys.putIfAbsent(normalizedDate, () => GlobalKey());
+
     String dateLabel;
     if (date == today) {
       dateLabel = "Today";
@@ -193,6 +248,7 @@ class _TransactionsView extends StatelessWidget {
 
     // blur background
     return ClipRRect(
+      key: _dateKeys[normalizedDate],
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(

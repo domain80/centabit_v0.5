@@ -128,12 +128,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<TransactionVModel> transactions,  int currentPage,  bool hasMore)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<TransactionVModel> transactions,  int currentPage,  bool hasMore,  String searchQuery,  DateTime? selectedDate)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.transactions,_that.currentPage,_that.hasMore);case _Error() when error != null:
+return success(_that.transactions,_that.currentPage,_that.hasMore,_that.searchQuery,_that.selectedDate);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +152,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<TransactionVModel> transactions,  int currentPage,  bool hasMore)  success,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<TransactionVModel> transactions,  int currentPage,  bool hasMore,  String searchQuery,  DateTime? selectedDate)  success,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Success():
-return success(_that.transactions,_that.currentPage,_that.hasMore);case _Error():
+return success(_that.transactions,_that.currentPage,_that.hasMore,_that.searchQuery,_that.selectedDate);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +175,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<TransactionVModel> transactions,  int currentPage,  bool hasMore)?  success,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<TransactionVModel> transactions,  int currentPage,  bool hasMore,  String searchQuery,  DateTime? selectedDate)?  success,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.transactions,_that.currentPage,_that.hasMore);case _Error() when error != null:
+return success(_that.transactions,_that.currentPage,_that.hasMore,_that.searchQuery,_that.selectedDate);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -257,7 +257,7 @@ String toString() {
 
 
 class _Success implements TransactionListState {
-  const _Success({required final  List<TransactionVModel> transactions, required this.currentPage, required this.hasMore}): _transactions = transactions;
+  const _Success({required final  List<TransactionVModel> transactions, required this.currentPage, required this.hasMore, this.searchQuery = '', this.selectedDate}): _transactions = transactions;
   
 
  final  List<TransactionVModel> _transactions;
@@ -269,6 +269,8 @@ class _Success implements TransactionListState {
 
  final  int currentPage;
  final  bool hasMore;
+@JsonKey() final  String searchQuery;
+ final  DateTime? selectedDate;
 
 /// Create a copy of TransactionListState
 /// with the given fields replaced by the non-null parameter values.
@@ -280,16 +282,16 @@ _$SuccessCopyWith<_Success> get copyWith => __$SuccessCopyWithImpl<_Success>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other._transactions, _transactions)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other._transactions, _transactions)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.selectedDate, selectedDate) || other.selectedDate == selectedDate));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_transactions),currentPage,hasMore);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_transactions),currentPage,hasMore,searchQuery,selectedDate);
 
 @override
 String toString() {
-  return 'TransactionListState.success(transactions: $transactions, currentPage: $currentPage, hasMore: $hasMore)';
+  return 'TransactionListState.success(transactions: $transactions, currentPage: $currentPage, hasMore: $hasMore, searchQuery: $searchQuery, selectedDate: $selectedDate)';
 }
 
 
@@ -300,7 +302,7 @@ abstract mixin class _$SuccessCopyWith<$Res> implements $TransactionListStateCop
   factory _$SuccessCopyWith(_Success value, $Res Function(_Success) _then) = __$SuccessCopyWithImpl;
 @useResult
 $Res call({
- List<TransactionVModel> transactions, int currentPage, bool hasMore
+ List<TransactionVModel> transactions, int currentPage, bool hasMore, String searchQuery, DateTime? selectedDate
 });
 
 
@@ -317,12 +319,14 @@ class __$SuccessCopyWithImpl<$Res>
 
 /// Create a copy of TransactionListState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? transactions = null,Object? currentPage = null,Object? hasMore = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? transactions = null,Object? currentPage = null,Object? hasMore = null,Object? searchQuery = null,Object? selectedDate = freezed,}) {
   return _then(_Success(
 transactions: null == transactions ? _self._transactions : transactions // ignore: cast_nullable_to_non_nullable
 as List<TransactionVModel>,currentPage: null == currentPage ? _self.currentPage : currentPage // ignore: cast_nullable_to_non_nullable
 as int,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
+as String,selectedDate: freezed == selectedDate ? _self.selectedDate : selectedDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

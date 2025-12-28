@@ -43,13 +43,72 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     emit(const TransactionListState.loading());
 
     try {
-      final transactions = _transactionService.getTransactionsPaginated(
-        page: _currentPage,
-        pageSize: _pageSize,
+      // Extract current filters from state
+      String searchQuery = '';
+      DateTime? selectedDate;
+
+      state.maybeWhen(
+        success: (_, __, ___, query, date) {
+          searchQuery = query;
+          selectedDate = date;
+        },
+        orElse: () {},
       );
 
+      // Get all transactions
+      var allTransactions = _transactionService.transactions;
+
+      // Apply search filter (if query exists)
+      if (searchQuery.isNotEmpty) {
+        allTransactions = allTransactions.where((tx) {
+          final category = tx.categoryId != null
+              ? _categoryService.getCategoryById(tx.categoryId!)
+              : null;
+
+          final matchesName =
+              tx.name.toLowerCase().contains(searchQuery.toLowerCase());
+          final matchesCategory = category?.name
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()) ??
+              false;
+
+          return matchesName || matchesCategory;
+        }).toList();
+      }
+
+      // Apply pagination on filtered results
+      final startIndex = _currentPage * _pageSize;
+      final endIndex =
+          (startIndex + _pageSize).clamp(0, allTransactions.length);
+
+      if (startIndex >= allTransactions.length && allTransactions.isNotEmpty) {
+        // No more pages
+        List<TransactionVModel> currentTransactions = [];
+        state.maybeWhen(
+          success: (transactions, _, __, ___, ____) {
+            currentTransactions = transactions;
+          },
+          orElse: () {},
+        );
+
+        emit(
+          TransactionListState.success(
+            transactions: currentTransactions,
+            currentPage: _currentPage,
+            hasMore: false,
+            searchQuery: searchQuery,
+            selectedDate: selectedDate,
+          ),
+        );
+        return;
+      }
+
+      final pageTransactions = allTransactions.isNotEmpty
+          ? allTransactions.sublist(startIndex, endIndex)
+          : <dynamic>[];
+
       // Denormalize: combine transaction + category data
-      final viewItems = transactions.map((transaction) {
+      final viewItems = pageTransactions.map((transaction) {
         final category = transaction.categoryId != null
             ? _categoryService.getCategoryById(transaction.categoryId!)
             : null;
@@ -69,13 +128,15 @@ class TransactionListCubit extends Cubit<TransactionListState> {
         );
       }).toList();
 
-      final hasMore = transactions.length == _pageSize;
+      final hasMore = endIndex < allTransactions.length;
 
       emit(
         TransactionListState.success(
           transactions: viewItems,
           currentPage: _currentPage,
           hasMore: hasMore,
+          searchQuery: searchQuery,
+          selectedDate: selectedDate,
         ),
       );
     } catch (e) {
@@ -97,6 +158,67 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   Future<void> deleteTransaction(String id) async {
     await _transactionService.deleteTransaction(id);
     // Stream will automatically trigger reload
+  }
+
+  /// Search transactions by name or category name
+  void searchTransactions(String query) {
+    // Reset to page 0 when search changes
+    _currentPage = 0;
+
+    // Update state with new search query first
+    state.maybeWhen(
+      success: (transactions, currentPage, hasMore, _, selectedDate) {
+        emit(TransactionListState.success(
+          transactions: transactions,
+          currentPage: currentPage,
+          hasMore: hasMore,
+          searchQuery: query,
+          selectedDate: selectedDate,
+        ));
+      },
+      orElse: () {},
+    );
+
+    // Reload with new search query
+    _loadTransactions();
+  }
+
+  /// Set selected date for scroll-to-date functionality
+  void setSelectedDate(DateTime? date) {
+    // Just update state, don't reload (scroll happens in UI)
+    state.maybeWhen(
+      success: (transactions, currentPage, hasMore, searchQuery, _) {
+        emit(TransactionListState.success(
+          transactions: transactions,
+          currentPage: currentPage,
+          hasMore: hasMore,
+          searchQuery: searchQuery,
+          selectedDate: date,
+        ));
+      },
+      orElse: () {},
+    );
+  }
+
+  /// Clear all filters
+  void clearFilters() {
+    _currentPage = 0;
+
+    // Clear filters and reload
+    state.maybeWhen(
+      success: (transactions, currentPage, hasMore, _, __) {
+        emit(TransactionListState.success(
+          transactions: transactions,
+          currentPage: currentPage,
+          hasMore: hasMore,
+          searchQuery: '',
+          selectedDate: null,
+        ));
+      },
+      orElse: () {},
+    );
+
+    _loadTransactions();
   }
 
   String _formatDate(DateTime date) {

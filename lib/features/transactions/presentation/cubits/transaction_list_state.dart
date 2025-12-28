@@ -13,6 +13,8 @@ abstract class TransactionListState with _$TransactionListState {
     required List<TransactionVModel> transactions,
     required int currentPage,
     required bool hasMore,
+    @Default('') String searchQuery,
+    DateTime? selectedDate,
   }) = _Success;
 
   const factory TransactionListState.error(String message) = _Error;
