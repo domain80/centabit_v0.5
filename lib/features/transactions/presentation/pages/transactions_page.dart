@@ -7,6 +7,7 @@ import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
+import 'package:centabit/shared/widgets/custom_date_picker.dart';
 import 'package:centabit/shared/widgets/shared_app_bar.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,32 @@ class _TransactionsView extends StatefulWidget {
 
 class _TransactionsViewState extends State<_TransactionsView> {
   final Map<DateTime, GlobalKey> _dateKeys = {};
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Register filter action widget when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<NavCubit>().setFilterAction(
+          CustomDatePicker(
+            currentDate: DateTime.now(),
+            onDateChanged: (date) {
+              context.read<TransactionListCubit>().setSelectedDate(date);
+            },
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clear filter action when leaving page
+    context.read<NavCubit>().setFilterAction(null);
+    super.dispose();
+  }
 
   void _scrollToDate(DateTime date) {
     final normalizedDate = DateTime(date.year, date.month, date.day);

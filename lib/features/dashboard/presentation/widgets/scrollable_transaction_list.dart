@@ -30,18 +30,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ScrollableTransactionList extends StatefulWidget {
   final double minHeight;
 
-  const ScrollableTransactionList({
-    super.key,
-    required this.minHeight,
-  });
+  const ScrollableTransactionList({super.key, required this.minHeight});
 
   @override
   State<ScrollableTransactionList> createState() =>
       _ScrollableTransactionListState();
 }
 
-class _ScrollableTransactionListState
-    extends State<ScrollableTransactionList> {
+class _ScrollableTransactionListState extends State<ScrollableTransactionList> {
   late final ScrollController _scrollController;
   DateTime? _previousDate;
 
@@ -85,13 +81,19 @@ class _ScrollableTransactionListState
         if (state.filteredTransactions.isEmpty) {
           return ConstrainedBox(
             constraints: BoxConstraints(minHeight: widget.minHeight),
-            child: Center(
-              child: Text(
-                l10n.noTransactionsForDate,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            child: Column(
+              mainAxisAlignment: .start,
+              children: [
+                SizedBox(height: spacing.xl4),
+                Center(
+                  child: Text(
+                    l10n.noTransactionsForDate,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           );
         }

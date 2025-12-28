@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,6 +28,9 @@ class NavState {
   /// Whether the navigation bar is visible (for auto-hide on scroll)
   final bool isNavBarVisible;
 
+  /// Optional filter action widget for search bar (e.g., CustomDatePicker)
+  final Widget? filterActionWidget;
+
   const NavState({
     required this.selectedIndex,
     required this.actionType,
@@ -35,6 +39,7 @@ class NavState {
     this.searchQuery = '',
     this.searchScope = '',
     this.isNavBarVisible = true,
+    this.filterActionWidget,
   });
 
   /// Create a copy of this state with optional field replacements
@@ -46,6 +51,7 @@ class NavState {
     String? searchQuery,
     String? searchScope,
     bool? isNavBarVisible,
+    Widget? filterActionWidget,
   }) {
     return NavState(
       selectedIndex: selectedIndex ?? this.selectedIndex,
@@ -55,6 +61,7 @@ class NavState {
       searchQuery: searchQuery ?? this.searchQuery,
       searchScope: searchScope ?? this.searchScope,
       isNavBarVisible: isNavBarVisible ?? this.isNavBarVisible,
+      filterActionWidget: filterActionWidget ?? this.filterActionWidget,
     );
   }
 }
@@ -100,8 +107,14 @@ class NavCubit extends Cubit<NavState> {
         searchQuery: '',
         searchScope: searchScope,
         isNavBarVisible: true, // Always show nav bar when changing tabs
+        filterActionWidget: null, // Clear filter action when switching tabs
       ),
     );
+  }
+
+  /// Set filter action widget for search bar (called by pages)
+  void setFilterAction(Widget? widget) {
+    emit(state.copyWith(filterActionWidget: widget));
   }
 
   /// Enable or disable search capability for the current page

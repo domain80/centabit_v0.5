@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
-import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
-import 'package:centabit/shared/widgets/custom_date_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -115,34 +113,18 @@ class _NavSearchBarState extends State<NavSearchBar> {
                 ),
               ),
             ),
-            // Calendar filter button (dark circle)
-            IconButton(
-              style: .new(
-                backgroundColor: WidgetStatePropertyAll(colorScheme.primary),
-                foregroundColor: WidgetStatePropertyAll(colorScheme.onPrimary),
-              ),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (bottomSheetContext) {
-                    return CustomDatePicker(
-                      currentDate: DateTime.now(),
-                      onDateChanged: (date) {
-                        Navigator.pop(bottomSheetContext);
 
-                        // Try to access TransactionListCubit (only works on transactions page)
-                        try {
-                          final cubit = context.read<TransactionListCubit>();
-                          cubit.setSelectedDate(date);
-                        } catch (e) {
-                          // Not on transactions page, ignore
-                        }
-                      },
-                    );
-                  },
-                );
+            // Conditionally render filter action widget from NavCubit
+            BlocBuilder<NavCubit, NavState>(
+              builder: (context, navState) {
+                final filterWidget = navState.filterActionWidget;
+
+                if (filterWidget == null) {
+                  return const SizedBox.shrink(); // No widget if not provided
+                }
+
+                return filterWidget; // Render the widget directly (e.g., CustomDatePicker)
               },
-              icon: Icon(TablerIcons.calendarCode),
             ),
           ],
         );
