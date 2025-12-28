@@ -40,26 +40,28 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   }
 
   void _loadTransactions() {
+    // Extract current filters from state BEFORE emitting loading
+    String searchQuery = '';
+    DateTime? selectedDate;
+
+    state.maybeWhen(
+      success: (_, __, ___, query, date) {
+        searchQuery = query;
+        selectedDate = date;
+      },
+      orElse: () {},
+    );
+
     emit(const TransactionListState.loading());
 
     try {
-      // Extract current filters from state
-      String searchQuery = '';
-      DateTime? selectedDate;
-
-      state.maybeWhen(
-        success: (_, __, ___, query, date) {
-          searchQuery = query;
-          selectedDate = date;
-        },
-        orElse: () {},
-      );
 
       // Get all transactions
       var allTransactions = _transactionService.transactions;
 
       // Apply search filter (if query exists)
       if (searchQuery.isNotEmpty) {
+        print('Filtering ${allTransactions.length} transactions with query: "$searchQuery"');
         allTransactions = allTransactions.where((tx) {
           final category = tx.categoryId != null
               ? _categoryService.getCategoryById(tx.categoryId!)
@@ -74,6 +76,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
           return matchesName || matchesCategory;
         }).toList();
+        print('After filtering: ${allTransactions.length} transactions');
       }
 
       // Apply pagination on filtered results
@@ -162,6 +165,8 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
   /// Search transactions by name or category name
   void searchTransactions(String query) {
+    print('TransactionListCubit.searchTransactions called with: "$query"');
+
     // Reset to page 0 when search changes
     _currentPage = 0;
 
@@ -185,6 +190,8 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
   /// Set selected date for scroll-to-date functionality
   void setSelectedDate(DateTime? date) {
+    print('TransactionListCubit.setSelectedDate called with: $date');
+
     // Just update state, don't reload (scroll happens in UI)
     state.maybeWhen(
       success: (transactions, currentPage, hasMore, searchQuery, _) {
@@ -195,8 +202,11 @@ class TransactionListCubit extends Cubit<TransactionListState> {
           searchQuery: searchQuery,
           selectedDate: date,
         ));
+        print('Emitted new state with selectedDate: $date');
       },
-      orElse: () {},
+      orElse: () {
+        print('setSelectedDate called but state is not success');
+      },
     );
   }
 

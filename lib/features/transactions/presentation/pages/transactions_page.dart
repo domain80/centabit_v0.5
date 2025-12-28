@@ -44,15 +44,21 @@ class _TransactionsViewState extends State<_TransactionsView> {
 
   void _scrollToDate(DateTime date) {
     final normalizedDate = DateTime(date.year, date.month, date.day);
+    print('_scrollToDate called for: $normalizedDate');
+    print('Available date keys: ${_dateKeys.keys.toList()}');
+
     final key = _dateKeys[normalizedDate];
 
     if (key?.currentContext != null) {
+      print('Found key and context, scrolling...');
       Scrollable.ensureVisible(
         key!.currentContext!,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
         alignment: 0.0, // Align header to top
       );
+    } else {
+      print('Key or context not found for date: $normalizedDate');
     }
   }
 
@@ -69,6 +75,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
               listenWhen: (prev, curr) => prev.searchQuery != curr.searchQuery,
               listener: (context, navState) {
                 // Page receives search query updates from nav bar
+                print('NavCubit search query changed: "${navState.searchQuery}"');
                 if (navState.searchQuery.isNotEmpty) {
                   context
                       .read<TransactionListCubit>()

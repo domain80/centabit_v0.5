@@ -4,6 +4,7 @@ import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
+import 'package:centabit/shared/widgets/custom_date_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -120,23 +121,26 @@ class _NavSearchBarState extends State<NavSearchBar> {
                 backgroundColor: WidgetStatePropertyAll(colorScheme.primary),
                 foregroundColor: WidgetStatePropertyAll(colorScheme.onPrimary),
               ),
-              onPressed: () async {
-                final date = await showDatePicker(
+              onPressed: () {
+                showModalBottomSheet(
                   context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime.now(),
-                );
+                  builder: (bottomSheetContext) {
+                    return CustomDatePicker(
+                      currentDate: DateTime.now(),
+                      onDateChanged: (date) {
+                        Navigator.pop(bottomSheetContext);
 
-                if (date != null && context.mounted) {
-                  // Try to access TransactionListCubit (only works on transactions page)
-                  try {
-                    final cubit = context.read<TransactionListCubit>();
-                    cubit.setSelectedDate(date);
-                  } catch (e) {
-                    // Not on transactions page, ignore
-                  }
-                }
+                        // Try to access TransactionListCubit (only works on transactions page)
+                        try {
+                          final cubit = context.read<TransactionListCubit>();
+                          cubit.setSelectedDate(date);
+                        } catch (e) {
+                          // Not on transactions page, ignore
+                        }
+                      },
+                    );
+                  },
+                );
               },
               icon: Icon(TablerIcons.calendarCode),
             ),
