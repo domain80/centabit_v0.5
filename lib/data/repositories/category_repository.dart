@@ -72,9 +72,10 @@ class CategoryRepository {
     await _localSource.createCategory(
       db.CategoriesCompanion.insert(
         id: model.id,
+        userId: _localSource.userId,
         name: model.name,
         iconName: model.iconName,
-        colorHex: const Value('#000000'), // Default color
+        colorHex: '#000000', // Default color
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
         isSynced: const Value(false), // Ready for future API sync

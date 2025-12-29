@@ -1,7 +1,7 @@
 import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/localizations/app_localizations.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
-import 'package:centabit/data/services/transaction_service.dart';
+import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_cubit.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_state.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
@@ -58,7 +58,7 @@ class _ScrollableTransactionListState extends State<ScrollableTransactionList> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final spacing = theme.extension<AppSpacing>()!;
-    final transactionService = getIt<TransactionService>();
+    final transactionRepository = getIt<TransactionRepository>();
 
     return BlocConsumer<DateFilterCubit, DateFilterState>(
       listenWhen: (previous, current) =>
@@ -112,7 +112,7 @@ class _ScrollableTransactionListState extends State<ScrollableTransactionList> {
                       (transaction) => TransactionTile(
                         transaction: transaction,
                         onDelete: () {
-                          transactionService.deleteTransaction(transaction.id);
+                          transactionRepository.deleteTransaction(transaction.id);
                         },
                         onEdit: null, // TODO: Navigate to edit form
                         onCopy: null, // TODO: Duplicate transaction

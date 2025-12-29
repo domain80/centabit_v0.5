@@ -83,6 +83,7 @@ class TransactionRepository {
     await _localSource.createTransaction(
       db.TransactionsCompanion.insert(
         id: model.id,
+        userId: _localSource.userId,
         name: model.name,
         amount: model.amount,
         type: model.type.name,

@@ -75,6 +75,7 @@ class BudgetRepository {
     await _localSource.createBudget(
       db.BudgetsCompanion.insert(
         id: model.id,
+        userId: _localSource.userId,
         name: model.name,
         amount: model.amount,
         startDate: model.startDate,

@@ -73,6 +73,7 @@ class AllocationRepository {
     await _localSource.createAllocation(
       db.AllocationsCompanion.insert(
         id: model.id,
+        userId: _localSource.userId,
         budgetId: model.budgetId,
         categoryId: model.categoryId,
         amount: model.amount,
