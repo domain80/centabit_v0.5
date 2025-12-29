@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:centabit/core/utils/date_formatter.dart';
 import 'package:centabit/data/services/category_service.dart';
 import 'package:centabit/data/services/transaction_service.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 class TransactionListCubit extends Cubit<TransactionListState> {
   final TransactionService _transactionService;
@@ -122,8 +122,10 @@ class TransactionListCubit extends Cubit<TransactionListState> {
           amount: transaction.amount,
           type: transaction.type,
           transactionDate: transaction.transactionDate,
-          formattedDate: _formatDate(transaction.transactionDate),
-          formattedTime: _formatTime(transaction.transactionDate),
+          formattedDate: DateFormatter.formatTransactionDateTime(
+            transaction.transactionDate,
+          ),
+          formattedTime: DateFormatter.formatTime(transaction.transactionDate),
           categoryId: transaction.categoryId,
           categoryName: category?.name,
           categoryIconName: category?.iconName,
@@ -229,25 +231,6 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     );
 
     _loadTransactions();
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDate = DateTime(date.year, date.month, date.day);
-
-    if (transactionDate == today) {
-      return "Today | ${DateFormat('hh:mm a').format(date)}";
-    } else if (transactionDate == yesterday) {
-      return "Yesterday | ${DateFormat('hh:mm a').format(date)}";
-    } else {
-      return DateFormat('MMM d, yy | hh:mm a').format(date);
-    }
-  }
-
-  String _formatTime(DateTime date) {
-    return DateFormat('hh:mm a').format(date);
   }
 
   @override

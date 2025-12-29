@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+
+import 'package:centabit/core/utils/date_formatter.dart';
 import 'package:centabit/data/services/category_service.dart';
 import 'package:centabit/data/services/transaction_service.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_state.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Cubit for managing date-filtered transaction display.
 ///
@@ -77,7 +78,7 @@ class DateFilterCubit extends Cubit<DateFilterState> {
     this._transactionService,
     this._categoryService,
   ) : super(DateFilterState(
-          selectedDate: _normalizeDate(DateTime.now()),
+          selectedDate: DateFormatter.normalizeToDay(DateTime.now()),
           filteredTransactions: [],
         )) {
     _subscribeToStreams();
@@ -117,7 +118,7 @@ class DateFilterCubit extends Cubit<DateFilterState> {
   /// cubit.changeDate(DateTime(2025, 12, 20));
   /// ```
   void changeDate(DateTime newDate) {
-    final normalizedDate = _normalizeDate(newDate);
+    final normalizedDate = DateFormatter.normalizeToDay(newDate);
     _filterTransactionsByDate(normalizedDate);
   }
 
@@ -162,8 +163,10 @@ class DateFilterCubit extends Cubit<DateFilterState> {
         amount: transaction.amount,
         type: transaction.type,
         transactionDate: transaction.transactionDate,
-        formattedDate: _formatDate(transaction.transactionDate),
-        formattedTime: _formatTime(transaction.transactionDate),
+        formattedDate: DateFormatter.formatTransactionDateTime(
+          transaction.transactionDate,
+        ),
+        formattedTime: DateFormatter.formatTime(transaction.transactionDate),
         categoryId: transaction.categoryId,
         categoryName: category?.name,
         categoryIconName: category?.iconName,
@@ -176,65 +179,6 @@ class DateFilterCubit extends Cubit<DateFilterState> {
       selectedDate: date,
       filteredTransactions: viewModels,
     ));
-  }
-
-  /// Formats date with smart relative strings.
-  ///
-  /// **Pattern**: Extracted from TransactionListCubit (could be shared utility)
-  ///
-  /// **Format Rules**:
-  /// - Same day as today → "Today | hh:mm a"
-  /// - Yesterday → "Yesterday | hh:mm a"
-  /// - Other dates → "MMM d, yy | hh:mm a"
-  ///
-  /// **Examples**:
-  /// - "Today | 02:30 PM"
-  /// - "Yesterday | 09:15 AM"
-  /// - "Dec 18, 25 | 11:45 AM"
-  ///
-  /// **Parameters**:
-  /// - `date`: The transaction date/time to format
-  ///
-  /// **Returns**: Formatted date string
-  ///
-  /// **TODO**: Extract to shared utility class
-  /// - Create `lib/core/utils/date_formatter.dart`
-  /// - Use in both TransactionListCubit and DateFilterCubit
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDate = DateTime(date.year, date.month, date.day);
-
-    if (transactionDate == today) {
-      return "Today | ${DateFormat('hh:mm a').format(date)}";
-    } else if (transactionDate == yesterday) {
-      return "Yesterday | ${DateFormat('hh:mm a').format(date)}";
-    } else {
-      return DateFormat('MMM d, yy | hh:mm a').format(date);
-    }
-  }
-
-  String _formatTime(DateTime date) {
-    return DateFormat('hh:mm a').format(date);
-  }
-
-  /// Normalizes date to start of day (00:00:00).
-  ///
-  /// Ensures accurate date comparison by removing time component.
-  ///
-  /// **Example**:
-  /// ```
-  /// Input:  2025-12-20 14:30:45
-  /// Output: 2025-12-20 00:00:00
-  /// ```
-  ///
-  /// **Parameters**:
-  /// - `date`: Date to normalize
-  ///
-  /// **Returns**: Date with time set to midnight
-  static DateTime _normalizeDate(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
   }
 
   /// Cancels stream subscriptions when cubit is closed.

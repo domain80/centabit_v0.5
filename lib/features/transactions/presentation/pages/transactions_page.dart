@@ -4,6 +4,7 @@ import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/router/navigation/nav_scroll_behavior.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
+import 'package:centabit/core/utils/date_formatter.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
@@ -12,7 +13,6 @@ import 'package:centabit/shared/widgets/shared_app_bar.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 
 /// Transactions page displaying a list of all transactions
@@ -71,15 +71,13 @@ class _TransactionsViewState extends State<_TransactionsView> {
   }
 
   void _scrollToDate(DateTime date, List<TransactionVModel> transactions) {
-    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final normalizedDate = DateFormatter.normalizeToDay(date);
     print('_scrollToDate called for: $normalizedDate');
 
     // Find the index of the first transaction that matches the target date
     final index = transactions.indexWhere((transaction) {
-      final transactionDate = DateTime(
-        transaction.transactionDate.year,
-        transaction.transactionDate.month,
-        transaction.transactionDate.day,
+      final transactionDate = DateFormatter.normalizeToDay(
+        transaction.transactionDate,
       );
       return transactionDate == normalizedDate;
     });
@@ -168,16 +166,12 @@ class _TransactionsViewState extends State<_TransactionsView> {
 
                     return StickyGroupedListView<TransactionVModel, DateTime>(
                       elements: transactions.toList(),
-                      groupBy: (transaction) => DateTime(
-                        transaction.transactionDate.year,
-                        transaction.transactionDate.month,
-                        transaction.transactionDate.day,
+                      groupBy: (transaction) => DateFormatter.normalizeToDay(
+                        transaction.transactionDate,
                       ),
                       groupSeparatorBuilder: (TransactionVModel transaction) {
-                        final date = DateTime(
-                          transaction.transactionDate.year,
-                          transaction.transactionDate.month,
-                          transaction.transactionDate.day,
+                        final date = DateFormatter.normalizeToDay(
+                          transaction.transactionDate,
                         );
                         return _buildDateHeader(context, date, spacing);
                       },
@@ -229,18 +223,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-
-    String dateLabel;
-    if (date == today) {
-      dateLabel = "Today";
-    } else if (date == yesterday) {
-      dateLabel = "Yesterday";
-    } else {
-      dateLabel = DateFormat('MMMM d, y').format(date);
-    }
+    final dateLabel = DateFormatter.formatHeaderDate(date);
 
     // Full-width blur background that stretches across the page
     return SizedBox(
