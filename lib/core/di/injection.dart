@@ -1,20 +1,20 @@
-import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:centabit/core/auth/auth_manager.dart';
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
+import 'package:centabit/data/local/allocation_local_source.dart';
+import 'package:centabit/data/local/budget_local_source.dart';
+import 'package:centabit/data/local/category_local_source.dart';
 import 'package:centabit/data/local/database.dart';
 import 'package:centabit/data/local/transaction_local_source.dart';
-import 'package:centabit/data/local/category_local_source.dart';
-import 'package:centabit/data/local/budget_local_source.dart';
-import 'package:centabit/data/local/allocation_local_source.dart';
-import 'package:centabit/data/repositories/transaction_repository.dart';
-import 'package:centabit/data/repositories/category_repository.dart';
-import 'package:centabit/data/repositories/budget_repository.dart';
 import 'package:centabit/data/repositories/allocation_repository.dart';
+import 'package:centabit/data/repositories/budget_repository.dart';
+import 'package:centabit/data/repositories/category_repository.dart';
+import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/data/sync/sync_manager.dart';
-import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/dashboard_cubit.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_cubit.dart';
+import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service locator instance for dependency injection
 ///

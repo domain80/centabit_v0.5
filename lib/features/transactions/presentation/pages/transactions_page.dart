@@ -44,6 +44,8 @@ class _TransactionsViewState extends State<_TransactionsView> {
   final GroupedItemScrollController _scrollController =
       GroupedItemScrollController();
 
+  NavCubit? _navCubit; // Store reference to avoid context access in dispose
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +53,8 @@ class _TransactionsViewState extends State<_TransactionsView> {
     // Register filter action widget when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<NavCubit>().setFilterAction(
+        _navCubit = context.read<NavCubit>();
+        _navCubit?.setFilterAction(
           CustomDatePickerIcon(
             currentDate: DateTime.now(),
             onDateChanged: (date) {
@@ -65,8 +68,8 @@ class _TransactionsViewState extends State<_TransactionsView> {
 
   @override
   void dispose() {
-    // Clear filter action when leaving page
-    context.read<NavCubit>().setFilterAction(null);
+    // Clear filter action when leaving page (using stored reference)
+    _navCubit?.setFilterAction(null);
     super.dispose();
   }
 
