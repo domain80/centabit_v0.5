@@ -1,7 +1,6 @@
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/router/navigation/shared_nav_bar.dart';
 import 'package:centabit/core/router/navigation/widgets/nav_search_bar.dart';
-import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -47,8 +46,6 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = Theme.of(context).extension<AppSpacing>()!;
-
     return BlocBuilder<NavCubit, NavState>(
       builder: (context, navState) {
         return Column(

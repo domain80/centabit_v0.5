@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:centabit/data/models/budget_model.dart';
 
 /// Service for managing budgets with in-memory storage and reactive streams.
@@ -95,8 +96,19 @@ class BudgetService {
 
     // Month name + year (e.g., "December 2025")
     final monthNames = [
-      '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     final budgetName = '${monthNames[now.month]} ${now.year}';
 
@@ -207,7 +219,6 @@ class BudgetService {
   /// **Note**: Usually returns 0-1 budgets for monthly budgets, but could
   /// return multiple if budget periods overlap.
   List<BudgetModel> getActiveBudgets() {
-    final now = DateTime.now();
     return _budgets.where((b) => b.isActive()).toList();
   }
 
