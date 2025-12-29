@@ -1,7 +1,14 @@
-import 'package:logger/logger.dart';
-import 'package:centabit/core/logging/log_config.dart';
+import 'package:flutter/foundation.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
-/// Singleton logger for the entire application
+/// Singleton logger for the entire application using Talker
+///
+/// Talker provides:
+/// - Beautiful colored console output (works in DevTools)
+/// - In-app log viewer screen
+/// - HTTP logging support
+/// - Error handling with stack traces
+/// - Performance monitoring
 ///
 /// Usage:
 /// ```dart
@@ -12,15 +19,26 @@ import 'package:centabit/core/logging/log_config.dart';
 /// ```
 class AppLogger {
   static AppLogger? _instance;
-  late final Logger _logger;
+  late final Talker _talker;
 
   AppLogger._internal() {
-    final config = LogConfig.current;
-    _logger = Logger(
-      filter: config.filter,
-      printer: config.printer,
-      output: config.output,
-      level: config.level,
+    _talker = TalkerFlutter.init(
+      settings: TalkerSettings(
+        // In development: log everything
+        // In production: only errors and critical
+        enabled: true,
+        useConsoleLogs: kDebugMode,
+        useHistory: true,
+        maxHistoryItems: 1000,
+      ),
+      logger: TalkerLogger(
+        settings: TalkerLoggerSettings(
+          // Environment-aware log level
+          level: kDebugMode ? LogLevel.verbose : LogLevel.error,
+          // Clean output without ANSI colors
+          enableColors: false,
+        ),
+      ),
     );
   }
 
@@ -29,34 +47,38 @@ class AppLogger {
     return _instance!;
   }
 
+  /// Get the underlying Talker instance
+  /// Useful for TalkerScreen and advanced features
+  Talker get talker => _talker;
+
   /// Log verbose/trace level message
-  void verbose(String message, {dynamic error, StackTrace? stackTrace}) {
-    _logger.t(message, error: error, stackTrace: stackTrace);
+  void verbose(String message, {Object? error, StackTrace? stackTrace}) {
+    _talker.verbose(message, error, stackTrace);
   }
 
   /// Log debug level message
-  void debug(String message, {dynamic error, StackTrace? stackTrace}) {
-    _logger.d(message, error: error, stackTrace: stackTrace);
+  void debug(String message, {Object? error, StackTrace? stackTrace}) {
+    _talker.debug(message, error, stackTrace);
   }
 
   /// Log info level message
-  void info(String message, {dynamic error, StackTrace? stackTrace}) {
-    _logger.i(message, error: error, stackTrace: stackTrace);
+  void info(String message, {Object? error, StackTrace? stackTrace}) {
+    _talker.info(message, error, stackTrace);
   }
 
   /// Log warning level message
-  void warning(String message, {dynamic error, StackTrace? stackTrace}) {
-    _logger.w(message, error: error, stackTrace: stackTrace);
+  void warning(String message, {Object? error, StackTrace? stackTrace}) {
+    _talker.warning(message, error, stackTrace);
   }
 
   /// Log error level message
-  void error(String message, {dynamic error, StackTrace? stackTrace}) {
-    _logger.e(message, error: error, stackTrace: stackTrace);
+  void error(String message, {Object? error, StackTrace? stackTrace}) {
+    _talker.error(message, error, stackTrace);
   }
 
-  /// Log fatal level message
-  void fatal(String message, {dynamic error, StackTrace? stackTrace}) {
-    _logger.f(message, error: error, stackTrace: stackTrace);
+  /// Log critical/fatal level message
+  void critical(String message, {Object? error, StackTrace? stackTrace}) {
+    _talker.critical(message, error, stackTrace);
   }
 
   /// Log with additional context metadata
@@ -65,37 +87,35 @@ class AppLogger {
   /// ```dart
   /// logger.logWithContext(
   ///   message: 'User logged in',
-  ///   level: Level.info,
   ///   context: {'userId': '123', 'method': 'google'},
   /// );
   /// ```
   void logWithContext({
     required String message,
-    required Level level,
     Map<String, dynamic>? context,
-    dynamic error,
+    Object? error,
     StackTrace? stackTrace,
+    LogLevel level = LogLevel.info,
   }) {
     final contextStr = context != null
         ? ' | ${context.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
         : '';
     final fullMessage = '$message$contextStr';
 
+    // Use appropriate log method based on level
     switch (level) {
-      case Level.trace:
+      case LogLevel.verbose:
         verbose(fullMessage, error: error, stackTrace: stackTrace);
-      case Level.debug:
+      case LogLevel.debug:
         debug(fullMessage, error: error, stackTrace: stackTrace);
-      case Level.info:
+      case LogLevel.info:
         info(fullMessage, error: error, stackTrace: stackTrace);
-      case Level.warning:
+      case LogLevel.warning:
         warning(fullMessage, error: error, stackTrace: stackTrace);
-      case Level.error:
+      case LogLevel.error:
         this.error(fullMessage, error: error, stackTrace: stackTrace);
-      case Level.fatal:
-        fatal(fullMessage, error: error, stackTrace: stackTrace);
-      default:
-        info(fullMessage, error: error, stackTrace: stackTrace);
+      case LogLevel.critical:
+        critical(fullMessage, error: error, stackTrace: stackTrace);
     }
   }
 }

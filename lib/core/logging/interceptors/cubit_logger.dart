@@ -1,7 +1,7 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:centabit/core/logging/app_logger.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// BlocObserver that automatically logs all cubit lifecycle events
+/// BlocObserver that automatically logs all cubit lifecycle events using Talker
 ///
 /// This observer logs:
 /// - Cubit creation
@@ -28,11 +28,7 @@ class CubitLogger extends BlocObserver {
   @override
   void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
     super.onError(bloc, error, stackTrace);
-    _logger.error(
-      '[${bloc.runtimeType}] Error',
-      error: error,
-      stackTrace: stackTrace,
-    );
+    _logger.error('[${bloc.runtimeType}] Error', error: error, stackTrace: stackTrace);
   }
 
   @override

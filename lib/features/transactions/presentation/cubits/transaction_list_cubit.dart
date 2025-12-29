@@ -47,7 +47,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     DateTime? selectedDate;
 
     state.maybeWhen(
-      success: (_, __, ___, query, date) {
+      success: (_, _, _, query, date) {
         searchQuery = query;
         selectedDate = date;
       },
@@ -90,7 +90,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
         // No more pages
         List<TransactionVModel> currentTransactions = [];
         state.maybeWhen(
-          success: (transactions, _, __, ___, ____) {
+          success: (transactions, _, _, _, _) {
             currentTransactions = transactions;
           },
           orElse: () {},
@@ -220,7 +220,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
     // Clear filters and reload
     state.maybeWhen(
-      success: (transactions, currentPage, hasMore, _, __) {
+      success: (transactions, currentPage, hasMore, _, _) {
         emit(TransactionListState.success(
           transactions: transactions,
           currentPage: currentPage,

@@ -1,5 +1,4 @@
 import 'package:centabit/core/logging/app_logger.dart';
-import 'package:logger/logger.dart';
 
 /// Mixin for repository logging with automatic operation tracking
 ///
@@ -60,7 +59,6 @@ mixin RepositoryLogger {
 
       _logger.logWithContext(
         message: '[$fullOperation] Completed',
-        level: Level.debug,
         context: {
           'duration_ms': stopwatch.elapsedMilliseconds,
           ...?metadata,
@@ -98,7 +96,6 @@ mixin RepositoryLogger {
 
       _logger.logWithContext(
         message: '[$fullOperation] Completed',
-        level: Level.debug,
         context: {
           'duration_ms': stopwatch.elapsedMilliseconds,
           ...?metadata,
