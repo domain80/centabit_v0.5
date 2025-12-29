@@ -12,8 +12,8 @@ import 'package:centabit/shared/widgets/shared_app_bar.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:intl/intl.dart';
+import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 
 /// Transactions page displaying a list of all transactions
 ///
@@ -41,7 +41,8 @@ class _TransactionsView extends StatefulWidget {
 }
 
 class _TransactionsViewState extends State<_TransactionsView> {
-  final Map<DateTime, GlobalKey> _dateKeys = {};
+  final GroupedItemScrollController _scrollController =
+      GroupedItemScrollController();
 
   @override
   void initState() {
@@ -69,23 +70,30 @@ class _TransactionsViewState extends State<_TransactionsView> {
     super.dispose();
   }
 
-  void _scrollToDate(DateTime date) {
+  void _scrollToDate(DateTime date, List<TransactionVModel> transactions) {
     final normalizedDate = DateTime(date.year, date.month, date.day);
     print('_scrollToDate called for: $normalizedDate');
-    print('Available date keys: ${_dateKeys.keys.toList()}');
 
-    final key = _dateKeys[normalizedDate];
+    // Find the index of the first transaction that matches the target date
+    final index = transactions.indexWhere((transaction) {
+      final transactionDate = DateTime(
+        transaction.transactionDate.year,
+        transaction.transactionDate.month,
+        transaction.transactionDate.day,
+      );
+      return transactionDate == normalizedDate;
+    });
 
-    if (key?.currentContext != null) {
-      print('Found key and context, scrolling...');
-      Scrollable.ensureVisible(
-        key!.currentContext!,
+    if (index != -1) {
+      print('Found transaction at index $index, scrolling...');
+      _scrollController.scrollTo(
+        index: index,
+        automaticAlignment: true,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
-        alignment: 0.0, // Align header to top
       );
     } else {
-      print('Key or context not found for date: $normalizedDate');
+      print('No transaction found for date: $normalizedDate');
     }
   }
 
@@ -102,11 +110,13 @@ class _TransactionsViewState extends State<_TransactionsView> {
               listenWhen: (prev, curr) => prev.searchQuery != curr.searchQuery,
               listener: (context, navState) {
                 // Page receives search query updates from nav bar
-                print('NavCubit search query changed: "${navState.searchQuery}"');
+                print(
+                  'NavCubit search query changed: "${navState.searchQuery}"',
+                );
                 if (navState.searchQuery.isNotEmpty) {
-                  context
-                      .read<TransactionListCubit>()
-                      .searchTransactions(navState.searchQuery);
+                  context.read<TransactionListCubit>().searchTransactions(
+                    navState.searchQuery,
+                  );
                 } else {
                   // Clear search when query is empty
                   context.read<TransactionListCubit>().clearFilters();
@@ -118,12 +128,12 @@ class _TransactionsViewState extends State<_TransactionsView> {
                   DateTime? currDate;
 
                   prev.maybeWhen(
-                    success: (_, __, ___, ____, date) => prevDate = date,
+                    success: (_, _, _, _, date) => prevDate = date,
                     orElse: () {},
                   );
 
                   curr.maybeWhen(
-                    success: (_, __, ___, ____, date) => currDate = date,
+                    success: (_, _, _, _, date) => currDate = date,
                     orElse: () {},
                   );
 
@@ -131,122 +141,80 @@ class _TransactionsViewState extends State<_TransactionsView> {
                 },
                 listener: (context, state) {
                   state.maybeWhen(
-                    success: (_, __, ___, ____, selectedDate) {
+                    success: (transactions, _, _, _, selectedDate) {
                       if (selectedDate != null) {
-                        _scrollToDate(selectedDate);
+                        _scrollToDate(selectedDate, transactions);
                       }
                     },
                     orElse: () {},
                   );
                 },
                 child: state.when(
-                initial: () => const SizedBox(),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                success: (transactions, _, __, ___, ____) {
-                  if (transactions.isEmpty) {
-                    return RefreshIndicator(
-                      onRefresh: () {
-                        context.read<TransactionListCubit>().refresh();
-                        return Future<void>.delayed(
-                          const Duration(milliseconds: 300),
+                  initial: () => const SizedBox(),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  success: (transactions, _, _, _, _) {
+                    if (transactions.isEmpty) {
+                      return RefreshIndicator(
+                        onRefresh: () {
+                          context.read<TransactionListCubit>().refresh();
+                          return Future<void>.delayed(
+                            const Duration(milliseconds: 300),
+                          );
+                        },
+                        child: const Center(child: Text('No transactions yet')),
+                      );
+                    }
+
+                    return StickyGroupedListView<TransactionVModel, DateTime>(
+                      elements: transactions.toList(),
+                      groupBy: (transaction) => DateTime(
+                        transaction.transactionDate.year,
+                        transaction.transactionDate.month,
+                        transaction.transactionDate.day,
+                      ),
+                      groupSeparatorBuilder: (TransactionVModel transaction) {
+                        final date = DateTime(
+                          transaction.transactionDate.year,
+                          transaction.transactionDate.month,
+                          transaction.transactionDate.day,
+                        );
+                        return _buildDateHeader(context, date, spacing);
+                      },
+                      itemBuilder: (context, TransactionVModel transaction) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: spacing.lg,
+                          ),
+                          child: TransactionTile(
+                            transaction: transaction,
+                            onEdit: () {
+                              // TODO: Implement edit transaction
+                            },
+                            onDelete: () => context
+                                .read<TransactionListCubit>()
+                                .deleteTransaction(transaction.id),
+                            onCopy: () {
+                              // TODO: Implement copy transaction
+                            },
+                          ),
                         );
                       },
-                      child: const Center(child: Text('No transactions yet')),
+                      itemScrollController: _scrollController,
+                      floatingHeader: true,
+                      order: StickyGroupedListOrder.DESC,
+                      separator: const SizedBox.shrink(),
+                      padding: EdgeInsets.only(bottom: 120),
                     );
-                  }
-
-                  // Group transactions by date
-                  final groupedTransactions = _groupTransactionsByDate(
-                    transactions,
-                  );
-
-                  // Sort dates descending (newest first)
-                  final sortedDates = groupedTransactions.keys.toList()
-                    ..sort((a, b) => b.compareTo(a));
-
-                  return RefreshIndicator(
-                    onRefresh: () {
-                      context.read<TransactionListCubit>().refresh();
-                      return Future<void>.delayed(
-                        const Duration(milliseconds: 300),
-                      );
-                    },
-                    child: CustomScrollView(
-                      slivers: [
-                        ...sortedDates.map((date) {
-                          final dateTransactions = groupedTransactions[date]!;
-
-                          return SliverStickyHeader(
-                            header: _buildDateHeader(context, date, spacing),
-                            sliver: SliverPadding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: spacing.lg,
-                              ),
-                              sliver: SliverList(
-                                delegate: SliverChildBuilderDelegate((
-                                  context,
-                                  index,
-                                ) {
-                                  return TransactionTile(
-                                    transaction: dateTransactions[index],
-                                    onEdit: () {
-                                      // TODO: Implement edit transaction
-                                    },
-                                    onDelete: () => context
-                                        .read<TransactionListCubit>()
-                                        .deleteTransaction(
-                                          dateTransactions[index].id,
-                                        ),
-                                    onCopy: () {
-                                      // TODO: Implement copy transaction
-                                    },
-                                  );
-                                }, childCount: dateTransactions.length),
-                              ),
-                            ),
-                          );
-                        }),
-
-                        // Bottom padding for navigation bar
-                        const SliverToBoxAdapter(child: SizedBox(height: 120)),
-                      ],
-                    ),
-                  );
-                },
-                error: (message) => Center(child: Text('Error: $message')),
-              ),
+                  },
+                  error: (message) => Center(child: Text('Error: $message')),
+                ),
               ),
             );
           },
         ),
       ),
     );
-  }
-
-  /// Groups transactions by their transaction date (normalized to day).
-  ///
-  /// Returns a Map where:
-  /// - Key: DateTime (normalized to start of day)
-  /// - Value: List of transactions for that date
-  Map<DateTime, List<TransactionVModel>> _groupTransactionsByDate(
-    List<TransactionVModel> transactions,
-  ) {
-    final Map<DateTime, List<TransactionVModel>> grouped = {};
-
-    for (final transaction in transactions) {
-      final date = DateTime(
-        transaction.transactionDate.year,
-        transaction.transactionDate.month,
-        transaction.transactionDate.day,
-      );
-
-      if (!grouped.containsKey(date)) {
-        grouped[date] = [];
-      }
-      grouped[date]!.add(transaction);
-    }
-
-    return grouped;
   }
 
   /// Builds a sticky date header widget.
@@ -265,12 +233,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
 
-    // Normalize date for key lookup
-    final normalizedDate = DateTime(date.year, date.month, date.day);
-
-    // Create or retrieve key for this date
-    _dateKeys.putIfAbsent(normalizedDate, () => GlobalKey());
-
     String dateLabel;
     if (date == today) {
       dateLabel = "Today";
@@ -280,24 +242,26 @@ class _TransactionsViewState extends State<_TransactionsView> {
       dateLabel = DateFormat('MMMM d, y').format(date);
     }
 
-    // blur background
-    return ClipRRect(
-      key: _dateKeys[normalizedDate],
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        child: Container(
-          color: colorScheme.surface.withAlpha(200),
-          padding: EdgeInsets.only(
-            left: spacing.lg,
-            right: spacing.lg,
-            top: spacing.md,
-            bottom: spacing.sm,
-          ),
-          child: Text(
-            dateLabel,
-            style: theme.textTheme.bodySmall?.copyWith(
-              // fontWeight: FontWeight.n,
-              color: colorScheme.onSurface.withValues(alpha: 0.8),
+    // Full-width blur background that stretches across the page
+    return SizedBox(
+      width: double.infinity,
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: Container(
+            width: double.infinity,
+            color: colorScheme.surface.withAlpha(200),
+            padding: EdgeInsets.only(
+              left: spacing.lg,
+              right: spacing.lg,
+              top: spacing.md,
+              bottom: spacing.sm,
+            ),
+            child: Text(
+              dateLabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
             ),
           ),
         ),
@@ -305,22 +269,3 @@ class _TransactionsViewState extends State<_TransactionsView> {
     );
   }
 }
-
-//     return Container(
-//       color: colorScheme.surface.withAlpha(100),
-//       padding: EdgeInsets.only(
-//         left: spacing.lg,
-//         right: spacing.lg,
-//         top: spacing.md,
-//         bottom: spacing.sm,
-//       ),
-//       child: Text(
-//         dateLabel,
-//         style: theme.textTheme.bodySmall?.copyWith(
-//           // fontWeight: FontWeight.n,
-//           color: colorScheme.onSurface.withValues(alpha: 0.8),
-//         ),
-//       ),
-//     );
-//   }
-// }

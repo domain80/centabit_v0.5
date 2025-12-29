@@ -30,6 +30,7 @@ dependencies:
   intl: ^0.20.2
   google_nav_bar: ^5.0.7
   flutter_sticky_header: ^0.8.0
+  sticky_grouped_list: ^3.1.0
 
 dev_dependencies:
   flutter_test:
