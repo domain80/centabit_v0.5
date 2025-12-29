@@ -28,8 +28,8 @@ class LogConfig {
       methodCount: 2, // Number of method calls to show
       errorMethodCount: 8, // Number of method calls for errors
       lineLength: 120, // Width of output
-      colors: true, // Colorful output
-      printEmojis: true, // Print emojis for log levels
+      colors: false, // Disable colors (ANSI codes don't render well in Flutter console)
+      printEmojis: false, // Disable emojis for cleaner output
       dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
     ),
     output: ConsoleOutput(),
