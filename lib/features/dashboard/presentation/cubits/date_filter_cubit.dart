@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:centabit/core/utils/date_formatter.dart';
-import 'package:centabit/data/services/category_service.dart';
-import 'package:centabit/data/services/transaction_service.dart';
+import 'package:centabit/data/repositories/category_repository.dart';
+import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_state.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,8 +59,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// )
 /// ```
 class DateFilterCubit extends Cubit<DateFilterState> {
-  final TransactionService _transactionService;
-  final CategoryService _categoryService;
+  final TransactionRepository _transactionRepository;
+  final CategoryRepository _categoryRepository;
 
   // Stream subscriptions for reactive updates
   StreamSubscription? _transactionSubscription;
@@ -75,8 +75,8 @@ class DateFilterCubit extends Cubit<DateFilterState> {
   /// final cubit = getIt<DateFilterCubit>();
   /// ```
   DateFilterCubit(
-    this._transactionService,
-    this._categoryService,
+    this._transactionRepository,
+    this._categoryRepository,
   ) : super(DateFilterState(
           selectedDate: DateFormatter.normalizeToDay(DateTime.now()),
           filteredTransactions: [],
@@ -93,11 +93,11 @@ class DateFilterCubit extends Cubit<DateFilterState> {
   /// - User adds a new transaction → refilter current date
   /// - User changes a category name → update denormalized data
   void _subscribeToStreams() {
-    _transactionSubscription = _transactionService.transactionsStream.listen((_) {
+    _transactionSubscription = _transactionRepository.transactionsStream.listen((_) {
       _filterTransactionsByDate(state.selectedDate);
     });
 
-    _categorySubscription = _categoryService.categoriesStream.listen((_) {
+    _categorySubscription = _categoryRepository.categoriesStream.listen((_) {
       _filterTransactionsByDate(state.selectedDate);
     });
 
@@ -139,7 +139,7 @@ class DateFilterCubit extends Cubit<DateFilterState> {
   /// - `date`: The date to filter by (should be normalized)
   void _filterTransactionsByDate(DateTime date) {
     // Get all transactions
-    final allTransactions = _transactionService.transactions;
+    final allTransactions = _transactionRepository.transactions;
 
     // Filter by date (year, month, day match)
     final transactionsOnDate = allTransactions.where((transaction) {
@@ -153,7 +153,7 @@ class DateFilterCubit extends Cubit<DateFilterState> {
     final viewModels = transactionsOnDate.map((transaction) {
       // Look up category if transaction has one
       final category = transaction.categoryId != null
-          ? _categoryService.getCategoryById(transaction.categoryId!)
+          ? _categoryRepository.getCategoryByIdSync(transaction.categoryId!)
           : null;
 
       // Create view model with denormalized data

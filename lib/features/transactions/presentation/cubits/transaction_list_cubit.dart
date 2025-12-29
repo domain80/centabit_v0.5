@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:centabit/core/utils/date_formatter.dart';
-import 'package:centabit/data/services/category_service.dart';
-import 'package:centabit/data/services/transaction_service.dart';
+import 'package:centabit/data/repositories/category_repository.dart';
+import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TransactionListCubit extends Cubit<TransactionListState> {
-  final TransactionService _transactionService;
-  final CategoryService _categoryService;
+  final TransactionRepository _transactionRepository;
+  final CategoryRepository _categoryRepository;
 
   StreamSubscription? _transactionSubscription;
   StreamSubscription? _categorySubscription;
@@ -17,21 +17,21 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   int _currentPage = 0;
   static const int _pageSize = 20;
 
-  TransactionListCubit(this._transactionService, this._categoryService)
+  TransactionListCubit(this._transactionRepository, this._categoryRepository)
     : super(const TransactionListState.initial()) {
     _subscribeToStreams();
   }
 
   void _subscribeToStreams() {
     // Listen to transaction changes
-    _transactionSubscription = _transactionService.transactionsStream.listen((
+    _transactionSubscription = _transactionRepository.transactionsStream.listen((
       _,
     ) {
       _loadTransactions();
     });
 
     // Listen to category changes (affects denormalization)
-    _categorySubscription = _categoryService.categoriesStream.listen((_) {
+    _categorySubscription = _categoryRepository.categoriesStream.listen((_) {
       _loadTransactions();
     });
 
@@ -57,14 +57,14 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     try {
 
       // Get all transactions
-      var allTransactions = _transactionService.transactions;
+      var allTransactions = _transactionRepository.transactions;
 
       // Apply search filter (if query exists)
       if (searchQuery.isNotEmpty) {
         print('Filtering ${allTransactions.length} transactions with query: "$searchQuery"');
         allTransactions = allTransactions.where((tx) {
           final category = tx.categoryId != null
-              ? _categoryService.getCategoryById(tx.categoryId!)
+              ? _categoryRepository.getCategoryByIdSync(tx.categoryId!)
               : null;
 
           final matchesName =
@@ -113,7 +113,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
       // Denormalize: combine transaction + category data
       final viewItems = pageTransactions.map((transaction) {
         final category = transaction.categoryId != null
-            ? _categoryService.getCategoryById(transaction.categoryId!)
+            ? _categoryRepository.getCategoryByIdSync(transaction.categoryId!)
             : null;
 
         return TransactionVModel(
@@ -161,7 +161,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   }
 
   Future<void> deleteTransaction(String id) async {
-    await _transactionService.deleteTransaction(id);
+    await _transactionRepository.deleteTransaction(id);
     // Stream will automatically trigger reload
   }
 

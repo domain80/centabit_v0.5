@@ -5,10 +5,10 @@ import 'package:centabit/data/models/budget_model.dart';
 import 'package:centabit/data/models/category_model.dart';
 import 'package:centabit/data/models/transaction_model.dart';
 import 'package:centabit/data/models/transactions_chart_data.dart';
-import 'package:centabit/data/services/allocation_service.dart';
-import 'package:centabit/data/services/budget_service.dart';
-import 'package:centabit/data/services/category_service.dart';
-import 'package:centabit/data/services/transaction_service.dart';
+import 'package:centabit/data/repositories/allocation_repository.dart';
+import 'package:centabit/data/repositories/budget_repository.dart';
+import 'package:centabit/data/repositories/category_repository.dart';
+import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/dashboard_state.dart';
 
 /// Cubit for managing dashboard state and budget report data.
@@ -56,10 +56,10 @@ import 'package:centabit/features/dashboard/presentation/cubits/dashboard_state.
 /// )
 /// ```
 class DashboardCubit extends Cubit<DashboardState> {
-  final BudgetService _budgetService;
-  final AllocationService _allocationService;
-  final TransactionService _transactionService;
-  final CategoryService _categoryService;
+  final BudgetRepository _budgetRepository;
+  final AllocationRepository _allocationRepository;
+  final TransactionRepository _transactionRepository;
+  final CategoryRepository _categoryRepository;
 
   // Stream subscriptions for reactive updates
   StreamSubscription? _budgetSubscription;
@@ -76,10 +76,10 @@ class DashboardCubit extends Cubit<DashboardState> {
   /// final cubit = getIt<DashboardCubit>();
   /// ```
   DashboardCubit(
-    this._budgetService,
-    this._allocationService,
-    this._transactionService,
-    this._categoryService,
+    this._budgetRepository,
+    this._allocationRepository,
+    this._transactionRepository,
+    this._categoryRepository,
   ) : super(const DashboardState.initial()) {
     _subscribeToStreams();
   }
@@ -97,19 +97,19 @@ class DashboardCubit extends Cubit<DashboardState> {
   /// - Implement incremental updates (only recalculate changed budgets)
   /// - Cache last computation
   void _subscribeToStreams() {
-    _budgetSubscription = _budgetService.budgetsStream.listen((_) {
+    _budgetSubscription = _budgetRepository.budgetsStream.listen((_) {
       _loadDashboardData();
     });
 
-    _allocationSubscription = _allocationService.allocationsStream.listen((_) {
+    _allocationSubscription = _allocationRepository.allocationsStream.listen((_) {
       _loadDashboardData();
     });
 
-    _transactionSubscription = _transactionService.transactionsStream.listen((_) {
+    _transactionSubscription = _transactionRepository.transactionsStream.listen((_) {
       _loadDashboardData();
     });
 
-    _categorySubscription = _categoryService.categoriesStream.listen((_) {
+    _categorySubscription = _categoryRepository.categoriesStream.listen((_) {
       _loadDashboardData();
     });
 
@@ -132,7 +132,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
     try {
       // Get all budgets that are currently active
-      final activeBudgets = _budgetService.getActiveBudgets();
+      final activeBudgets = _budgetRepository.getActiveBudgets();
 
       // Build a page model for each active budget
       final budgetPages = activeBudgets.map((budget) {
@@ -168,16 +168,16 @@ class DashboardCubit extends Cubit<DashboardState> {
   /// **Returns**: Complete [BudgetPageModel] ready for UI rendering
   BudgetPageModel _buildBudgetPageModel(BudgetModel budget) {
     // Get allocations for this budget
-    final allocations = _allocationService.getAllocationsForBudget(budget.id);
+    final allocations = _allocationRepository.getAllocationsForBudget(budget.id);
 
     // Get transactions for this budget
     // Note: Currently transactions have null budgetId (user decision)
     // So we get ALL transactions for now
     // TODO: Once transactions are linked to budgets, filter by budgetId
-    final transactions = _transactionService.transactions;
+    final transactions = _transactionRepository.transactions;
 
     // Get all categories for chart display
-    final categories = _categoryService.categories;
+    final categories = _categoryRepository.categories;
 
     // Build chart data combining allocations and transactions
     final chartData = _buildChartData(
