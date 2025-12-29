@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:centabit/core/theme/tabler_icons.dart';
 
 class FormHeader extends StatelessWidget {
   final void Function()? onDelete;
@@ -32,7 +33,7 @@ class FormHeader extends StatelessWidget {
             iconSize: 24,
             padding: const EdgeInsets.all(8),
             icon: Icon(
-              Icons.delete_outline,
+              TablerIcons.trash,
               color: colorScheme.error,
             ),
             style: IconButton.styleFrom(

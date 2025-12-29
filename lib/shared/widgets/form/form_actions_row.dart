@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:centabit/core/theme/tabler_icons.dart';
 
 class FormActionsRow extends StatelessWidget {
   final Widget? actionWidget;
@@ -26,7 +27,7 @@ class FormActionsRow extends StatelessWidget {
         ),
         IconButton(
           onPressed: onCancel,
-          icon: const Icon(Icons.close),
+          icon: const Icon(TablerIcons.x),
         ),
       ],
     );

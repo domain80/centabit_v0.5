@@ -96,7 +96,7 @@ class TransactionTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Spacer(),
-            Icon(Icons.delete, color: colorScheme.error),
+            Icon(TablerIcons.trash, color: colorScheme.error),
           ],
         ),
       ),

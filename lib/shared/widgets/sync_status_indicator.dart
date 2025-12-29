@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:centabit/core/di/injection.dart';
+import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/data/sync/sync_manager.dart';
 import 'package:centabit/data/sync/sync_status.dart';
 
@@ -48,18 +49,18 @@ class SyncStatusIndicator extends StatelessWidget {
             ),
           ),
           synced: (lastSyncTime) => IconButton(
-            icon: const Icon(Icons.cloud_done, size: 20),
+            icon: const Icon(TablerIcons.cloudCheck, size: 20),
             onPressed: () => _showSyncInfo(context, lastSyncTime),
             tooltip: 'Last synced: ${_formatSyncTime(lastSyncTime)}',
           ),
           failed: (error) => IconButton(
-            icon: const Icon(Icons.cloud_off, size: 20, color: Colors.red),
+            icon: const Icon(TablerIcons.cloudOff, size: 20, color: Colors.red),
             onPressed: () => _showErrorDialog(context, error),
             tooltip: 'Sync failed',
           ),
           offline: () => const Padding(
             padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.cloud_off, size: 20),
+            child: Icon(TablerIcons.cloudOff, size: 20),
           ),
         );
       },

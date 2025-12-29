@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme_extensions.dart';
+import '../../../../core/theme/tabler_icons.dart';
 
 /// Login page for user authentication
 class LoginPage extends StatelessWidget {
@@ -52,7 +53,7 @@ class LoginPage extends StatelessWidget {
                         // Navigate to dashboard
                         context.go(AppRouter.dashboard);
                       },
-                      icon: const Icon(Icons.login_rounded),
+                      icon: const Icon(TablerIcons.login),
                       label: const Text('Continue with Google'),
                     ),
                   ),

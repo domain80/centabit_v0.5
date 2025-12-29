@@ -1,4 +1,5 @@
 import 'package:centabit/core/router/app_router.dart';
+import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/shared/widgets/sync_status_indicator.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ AppBar sharedAppBar(BuildContext context, {required Widget title}) {
     actions: [
       const SyncStatusIndicator(), // Sync status indicator (top-right)
       IconButton(
-        icon: const Icon(Icons.logout_rounded),
+        icon: const Icon(TablerIcons.logout),
         onPressed: () {
           context.go(AppRouter.login);
         },

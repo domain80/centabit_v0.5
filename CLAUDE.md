@@ -630,4 +630,4 @@ class DashboardState with _$DashboardState {
 - Both widgets maintain same styling and date range constraints
 - Icon-based version used in navigation filter actions for compact UI
 - Text-based version used in content areas where date context is helpful
-
+- we will be using tabler icons from @lib/core/theme/tabler_icons.dart
