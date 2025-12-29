@@ -9,6 +9,8 @@ Centabit v0.5 is a Flutter budgeting application with comprehensive budget track
 - **Transaction Management**: Date-filtered transaction lists with search
 - **Category-based Budgeting**: Allocations across multiple spending categories
 - **Material 3 Design**: Custom theme with glassmorphic navigation and animations
+- **Local-First Architecture**: Offline-first with Drift/SQLite database and isolate-based sync
+- **Multi-User Ready**: userId filtering on all queries for future OAuth integration
 
 ## Development Commands
 
@@ -27,9 +29,9 @@ flutter run -d windows        # Windows
 flutter run -d linux          # Linux
 ```
 
-### Code Generation (Freezed & JSON)
+### Code Generation (Freezed, JSON, Drift)
 ```bash
-# Generate code for @freezed models and JSON serialization
+# Generate code for @freezed models, JSON serialization, and Drift database
 flutter pub run build_runner build --delete-conflicting-outputs
 
 # Watch mode (auto-regenerate on file changes)
@@ -42,7 +44,8 @@ flutter pub run build_runner clean
 **Important**: Run build_runner after creating or modifying:
 - `@freezed` classes (models, states)
 - `@JsonSerializable` classes
-- Files ending in `.freezed.dart` or `.g.dart` are auto-generated - never edit them manually
+- Drift database schema (`lib/data/local/database.dart`)
+- Files ending in `.freezed.dart`, `.g.dart` are auto-generated - never edit them manually
 
 ### Testing
 No tests are currently configured in this project. To add tests:
@@ -114,14 +117,23 @@ lib/
 │   ├── utils/                   # Helper functions and constants
 │   └── router/                  # Go Router configuration
 │
-├── data/                        # Data layer
+├── data/                        # Data layer (v5 local-first architecture)
 │   ├── models/                  # Domain models (business entities)
-│   ├── repositories/            # Repository implementations
-│   └── services/                # Data services
-│       ├── local/               # Local data sources (SharedPreferences, SQLite)
-│       │   └── dtos/            # Local data transfer objects
-│       └── remote/              # Remote data sources (APIs)
-│           └── dtos/            # Remote data transfer objects
+│   ├── local/                   # Local data sources (Drift/SQLite)
+│   │   ├── database.dart        # Drift database schema with userId filtering
+│   │   ├── database.g.dart      # Generated Drift code (DO NOT EDIT)
+│   │   ├── transaction_local_source.dart
+│   │   ├── category_local_source.dart
+│   │   ├── budget_local_source.dart
+│   │   └── allocation_local_source.dart
+│   ├── repositories/            # Repository layer (coordinates local + future remote)
+│   │   ├── transaction_repository.dart
+│   │   ├── category_repository.dart
+│   │   ├── budget_repository.dart
+│   │   └── allocation_repository.dart
+│   └── sync/                    # Sync management (isolate-based)
+│       ├── sync_manager.dart    # Background sync orchestrator
+│       └── sync_status.dart     # Sync status state (freezed)
 │
 └── features/                    # Feature modules (feature-first organization)
     ├── auth/                    # Authentication feature
@@ -166,21 +178,110 @@ lib/
 
 ## Architecture Notes
 
+### V5 Local-First Architecture (Current)
+
+The app uses a **local-first repository pattern** with offline capabilities and background sync:
+
+```
+Presentation (Cubits)
+    ↓ (stream subscriptions)
+Repositories (coordinate local + future remote)
+    ↓
+LocalSources (userId-filtered Drift queries)
+    ↓
+Drift Database (SQLite)
+    ↓
+SyncManager (isolate-based background sync)
+```
+
+**Key Components**:
+
+1. **Drift Database** (`lib/data/local/database.dart`):
+   - Type-safe SQLite with reactive queries
+   - All tables have `userId` column for multi-user support
+   - Sync metadata: `isSynced`, `isDeleted`, `lastSyncedAt`
+   - Soft delete pattern (marks as deleted, doesn't remove)
+
+2. **LocalSources** (`lib/data/local/*_local_source.dart`):
+   - userId-filtered data access (security + multi-user)
+   - Reactive streams via Drift's `watch()` API
+   - CRUD operations with automatic userId injection
+   - Pattern: All queries filter by `userId.equals(userId)`
+
+3. **Repositories** (`lib/data/repositories/*_repository.dart`):
+   - Broadcast streams (like v0.5 services)
+   - Transform Drift entities ↔ Domain models
+   - Coordinate local (and future remote) sources
+   - Sync stubs ready for API integration
+   - Synchronous getters for immediate access
+
+4. **SyncManager** (`lib/data/sync/sync_manager.dart`):
+   - Isolate-based background sync (non-blocking)
+   - Periodic sync timer (default: 5 minutes)
+   - SendPort/ReceivePort communication pattern
+   - Status streaming (idle, syncing, synced, failed, offline)
+
+5. **AuthManager** (`lib/core/auth/auth_manager.dart`):
+   - Anonymous token: `anon_{uuid}`
+   - Persisted in SharedPreferences
+   - Future OAuth preparation (Google Sign-In)
+   - Used to filter all database queries
+
+**Data Flow (Repository Pattern)**:
+```
+User Action
+  ↓
+Cubit calls Repository method
+  ↓
+Repository calls LocalSource (with userId)
+  ↓
+LocalSource executes Drift query (userId filtered)
+  ↓
+Drift emits change via watch() stream
+  ↓
+Repository receives update, transforms to domain models
+  ↓
+Repository emits to broadcast stream
+  ↓
+Cubit's stream subscription triggers reload
+  ↓
+UI updates
+```
+
+**Critical Pattern - userId Filtering**:
+Every database query MUST filter by userId for security and multi-user support:
+
+```dart
+// LocalSource example
+Future<List<Transaction>> watchAllTransactions() {
+  return (_db.select(_db.transactions)
+        ..where((t) =>
+            t.userId.equals(userId) &  // CRITICAL: Always filter by userId
+            t.isDeleted.equals(false))
+        ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]))
+      .watch();
+}
+```
+
+**Sync Stubs (Ready for API)**:
+All repositories have TODO comments for future API integration:
+```dart
+Future<void> createTransaction(TransactionModel model) async {
+  await _localSource.createTransaction(/* ... */);
+  // TODO: When API is ready, trigger background sync in isolate
+}
+```
+
 ### MVVM Architecture
 
 The application follows the **Model-View-ViewModel (MVVM)** pattern as recommended by the Flutter team:
 
 **Model (Data Layer)**
 - Located in `lib/data/`
-- Contains domain models, repositories (when needed), and data services
-- Handles data operations (API calls, local storage)
-- DTOs (Data Transfer Objects) for API and local storage communication
-- **Important**: Repositories are optional - only create them when:
-  - You need to combine multiple services (e.g., sync local + remote data)
-  - You need to cache or transform data from multiple sources
-  - You have complex data orchestration logic
-- For simple cases, Cubits can call services directly
-- Models and DTOs can be the same class when there's no transformation needed
+- **V5 uses repositories** for all data access (local-first pattern)
+- Repositories coordinate LocalSources (Drift) and future RemoteSources (API)
+- Domain models are separate from Drift entities (transformation happens in repositories)
+- All data access must go through repositories (cubits never call LocalSources directly)
 
 **View (Presentation Layer)**
 - Located in `lib/features/[feature]/presentation/pages/` and `widgets/`
@@ -193,7 +294,8 @@ The application follows the **Model-View-ViewModel (MVVM)** pattern as recommend
 - Located in `lib/features/[feature]/presentation/cubits/`
 - Implemented using **Cubit** from the `bloc` package
 - Manages UI state and business logic for views
-- Can interact with repositories OR services directly (depending on complexity)
+- **Always uses repositories** (never accesses LocalSources directly)
+- Subscribes to repository streams for reactive updates
 - Emits states that views listen to
 - Contains presentation logic (validation, formatting, etc.)
 
@@ -208,52 +310,53 @@ The application follows the **Model-View-ViewModel (MVVM)** pattern as recommend
 
 3. **Dependency Rule**: Dependencies flow inward:
    - Views depend on ViewModels (Cubits)
-   - ViewModels depend on Repositories OR Services (use what makes sense)
-   - Repositories depend on Services (only when needed)
+   - ViewModels (Cubits) depend on Repositories
+   - Repositories depend on LocalSources (and future RemoteSources)
+   - LocalSources depend on Drift Database
    - Inner layers don't know about outer layers
 
 4. **Immutability**: Use immutable state classes for Cubit states
 
 5. **Single Source of Truth**: Each piece of state has one authoritative source
 
-6. **Pragmatic Layering**: Don't add layers that don't provide value
-   - Skip repositories if they would just pass through to services
-   - Skip domain layer if business logic fits cleanly in Cubits
-   - Models and DTOs can be the same when no transformation is needed
+6. **Offline-First**: Local database is the single source of truth
+   - All writes go to local database first (optimistic updates)
+   - Background sync to API happens asynchronously in isolates
+   - App works fully offline, syncs when online
 
 ### State Management
 
 - **Package**: `flutter_bloc` (Cubit pattern)
 - **Location**: `lib/features/[feature]/presentation/cubits/`
-- **Pattern**: Stream-based reactive cubits that subscribe to service changes
+- **Pattern**: Stream-based reactive cubits that subscribe to repository streams
 - **State Classes**: Use `@freezed` with union types (initial, loading, success, error)
 - **Dependency Injection**: `get_it` service locator (configured in `lib/core/di/injection.dart`)
 
 **Key Pattern - Reactive Cubits with Stream Subscriptions**:
 
-This app uses a stream-based reactive pattern where cubits subscribe to service streams and automatically reload data when services emit changes:
+This app uses a stream-based reactive pattern where cubits subscribe to repository streams and automatically reload data when repositories emit changes:
 
 ```dart
 class DashboardCubit extends Cubit<DashboardState> {
-  final BudgetService _budgetService;
-  final TransactionService _transactionService;
+  final BudgetRepository _budgetRepository;
+  final TransactionRepository _transactionRepository;
 
   StreamSubscription? _budgetSubscription;
   StreamSubscription? _transactionSubscription;
 
-  DashboardCubit(this._budgetService, this._transactionService)
+  DashboardCubit(this._budgetRepository, this._transactionRepository)
       : super(const DashboardState.initial()) {
-    // Subscribe to service streams for reactive updates
-    _budgetSubscription = _budgetService.budgetsStream.listen((_) => _loadData());
-    _transactionSubscription = _transactionService.transactionsStream.listen((_) => _loadData());
+    // Subscribe to repository streams for reactive updates
+    _budgetSubscription = _budgetRepository.budgetsStream.listen((_) => _loadData());
+    _transactionSubscription = _transactionRepository.transactionsStream.listen((_) => _loadData());
     _loadData(); // Initial load
   }
 
   Future<void> _loadData() async {
     emit(const DashboardState.loading());
     try {
-      final budgets = _budgetService.getActiveBudgets();
-      final transactions = _transactionService.transactions;
+      final budgets = _budgetRepository.getActiveBudgets();
+      final transactions = _transactionRepository.transactions;
       // ... build view models, calculate metrics
       emit(DashboardState.success(data));
     } catch (e) {
@@ -271,18 +374,18 @@ class DashboardCubit extends Cubit<DashboardState> {
 ```
 
 **Cubit Registration** (`lib/core/di/injection.dart`):
-- **Services**: `registerLazySingleton` (single instance, created on first access)
+- **Repositories**: `registerLazySingleton` (single instance, created on first access)
 - **Cubits**: `registerFactory` (new instance per request)
 
 ```dart
-// Services (singletons with broadcast streams)
-getIt.registerLazySingleton<BudgetService>(() => BudgetService());
-getIt.registerLazySingleton<TransactionService>(() => TransactionService(getIt()));
+// Repositories (singletons with broadcast streams)
+getIt.registerLazySingleton<BudgetRepository>(() => BudgetRepository(getIt()));
+getIt.registerLazySingleton<TransactionRepository>(() => TransactionRepository(getIt()));
 
 // Cubits (factories - new instance per widget)
 getIt.registerFactory<DashboardCubit>(() => DashboardCubit(
-  getIt<BudgetService>(),
-  getIt<TransactionService>(),
+  getIt<BudgetRepository>(),
+  getIt<TransactionRepository>(),
 ));
 ```
 
@@ -397,98 +500,43 @@ Container(
 )
 ```
 
-### Data Flow
+### Repository Pattern (V5)
 
-**Simple Flow (no repository)**:
-1. **User Interaction** → View captures input
-2. **View** → Calls ViewModel (Cubit) method
-3. **ViewModel** → Calls Service directly
-4. **Service** → Returns data/DTO or error
-5. **ViewModel** → Transforms DTO to Model (if needed) and emits new state
-6. **View** → Rebuilds with new state
-
-**Complex Flow (with repository)**:
-1. **User Interaction** → View captures input
-2. **View** → Calls ViewModel (Cubit) method
-3. **ViewModel** → Calls Repository method
-4. **Repository** → Coordinates multiple Services (local + remote, caching, etc.)
-5. **Services** → Return data/DTOs or errors
-6. **Repository** → Transforms DTOs to Models, handles caching/merging
-7. **ViewModel** → Emits new state
-8. **View** → Rebuilds with new state
-
-### When to Use Repositories vs Direct Service Calls
-
-**Use Repository when**:
-- Combining local and remote data sources (offline-first, sync)
-- Implementing caching strategy
-- Complex data transformation from multiple DTOs to domain model
-- Need to coordinate multiple services for a single operation
-- Example: `TransactionRepository` syncs remote API + local SQLite
-
-**Call Service Directly when**:
-- Simple CRUD operations to a single data source
-- No caching or coordination needed
-- DTO and Model are the same (or minimal transformation)
-- Example: `AuthService.login()` just calls API and returns user
-
-### Models vs DTOs
-
-**Use Same Class (Model = DTO) when**:
-- API response structure matches your domain needs
-- No complex transformation required
-- Simple data structures
-- Example: `UserModel` can be used for both API and domain if fields align
-
-**Use Separate Classes when**:
-- API structure differs significantly from domain model
-- Need to combine multiple API responses into one model
-- Converting between different data representations
-- Example: API returns `user_name` but domain uses `username`
-
-### Data Services Pattern
-
-All services follow a consistent broadcast stream pattern for reactive updates:
+All data access goes through repositories with broadcast streams for reactive updates:
 
 ```dart
-class BudgetService {
-  final List<BudgetModel> _budgets = [];
-  final _budgetsController = StreamController<List<BudgetModel>>.broadcast();
+class TransactionRepository {
+  final TransactionLocalSource _localSource;
+  final _transactionsController = StreamController<List<TransactionModel>>.broadcast();
 
-  Stream<List<BudgetModel>> get budgetsStream => _budgetsController.stream;
-  List<BudgetModel> get budgets => List.unmodifiable(_budgets);
+  StreamSubscription? _dbSubscription;
+  List<TransactionModel> _latestTransactions = [];
 
-  BudgetService() {
-    _initializeDefaults(); // Load sample data
+  TransactionRepository(this._localSource) {
+    // Subscribe to Drift's reactive watch() streams
+    _dbSubscription = _localSource.watchAllTransactions().listen((dbTransactions) {
+      final models = dbTransactions.map(_mapToModel).toList();
+      _latestTransactions = models;  // Cache for synchronous access
+      _transactionsController.add(models);  // Emit to cubits
+    });
   }
 
-  Future<void> createBudget(BudgetModel budget) async {
-    _budgets.add(budget);
-    _budgetsController.add(_budgets); // Emit change
-  }
+  // Public API for cubits
+  Stream<List<TransactionModel>> get transactionsStream => _transactionsController.stream;
+  List<TransactionModel> get transactions => _latestTransactions;
 
-  List<BudgetModel> getActiveBudgets() {
-    final now = DateTime.now();
-    return _budgets.where((b) =>
-      now.isAfter(b.startDate) && now.isBefore(b.endDate)
-    ).toList();
+  Future<void> createTransaction(TransactionModel model) async {
+    await _localSource.createTransaction(/* ... with userId */);
+    // TODO: Trigger background sync in isolate when API ready
   }
 }
 ```
 
-**Service Dependencies**: Services can depend on other services (constructor injection)
-```dart
-class TransactionService {
-  final CategoryService _categoryService;
-  TransactionService(this._categoryService) { /* ... */ }
-}
-```
-
-**Current Services**:
-- `CategoryService` - Spending categories (no dependencies)
-- `BudgetService` - Budget periods (no dependencies)
-- `TransactionService` - Transactions (depends on CategoryService)
-- `AllocationService` - Budget allocations (depends on Category + Budget)
+**Current Repositories**:
+- `TransactionRepository` - Transaction CRUD with userId filtering
+- `CategoryRepository` - Category CRUD with userId filtering
+- `BudgetRepository` - Budget CRUD with userId filtering
+- `AllocationRepository` - Allocation CRUD with userId filtering
 
 ### Freezed Models
 
@@ -551,7 +599,8 @@ class DashboardState with _$DashboardState {
 - **Cubits**: `[feature_name]_cubit.dart` (e.g., `login_cubit.dart`)
 - **States**: `[feature_name]_state.dart` (e.g., `login_state.dart`)
 - **Models**: `[model_name]_model.dart` (e.g., `user_model.dart`)
-- **Services**: `[service_name]_service.dart` (e.g., `budget_service.dart`)
+- **Repositories**: `[entity_name]_repository.dart` (e.g., `transaction_repository.dart`)
+- **LocalSources**: `[entity_name]_local_source.dart` (e.g., `transaction_local_source.dart`)
 - **View Models** (non-freezed): `[entity]_chart_data.dart` (e.g., `transactions_chart_data.dart`)
 
 ### Key App-Specific Concepts
@@ -564,16 +613,16 @@ class DashboardState with _$DashboardState {
 - Calculated in `DashboardCubit._calculateBAR()`
 
 **Data Denormalization**:
-- Transactions store only `categoryId`, not full category object
-- Cubits denormalize data by joining service data into view models
+- Transactions store only `categoryId` in database, not full category object
+- Cubits denormalize data by joining repository data into view models
 - Pattern: `TransactionVModel` includes full category data for display
-- Benefit: Services stay simple, UI gets rich data
+- Benefit: Database stays normalized, UI gets rich data
 
 **Budget Allocations**:
 - Each budget has multiple allocations (one per category)
 - Tracks planned spending per category
 - Compared against actual transactions in charts
-- Managed by `AllocationService` with Category + Budget dependencies
+- Managed by `AllocationRepository` with userId filtering
 
 **Custom Date Pickers**:
 - `CustomDatePicker` (text-based): Uses `CupertinoCalendarPickerButton` for text display with calendar picker
