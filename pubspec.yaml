@@ -31,6 +31,11 @@ dependencies:
   google_nav_bar: ^5.0.7
   flutter_sticky_header: ^0.8.0
   sticky_grouped_list: ^3.1.0
+  drift: ^2.19.0
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  google_sign_in: ^6.2.2
 
 dev_dependencies:
   flutter_test:
@@ -39,6 +44,7 @@ dev_dependencies:
   build_runner: ^2.4.13
   freezed: ^3.2.3
   json_serializable: ^6.8.0
+  drift_dev: ^2.19.0
 
 flutter:
   uses-material-design: true
