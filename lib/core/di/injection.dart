@@ -1,4 +1,5 @@
 import 'package:centabit/core/auth/auth_manager.dart';
+import 'package:centabit/core/logging/app_logger.dart';
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/data/local/allocation_local_source.dart';
 import 'package:centabit/data/local/budget_local_source.dart';
@@ -72,6 +73,13 @@ final getIt = GetIt.instance;
 /// BlocProvider(create: (_) => getIt<TransactionListCubit>())
 /// ```
 Future<void> configureDependencies() async {
+  // ========================================
+  // Logging Infrastructure
+  // ========================================
+
+  // AppLogger singleton
+  getIt.registerLazySingleton<AppLogger>(() => AppLogger.instance);
+
   // ========================================
   // Foundation (SharedPreferences, Auth)
   // ========================================

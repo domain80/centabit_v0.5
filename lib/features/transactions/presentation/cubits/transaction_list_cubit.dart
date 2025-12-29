@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:centabit/core/logging/app_logger.dart';
 import 'package:centabit/core/utils/date_formatter.dart';
 import 'package:centabit/data/repositories/category_repository.dart';
 import 'package:centabit/data/repositories/transaction_repository.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class TransactionListCubit extends Cubit<TransactionListState> {
   final TransactionRepository _transactionRepository;
   final CategoryRepository _categoryRepository;
+  final _logger = AppLogger.instance;
 
   StreamSubscription? _transactionSubscription;
   StreamSubscription? _categorySubscription;
@@ -61,7 +63,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
       // Apply search filter (if query exists)
       if (searchQuery.isNotEmpty) {
-        print('Filtering ${allTransactions.length} transactions with query: "$searchQuery"');
+        _logger.debug('Filtering ${allTransactions.length} transactions with query: "$searchQuery"');
         allTransactions = allTransactions.where((tx) {
           final category = tx.categoryId != null
               ? _categoryRepository.getCategoryByIdSync(tx.categoryId!)
@@ -76,7 +78,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
           return matchesName || matchesCategory;
         }).toList();
-        print('After filtering: ${allTransactions.length} transactions');
+        _logger.debug('After filtering: ${allTransactions.length} transactions');
       }
 
       // Apply pagination on filtered results
@@ -167,7 +169,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
   /// Search transactions by name or category name
   void searchTransactions(String query) {
-    print('TransactionListCubit.searchTransactions called with: "$query"');
+    _logger.debug('searchTransactions called with query: "$query"');
 
     // Reset to page 0 when search changes
     _currentPage = 0;
@@ -192,7 +194,7 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
   /// Set selected date for scroll-to-date functionality
   void setSelectedDate(DateTime? date) {
-    print('TransactionListCubit.setSelectedDate called with: $date');
+    _logger.debug('setSelectedDate called with date: ${date?.toIso8601String()}');
 
     // Just update state, don't reload (scroll happens in UI)
     state.maybeWhen(
@@ -204,10 +206,10 @@ class TransactionListCubit extends Cubit<TransactionListState> {
           searchQuery: searchQuery,
           selectedDate: date,
         ));
-        print('Emitted new state with selectedDate: $date');
+        _logger.verbose('Emitted new state with selectedDate: $date');
       },
       orElse: () {
-        print('setSelectedDate called but state is not success');
+        _logger.warning('setSelectedDate called but state is not success');
       },
     );
   }

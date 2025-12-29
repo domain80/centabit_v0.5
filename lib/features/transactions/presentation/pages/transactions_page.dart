@@ -75,7 +75,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
 
   void _scrollToDate(DateTime date, List<TransactionVModel> transactions) {
     final normalizedDate = DateFormatter.normalizeToDay(date);
-    print('_scrollToDate called for: $normalizedDate');
 
     // Find the index of the first transaction that matches the target date
     final index = transactions.indexWhere((transaction) {
@@ -86,15 +85,12 @@ class _TransactionsViewState extends State<_TransactionsView> {
     });
 
     if (index != -1) {
-      print('Found transaction at index $index, scrolling...');
       _scrollController.scrollTo(
         index: index,
         automaticAlignment: true,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
-    } else {
-      print('No transaction found for date: $normalizedDate');
     }
   }
 
@@ -111,9 +107,6 @@ class _TransactionsViewState extends State<_TransactionsView> {
               listenWhen: (prev, curr) => prev.searchQuery != curr.searchQuery,
               listener: (context, navState) {
                 // Page receives search query updates from nav bar
-                print(
-                  'NavCubit search query changed: "${navState.searchQuery}"',
-                );
                 if (navState.searchQuery.isNotEmpty) {
                   context.read<TransactionListCubit>().searchTransactions(
                     navState.searchQuery,

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/di/injection.dart';
 import 'core/localizations/app_localizations.dart';
+import 'core/logging/app_logger.dart';
+import 'core/logging/interceptors/cubit_logger.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
@@ -10,8 +13,15 @@ void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Setup BLoC observer for automatic cubit logging
+  Bloc.observer = CubitLogger();
+
   // Initialize dependency injection
   await configureDependencies();
+
+  // Log application startup
+  final logger = AppLogger.instance;
+  logger.info('Application starting...');
 
   runApp(const MainApp());
 }

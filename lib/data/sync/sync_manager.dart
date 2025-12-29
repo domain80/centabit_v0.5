@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'package:centabit/core/logging/app_logger.dart';
 import 'package:centabit/data/sync/sync_status.dart';
 
 /// Manages background sync in isolates
@@ -114,7 +115,7 @@ class SyncManager {
   /// ```
   void triggerSync() {
     if (_syncSendPort == null) {
-      print('Sync isolate not ready');
+      AppLogger.instance.warning('Sync isolate not ready');
       return;
     }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:centabit/core/logging/interceptors/repository_logger.dart';
 import 'package:centabit/data/local/budget_local_source.dart';
 import 'package:centabit/data/models/budget_model.dart';
 import 'package:centabit/data/local/database.dart' as db;
@@ -11,7 +12,9 @@ import 'package:drift/drift.dart';
 /// 2. Emit broadcast streams (like v0.5 services)
 /// 3. Transform Drift entities ↔ Domain Models
 /// 4. Manage sync queue (stub for now - no API yet)
-class BudgetRepository {
+class BudgetRepository with RepositoryLogger {
+  @override
+  String get repositoryName => 'BudgetRepository';
   final BudgetLocalSource _localSource;
 
   final _budgetsController =
@@ -72,53 +75,87 @@ class BudgetRepository {
 
   /// Create budget (optimistic update - local only for now)
   Future<void> createBudget(BudgetModel model) async {
-    await _localSource.createBudget(
-      db.BudgetsCompanion.insert(
-        id: model.id,
-        userId: _localSource.userId,
-        name: model.name,
-        amount: model.amount,
-        startDate: model.startDate,
-        endDate: model.endDate,
-        createdAt: model.createdAt,
-        updatedAt: model.updatedAt,
-        isSynced: const Value(false), // Ready for future API sync
-      ),
-    );
+    return trackRepositoryOperation(
+      operation: 'createBudget',
+      execute: () async {
+        await _localSource.createBudget(
+          db.BudgetsCompanion.insert(
+            id: model.id,
+            userId: _localSource.userId,
+            name: model.name,
+            amount: model.amount,
+            startDate: model.startDate,
+            endDate: model.endDate,
+            createdAt: model.createdAt,
+            updatedAt: model.updatedAt,
+            isSynced: const Value(false), // Ready for future API sync
+          ),
+        );
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'budgetId': model.id, 'name': model.name},
+    );
   }
 
   /// Update budget
   Future<void> updateBudget(BudgetModel model) async {
-    final updatedModel = model.withUpdatedTimestamp();
-    await _localSource.updateBudget(_mapToDbModel(updatedModel));
+    return trackRepositoryOperation(
+      operation: 'updateBudget',
+      execute: () async {
+        final updatedModel = model.withUpdatedTimestamp();
+        await _localSource.updateBudget(_mapToDbModel(updatedModel));
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'budgetId': model.id},
+    );
   }
 
   /// Delete budget (soft delete)
   Future<void> deleteBudget(String id) async {
-    await _localSource.deleteBudget(id);
+    return trackRepositoryOperation(
+      operation: 'deleteBudget',
+      execute: () async {
+        await _localSource.deleteBudget(id);
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'budgetId': id},
+    );
   }
 
   /// Get budget by ID
   Future<BudgetModel?> getBudgetById(String id) async {
-    final dbBudget = await _localSource.getBudgetById(id);
-    return dbBudget != null ? _mapToModel(dbBudget) : null;
+    return trackRepositoryOperation(
+      operation: 'getBudgetById',
+      execute: () async {
+        final dbBudget = await _localSource.getBudgetById(id);
+        return dbBudget != null ? _mapToModel(dbBudget) : null;
+      },
+      metadata: {'budgetId': id},
+    );
   }
 
   /// Get active budgets (synchronous - from cache)
   List<BudgetModel> getActiveBudgets() {
-    return _latestBudgets.where((budget) => budget.isActive()).toList();
+    return trackRepositoryOperationSync(
+      operation: 'getActiveBudgets',
+      execute: () {
+        return _latestBudgets.where((budget) => budget.isActive()).toList();
+      },
+    );
   }
 
   /// Sync stub (ready for future API)
   Future<void> sync() async {
-    // TODO: Implement API sync in isolate when backend is ready
-    print('Sync not implemented yet - no API available');
+    return trackRepositoryOperation(
+      operation: 'sync',
+      execute: () async {
+        // TODO: Implement API sync in isolate when backend is ready
+        // For now, this is a stub
+      },
+    );
   }
 
   void dispose() {

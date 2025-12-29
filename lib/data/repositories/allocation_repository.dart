@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:centabit/core/logging/interceptors/repository_logger.dart';
 import 'package:centabit/data/local/allocation_local_source.dart';
 import 'package:centabit/data/models/allocation_model.dart';
 import 'package:centabit/data/local/database.dart' as db;
@@ -11,7 +12,9 @@ import 'package:drift/drift.dart';
 /// 2. Emit broadcast streams (like v0.5 services)
 /// 3. Transform Drift entities ↔ Domain Models
 /// 4. Manage sync queue (stub for now - no API yet)
-class AllocationRepository {
+class AllocationRepository with RepositoryLogger {
+  @override
+  String get repositoryName => 'AllocationRepository';
   final AllocationLocalSource _localSource;
 
   final _allocationsController =
@@ -70,57 +73,98 @@ class AllocationRepository {
 
   /// Create allocation (optimistic update - local only for now)
   Future<void> createAllocation(AllocationModel model) async {
-    await _localSource.createAllocation(
-      db.AllocationsCompanion.insert(
-        id: model.id,
-        userId: _localSource.userId,
-        budgetId: model.budgetId,
-        categoryId: model.categoryId,
-        amount: model.amount,
-        createdAt: model.createdAt,
-        updatedAt: model.updatedAt,
-        isSynced: const Value(false), // Ready for future API sync
-      ),
-    );
+    return trackRepositoryOperation(
+      operation: 'createAllocation',
+      execute: () async {
+        await _localSource.createAllocation(
+          db.AllocationsCompanion.insert(
+            id: model.id,
+            userId: _localSource.userId,
+            budgetId: model.budgetId,
+            categoryId: model.categoryId,
+            amount: model.amount,
+            createdAt: model.createdAt,
+            updatedAt: model.updatedAt,
+            isSynced: const Value(false), // Ready for future API sync
+          ),
+        );
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'allocationId': model.id, 'budgetId': model.budgetId, 'categoryId': model.categoryId},
+    );
   }
 
   /// Update allocation
   Future<void> updateAllocation(AllocationModel model) async {
-    final updatedModel = model.withUpdatedTimestamp();
-    await _localSource.updateAllocation(_mapToDbModel(updatedModel));
+    return trackRepositoryOperation(
+      operation: 'updateAllocation',
+      execute: () async {
+        final updatedModel = model.withUpdatedTimestamp();
+        await _localSource.updateAllocation(_mapToDbModel(updatedModel));
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'allocationId': model.id},
+    );
   }
 
   /// Delete allocation (soft delete)
   Future<void> deleteAllocation(String id) async {
-    await _localSource.deleteAllocation(id);
+    return trackRepositoryOperation(
+      operation: 'deleteAllocation',
+      execute: () async {
+        await _localSource.deleteAllocation(id);
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'allocationId': id},
+    );
   }
 
   /// Get allocation by ID
   Future<AllocationModel?> getAllocationById(String id) async {
-    final dbAllocation = await _localSource.getAllocationById(id);
-    return dbAllocation != null ? _mapToModel(dbAllocation) : null;
+    return trackRepositoryOperation(
+      operation: 'getAllocationById',
+      execute: () async {
+        final dbAllocation = await _localSource.getAllocationById(id);
+        return dbAllocation != null ? _mapToModel(dbAllocation) : null;
+      },
+      metadata: {'allocationId': id},
+    );
   }
 
   /// Get allocations for a specific budget (synchronous - from cache)
   List<AllocationModel> getAllocationsForBudget(String budgetId) {
-    return _latestAllocations.forBudget(budgetId);
+    return trackRepositoryOperationSync(
+      operation: 'getAllocationsForBudget',
+      execute: () {
+        return _latestAllocations.forBudget(budgetId);
+      },
+      metadata: {'budgetId': budgetId},
+    );
   }
 
   /// Get allocations for a specific category (synchronous - from cache)
   List<AllocationModel> getAllocationsForCategory(String categoryId) {
-    return _latestAllocations.forCategory(categoryId);
+    return trackRepositoryOperationSync(
+      operation: 'getAllocationsForCategory',
+      execute: () {
+        return _latestAllocations.forCategory(categoryId);
+      },
+      metadata: {'categoryId': categoryId},
+    );
   }
 
   /// Sync stub (ready for future API)
   Future<void> sync() async {
-    // TODO: Implement API sync in isolate when backend is ready
-    print('Sync not implemented yet - no API available');
+    return trackRepositoryOperation(
+      operation: 'sync',
+      execute: () async {
+        // TODO: Implement API sync in isolate when backend is ready
+        // For now, this is a stub
+      },
+    );
   }
 
   void dispose() {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:centabit/core/logging/interceptors/repository_logger.dart';
 import 'package:centabit/data/local/category_local_source.dart';
 import 'package:centabit/data/models/category_model.dart';
 import 'package:centabit/data/local/database.dart' as db;
@@ -11,7 +12,9 @@ import 'package:drift/drift.dart';
 /// 2. Emit broadcast streams (like v0.5 services)
 /// 3. Transform Drift entities ↔ Domain Models
 /// 4. Manage sync queue (stub for now - no API yet)
-class CategoryRepository {
+class CategoryRepository with RepositoryLogger {
+  @override
+  String get repositoryName => 'CategoryRepository';
   final CategoryLocalSource _localSource;
 
   final _categoriesController =
@@ -69,56 +72,91 @@ class CategoryRepository {
 
   /// Create category (optimistic update - local only for now)
   Future<void> createCategory(CategoryModel model) async {
-    await _localSource.createCategory(
-      db.CategoriesCompanion.insert(
-        id: model.id,
-        userId: _localSource.userId,
-        name: model.name,
-        iconName: model.iconName,
-        colorHex: '#000000', // Default color
-        createdAt: model.createdAt,
-        updatedAt: model.updatedAt,
-        isSynced: const Value(false), // Ready for future API sync
-      ),
-    );
+    return trackRepositoryOperation(
+      operation: 'createCategory',
+      execute: () async {
+        await _localSource.createCategory(
+          db.CategoriesCompanion.insert(
+            id: model.id,
+            userId: _localSource.userId,
+            name: model.name,
+            iconName: model.iconName,
+            colorHex: '#000000', // Default color
+            createdAt: model.createdAt,
+            updatedAt: model.updatedAt,
+            isSynced: const Value(false), // Ready for future API sync
+          ),
+        );
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'categoryId': model.id, 'name': model.name},
+    );
   }
 
   /// Update category
   Future<void> updateCategory(CategoryModel model) async {
-    final updatedModel = model.copyWith(updatedAt: DateTime.now());
-    await _localSource.updateCategory(_mapToDbModel(updatedModel));
+    return trackRepositoryOperation(
+      operation: 'updateCategory',
+      execute: () async {
+        final updatedModel = model.copyWith(updatedAt: DateTime.now());
+        await _localSource.updateCategory(_mapToDbModel(updatedModel));
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'categoryId': model.id},
+    );
   }
 
   /// Delete category (soft delete)
   Future<void> deleteCategory(String id) async {
-    await _localSource.deleteCategory(id);
+    return trackRepositoryOperation(
+      operation: 'deleteCategory',
+      execute: () async {
+        await _localSource.deleteCategory(id);
 
-    // TODO: When API is ready, trigger background sync in isolate
+        // TODO: When API is ready, trigger background sync in isolate
+      },
+      metadata: {'categoryId': id},
+    );
   }
 
   /// Get category by ID
   Future<CategoryModel?> getCategoryById(String id) async {
-    final dbCategory = await _localSource.getCategoryById(id);
-    return dbCategory != null ? _mapToModel(dbCategory) : null;
+    return trackRepositoryOperation(
+      operation: 'getCategoryById',
+      execute: () async {
+        final dbCategory = await _localSource.getCategoryById(id);
+        return dbCategory != null ? _mapToModel(dbCategory) : null;
+      },
+      metadata: {'categoryId': id},
+    );
   }
 
   /// Get category by ID (synchronous - from cache)
   CategoryModel? getCategoryByIdSync(String id) {
-    try {
-      return _latestCategories.firstWhere((cat) => cat.id == id);
-    } catch (e) {
-      return null;
-    }
+    return trackRepositoryOperationSync(
+      operation: 'getCategoryByIdSync',
+      execute: () {
+        try {
+          return _latestCategories.firstWhere((cat) => cat.id == id);
+        } catch (e) {
+          return null;
+        }
+      },
+      metadata: {'categoryId': id},
+    );
   }
 
   /// Sync stub (ready for future API)
   Future<void> sync() async {
-    // TODO: Implement API sync in isolate when backend is ready
-    print('Sync not implemented yet - no API available');
+    return trackRepositoryOperation(
+      operation: 'sync',
+      execute: () async {
+        // TODO: Implement API sync in isolate when backend is ready
+        // For now, this is a stub
+      },
+    );
   }
 
   void dispose() {
