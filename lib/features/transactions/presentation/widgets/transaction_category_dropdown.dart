@@ -126,6 +126,16 @@ class _TransactionCategoryDropdownState
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Category icon (if selected)
+                      if (selectedCategory != null) ...[
+                        Icon(
+                          _getIconData(selectedCategory.iconName),
+                          size: 18,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        SizedBox(width: spacing.xs),
+                      ],
+                      // Category name
                       Expanded(
                         child: Text(
                           selectedCategory?.name ?? 'Select category',
@@ -133,6 +143,7 @@ class _TransactionCategoryDropdownState
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      // Chevron down
                       Icon(
                         TablerIcons.chevronDown,
                         size: 16,
