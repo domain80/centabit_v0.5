@@ -33,16 +33,23 @@ class TransactionTimePicker extends StatelessWidget {
         FormBuilderField<TimeOfDay>(
           name: 'time',
           builder: (field) {
-            return CupertinoTimePickerButton(
-              initialTime: field.value ?? TimeOfDay.now(),
-              onTimeChanged: (time) {
-                field.didChange(time);
-              },
-              buttonDecoration: PickerButtonDecoration(
-                textStyle: textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface,
+            return Theme(
+              data: theme.copyWith(
+                colorScheme: theme.colorScheme.copyWith(
+                  primary: theme.colorScheme.secondary,
                 ),
-                backgroundColor: Colors.transparent,
+              ),
+              child: CupertinoTimePickerButton(
+                initialTime: field.value ?? TimeOfDay.now(),
+                onTimeChanged: (time) {
+                  field.didChange(time);
+                },
+                buttonDecoration: PickerButtonDecoration(
+                  textStyle: textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  backgroundColor: Colors.transparent,
+                ),
               ),
             );
           },

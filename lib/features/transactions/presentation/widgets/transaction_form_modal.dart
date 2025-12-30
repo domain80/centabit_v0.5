@@ -120,26 +120,18 @@ class _TransactionFormContent extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 22, // v4 exact
             children: [
-              // Form Header with gradient (v4 styling)
+              // Form Header
               Row(
                 children: [
                   Expanded(
-                    child: ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.secondary,
-                        ],
-                      ).createShader(bounds),
-                      child: Text(
-                        initialValue != null
-                            ? 'Update Transaction'
-                            : 'Add Transaction',
-                        style: const TextStyle(
-                          fontSize: 28, // v4's h2
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white, // Required for ShaderMask
-                        ),
+                    child: Text(
+                      initialValue != null
+                          ? 'Update Transaction'
+                          : 'Add Transaction',
+                      style: TextStyle(
+                        fontSize: 28, // v4's h2
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ),

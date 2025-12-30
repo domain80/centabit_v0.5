@@ -35,23 +35,30 @@ class TransactionDatePicker extends StatelessWidget {
         FormBuilderField<DateTime>(
           name: 'date',
           builder: (field) {
-            return CupertinoCalendarPickerButton(
-              minimumDateTime: DateTime.now().subtract(
-                const Duration(days: 365 * 10),
-              ),
-              maximumDateTime: DateTime.now().add(
-                const Duration(days: 365 * 10),
-              ),
-              formatter: (dateTime) => DateFormatter.formatHeaderDate(dateTime),
-              initialDateTime: field.value ?? DateTime.now(),
-              onDateTimeChanged: (dateTime) {
-                field.didChange(dateTime);
-              },
-              buttonDecoration: PickerButtonDecoration(
-                textStyle: textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface,
+            return Theme(
+              data: theme.copyWith(
+                colorScheme: theme.colorScheme.copyWith(
+                  primary: theme.colorScheme.secondary,
                 ),
-                backgroundColor: Colors.transparent,
+              ),
+              child: CupertinoCalendarPickerButton(
+                minimumDateTime: DateTime.now().subtract(
+                  const Duration(days: 365 * 10),
+                ),
+                maximumDateTime: DateTime.now().add(
+                  const Duration(days: 365 * 10),
+                ),
+                formatter: (dateTime) => DateFormatter.formatHeaderDate(dateTime),
+                initialDateTime: field.value ?? DateTime.now(),
+                onDateTimeChanged: (dateTime) {
+                  field.didChange(dateTime);
+                },
+                buttonDecoration: PickerButtonDecoration(
+                  textStyle: textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  backgroundColor: Colors.transparent,
+                ),
               ),
             );
           },
