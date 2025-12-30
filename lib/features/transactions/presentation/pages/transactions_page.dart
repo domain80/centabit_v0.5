@@ -203,7 +203,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
                                   .transactions
                                   .firstWhere((t) => t.id == transaction.id);
                               final copy = TransactionModel.create(
-                                name: '${original.name} (Copy)',
+                                name: original.name,
                                 amount: original.amount,
                                 type: original.type,
                                 transactionDate: DateTime.now(),

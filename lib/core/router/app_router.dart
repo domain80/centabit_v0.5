@@ -6,6 +6,7 @@ import '../../core/di/injection.dart';
 import '../../core/router/navigation/app_nav_shell.dart';
 import '../../core/router/navigation/nav_cubit.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/budgets/presentation/pages/budget_details_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
@@ -74,19 +75,13 @@ class AppRouter {
                 name: 'budgets',
                 builder: (context, state) => const BudgetsPage(),
                 routes: [
-                  // Budget details sub-route (Phase 2 - placeholder for now)
+                  // Budget details sub-route
                   GoRoute(
                     path: ':id',
                     name: 'budget-details',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return Scaffold(
-                        appBar: AppBar(title: const Text('Budget Details')),
-                        body: Center(
-                          child: Text('Budget Details\nID: $id\n\nComing in Phase 2'),
-                        ),
-                      );
-                      // TODO Phase 2: Replace with BudgetDetailsPage(budgetId: id)
+                      return BudgetDetailsPage(budgetId: id);
                     },
                   ),
                 ],

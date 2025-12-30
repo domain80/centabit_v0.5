@@ -11,6 +11,7 @@ import 'package:centabit/data/repositories/budget_repository.dart';
 import 'package:centabit/data/repositories/category_repository.dart';
 import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/data/sync/sync_manager.dart';
+import 'package:centabit/features/budgets/presentation/cubits/budget_details_cubit.dart';
 import 'package:centabit/features/budgets/presentation/cubits/budget_form_cubit.dart';
 import 'package:centabit/features/budgets/presentation/cubits/budget_list_cubit.dart';
 import 'package:centabit/features/categories/presentation/cubits/category_form_cubit.dart';
@@ -211,6 +212,16 @@ Future<void> configureDependencies() async {
       getIt<BudgetRepository>(),
       getIt<AllocationRepository>(),
       getIt<CategoryRepository>(),
+    ),
+  );
+
+  getIt.registerFactoryParam<BudgetDetailsCubit, String, void>(
+    (budgetId, _) => BudgetDetailsCubit(
+      budgetId: budgetId,
+      budgetRepository: getIt<BudgetRepository>(),
+      allocationRepository: getIt<AllocationRepository>(),
+      transactionRepository: getIt<TransactionRepository>(),
+      categoryRepository: getIt<CategoryRepository>(),
     ),
   );
 }

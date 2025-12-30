@@ -115,9 +115,9 @@ class _ScrollableTransactionListState extends State<ScrollableTransactionList> {
                       (transaction) => TransactionTile(
                         transaction: transaction,
                         onEdit: () {
-                          final transactionModel =
-                              transactionRepository.transactions
-                                  .firstWhere((t) => t.id == transaction.id);
+                          final transactionModel = transactionRepository
+                              .transactions
+                              .firstWhere((t) => t.id == transaction.id);
 
                           showModalBottomSheetUtil(
                             context,
@@ -128,13 +128,15 @@ class _ScrollableTransactionListState extends State<ScrollableTransactionList> {
                           );
                         },
                         onDelete: () {
-                          transactionRepository.deleteTransaction(transaction.id);
+                          transactionRepository.deleteTransaction(
+                            transaction.id,
+                          );
                         },
                         onCopy: () {
                           final original = transactionRepository.transactions
                               .firstWhere((t) => t.id == transaction.id);
                           final copy = TransactionModel.create(
-                            name: '${original.name} (Copy)',
+                            name: original.name,
                             amount: original.amount,
                             type: original.type,
                             transactionDate: DateTime.now(),
