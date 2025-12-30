@@ -34,43 +34,46 @@ class TransactionFormModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<TransactionFormCubit>(),
-      child: BlocListener<TransactionFormCubit, TransactionFormState>(
-        listener: (context, state) {
-          state.when(
-            initial: () {},
-            loading: () {
-              // Loading state - could show loading indicator if needed
-            },
-            success: () {
-              // Show success message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    initialValue != null
-                        ? 'Transaction updated successfully'
-                        : 'Transaction created successfully',
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: BlocListener<TransactionFormCubit, TransactionFormState>(
+          listener: (context, state) {
+            state.when(
+              initial: () {},
+              loading: () {
+                // Loading state - could show loading indicator if needed
+              },
+              success: () {
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      initialValue != null
+                          ? 'Transaction updated successfully'
+                          : 'Transaction created successfully',
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    duration: const Duration(seconds: 2),
                   ),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-              // Close modal on success
-              Navigator.of(context).pop();
-            },
-            error: (message) {
-              // Show error snackbar but keep modal open (preserve form state)
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
-            },
-          );
-        },
-        child: SafeArea(
-          child: _TransactionFormContent(initialValue: initialValue),
+                );
+                // Close modal on success
+                Navigator.of(context).pop();
+              },
+              error: (message) {
+                // Show error snackbar but keep modal open (preserve form state)
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
+              },
+            );
+          },
+          child: SafeArea(
+            child: _TransactionFormContent(initialValue: initialValue),
+          ),
         ),
       ),
     );
@@ -91,8 +94,10 @@ class _TransactionFormContent extends StatelessWidget {
     final cubit = context.read<TransactionFormCubit>();
     final theme = Theme.of(context);
 
-    // Get default budget ID (edit mode: use existing, create mode: use first active budget)
-    final defaultBudgetId = initialValue?.budgetId ?? cubit.defaultBudgetId;
+    // Budget ID logic:
+    // - Edit/copy mode: preserve original budget (even if null)
+    // - Create mode: start with null (user must select)
+    final defaultBudgetId = initialValue?.budgetId;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
