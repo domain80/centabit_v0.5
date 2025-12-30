@@ -90,12 +90,17 @@ class BudgetDetailsCubit extends Cubit<BudgetDetailsState> {
         final isInDateRange = !t.transactionDate.isBefore(budget.startDate) &&
             !t.transactionDate.isAfter(budget.endDate);
 
-        // Transaction must link to this budget OR have category in allocations
-        final isLinkedToBudget = t.budgetId == budgetId;
+        if (!isInDateRange) return false;
+
+        // If transaction has explicit budgetId, ONLY include if it matches this budget
+        if (t.budgetId != null) {
+          return t.budgetId == budgetId;
+        }
+
+        // If no budgetId, include as fallback if category is in allocations
         final categoryInAllocations =
             allocations.any((a) => a.categoryId == t.categoryId);
-
-        return isInDateRange && (isLinkedToBudget || categoryInAllocations);
+        return categoryInAllocations;
       }).toList();
 
       // Build allocation detail view models
