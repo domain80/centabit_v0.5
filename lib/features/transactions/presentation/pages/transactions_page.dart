@@ -177,22 +177,22 @@ class _TransactionsViewState extends State<_TransactionsView> {
                       },
                       itemBuilder: (context, TransactionVModel transaction) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: spacing.lg,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: spacing.lg),
                           child: TransactionTile(
                             transaction: transaction,
                             onEdit: () {
-                              final transactionModel = getIt<TransactionRepository>()
-                                  .transactions
-                                  .firstWhere((t) => t.id == transaction.id);
+                              final transactionModel =
+                                  getIt<TransactionRepository>().transactions
+                                      .firstWhere(
+                                        (t) => t.id == transaction.id,
+                                      );
 
                               showModalBottomSheetUtil(
                                 context,
                                 builder: (_) => TransactionFormModal(
                                   initialValue: transactionModel,
                                 ),
-                                modalFractionalHeight: 0.85,
+                                modalFractionalHeight: 0.78,
                               );
                             },
                             onDelete: () => context
@@ -214,10 +214,9 @@ class _TransactionsViewState extends State<_TransactionsView> {
 
                               showModalBottomSheetUtil(
                                 context,
-                                builder: (_) => TransactionFormModal(
-                                  initialValue: copy,
-                                ),
-                                modalFractionalHeight: 0.85,
+                                builder: (_) =>
+                                    TransactionFormModal(initialValue: copy),
+                                modalFractionalHeight: 0.78,
                               );
                             },
                           ),
