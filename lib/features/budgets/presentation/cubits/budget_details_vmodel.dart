@@ -26,23 +26,42 @@ class BudgetDetailsVModel {
 
   double get unallocated => budget.amount - totalAllocated;
 
-  // BAR calculation (from Dashboard pattern)
+  // BAR calculation (matches Dashboard logic for consistency)
   double get barValue {
     final now = DateTime.now();
-    if (now.isBefore(budget.startDate)) return 0.0;
-    if (now.isAfter(budget.endDate)) return 1.0;
 
-    final totalDays = budget.endDate.difference(budget.startDate).inDays;
-    final elapsedDays = now.difference(budget.startDate).inDays;
+    // Edge case: No budget allocated
+    if (totalAllocated <= 0) return 0.0;
 
-    if (totalDays == 0 || budget.amount == 0) return 0.0;
+    // Calculate total days in budget period (inclusive)
+    final totalDays = budget.endDate.difference(budget.startDate).inDays + 1;
 
-    final timeProgress = elapsedDays / totalDays;
-    final spendProgress = totalSpent / budget.amount;
+    // Calculate elapsed days based on current date
+    final int elapsedDays;
+    if (now.isBefore(budget.startDate)) {
+      // Before budget starts
+      elapsedDays = 0;
+    } else if (now.isAfter(budget.endDate)) {
+      // After budget ends
+      elapsedDays = totalDays;
+    } else {
+      // During budget period
+      elapsedDays = now.difference(budget.startDate).inDays + 1;
+    }
 
-    if (timeProgress == 0) return 0.0;
+    // Calculate spending ratio (how much of allocated budget is spent)
+    final spendRatio = totalSpent / totalAllocated;
 
-    return spendProgress / timeProgress; // >1.0 = overspending
+    // Calculate time ratio (how much of period has elapsed)
+    // Add 0.3 to prevent extreme values at start of period
+    final timeRatio = totalDays > 0 ? (elapsedDays + 0.3) / totalDays : 1.0;
+
+    // Edge case: Avoid division by zero
+    if (timeRatio == 0) return 0.0;
+
+    // Calculate and return BAR
+    // Higher value = spending faster than time passing
+    return spendRatio / timeRatio;
   }
 
   // Progress percentage
