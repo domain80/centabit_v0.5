@@ -114,6 +114,7 @@ extension BudgetModelExtensions on BudgetModel {
   /// Checks if this budget is currently active.
   ///
   /// A budget is active if the current date/time falls within its period.
+  /// Uses inclusive date range (startDate <= now <= endDate).
   ///
   /// **Example**:
   /// ```dart
@@ -123,7 +124,7 @@ extension BudgetModelExtensions on BudgetModel {
   /// ```
   bool isActive() {
     final now = DateTime.now();
-    return now.isAfter(startDate) && now.isBefore(endDate);
+    return !now.isBefore(startDate) && !now.isAfter(endDate);
   }
 
   /// Calculates the total number of days in this budget period.
