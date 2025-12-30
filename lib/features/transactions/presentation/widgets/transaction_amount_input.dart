@@ -62,10 +62,6 @@ class _TransactionAmountInputState extends State<TransactionAmountInput> {
       children: [
         Text(
           'Amount (USD)', // TODO: Get currency from settings
-          style: const TextStyle(
-            fontSize: 18, // v4's large
-            fontWeight: FontWeight.w400, // Regular, not semibold
-          ),
         ),
         SizedBox(height: spacing.xs),
         FormBuilderField<String>(

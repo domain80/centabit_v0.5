@@ -27,17 +27,7 @@ class TransactionBudgetDropdown extends StatelessWidget {
     return Row(
       spacing: 40, // v4 exact
       children: [
-        Expanded(
-          flex: 1,
-          child: Text(
-            'Budget',
-            style: TextStyle(
-              fontSize: 18, // v4's large
-              fontWeight: FontWeight.w400, // Regular, not semibold
-              color: theme.colorScheme.primary, // Emphasized with primary color
-            ),
-          ),
-        ),
+        Expanded(flex: 1, child: Text('Budget')),
         Expanded(
           flex: 2,
           child: FormBuilderField<String>(
@@ -63,12 +53,16 @@ class TransactionBudgetDropdown extends StatelessWidget {
               if (field.value != null && field.value!.isNotEmpty) {
                 selected = cubit.activeBudgets.firstWhere(
                   (b) => b.id == field.value,
-                  orElse: () => dropdownItems.first, // Fallback to "No budget selected"
+                  orElse: () =>
+                      dropdownItems.first, // Fallback to "No budget selected"
                 );
               }
 
               return SelectDropdown<BudgetModel>(
                 items: dropdownItems,
+                buttonStyle: ButtonStyle(
+                  padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                ),
                 selected: selected,
                 onItemTap: (budget) {
                   if (budget != null) {
@@ -84,9 +78,13 @@ class TransactionBudgetDropdown extends StatelessWidget {
                         child: Text(
                           selectedBudget?.name ?? 'No budget selected',
                           style: textTheme.bodyMedium?.copyWith(
-                            fontStyle: selectedBudget == null ? FontStyle.italic : null,
+                            fontStyle: selectedBudget == null
+                                ? FontStyle.italic
+                                : null,
                             color: selectedBudget == null
-                                ? theme.colorScheme.onSurface.withValues(alpha: 150/255)
+                                ? theme.colorScheme.onSurface.withValues(
+                                    alpha: 150 / 255,
+                                  )
                                 : theme.colorScheme.onSurface,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -116,21 +114,26 @@ class TransactionBudgetDropdown extends StatelessWidget {
                           color: isSelected
                               ? theme.colorScheme.primary
                               : (isNoneOption
-                                  ? theme.colorScheme.onSurface.withValues(alpha: 150/255)
-                                  : theme.colorScheme.onSurface),
+                                    ? theme.colorScheme.onSurface.withValues(
+                                        alpha: 150 / 255,
+                                      )
+                                    : theme.colorScheme.onSurface),
                         ),
                         SizedBox(width: spacing.xs),
                         Expanded(
                           child: Text(
                             budget.name,
                             style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                               fontStyle: isNoneOption ? FontStyle.italic : null,
                               color: isSelected
                                   ? theme.colorScheme.primary
                                   : (isNoneOption
-                                      ? theme.colorScheme.onSurface.withValues(alpha: 150/255)
-                                      : theme.colorScheme.onSurface),
+                                        ? theme.colorScheme.onSurface
+                                              .withValues(alpha: 150 / 255)
+                                        : theme.colorScheme.onSurface),
                             ),
                           ),
                         ),

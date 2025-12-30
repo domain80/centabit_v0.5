@@ -71,16 +71,7 @@ class _TransactionCategoryDropdownState
     return Row(
       spacing: 40, // v4 exact
       children: [
-        Expanded(
-          flex: 1,
-          child: Text(
-            'Category',
-            style: const TextStyle(
-              fontSize: 18, // v4's large
-              fontWeight: FontWeight.w400, // Regular, not semibold
-            ),
-          ),
-        ),
+        Expanded(flex: 1, child: Text('Category')),
         Expanded(
           flex: 2,
           child: FormBuilderField<String>(

@@ -22,16 +22,7 @@ class TransactionDatePicker extends StatelessWidget {
     return Row(
       spacing: 40, // v4 exact
       children: [
-        Expanded(
-          flex: 1,
-          child: Text(
-            'Transaction date',
-            style: const TextStyle(
-              fontSize: 18, // v4's large
-              fontWeight: FontWeight.w400, // Regular, not semibold
-            ),
-          ),
-        ),
+        Expanded(flex: 1, child: Text('Transaction date')),
         FormBuilderField<DateTime>(
           name: 'date',
           builder: (field) {

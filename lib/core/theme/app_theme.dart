@@ -87,7 +87,7 @@ class AppTheme {
       // Bottom sheet theme
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colorScheme.surface,
-        surfaceTintColor: colorScheme.surfaceTint,
+        surfaceTintColor: Colors.transparent, // Disable Material 3 tint overlay
         elevation: 3,
         shadowColor: colorScheme.shadow.withValues(alpha: 0.15),
         shape: const RoundedRectangleBorder(
@@ -265,7 +265,7 @@ class AppTheme {
       // Bottom sheet theme
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colorScheme.surface,
-        surfaceTintColor: colorScheme.surfaceTint,
+        surfaceTintColor: Colors.transparent, // Disable Material 3 tint overlay
         elevation: 3,
         shadowColor: colorScheme.shadow.withValues(alpha: 0.3),
         shape: const RoundedRectangleBorder(

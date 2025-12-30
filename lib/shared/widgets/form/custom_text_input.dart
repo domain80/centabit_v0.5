@@ -24,23 +24,16 @@ class CustomTextInput extends StatelessWidget {
       name: name,
       validator: validator,
       keyboardType: TextInputType.text,
-      style: textTheme.bodyLarge?.copyWith(
-        fontWeight: FontWeight.w500,
-      ),
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        hintText: hintText,
-        hintStyle: textTheme.bodyLarge?.copyWith(
-          color: colorScheme.onSurface.withValues(alpha: 0.5),
-          fontWeight: FontWeight.w400,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 16,
         ),
+        hintText: hintText,
         fillColor: Colors.transparent,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: colorScheme.primary,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -51,10 +44,7 @@ class CustomTextInput extends StatelessWidget {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: colorScheme.error,
-            width: 1,
-          ),
+          borderSide: BorderSide(color: colorScheme.error, width: 1),
         ),
       ),
     );
