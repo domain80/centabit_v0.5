@@ -56,7 +56,7 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
           children: [
             // Search bar - always present, scales to 0 when not enabled
             GestureDetector(
-              onTap: navState.isSearching
+              onTap: navState.isSearching || !navState.searchEnabled
                   ? null
                   : () => context.read<NavCubit>().toggleSearchMode(),
               child: AbsorbPointer(

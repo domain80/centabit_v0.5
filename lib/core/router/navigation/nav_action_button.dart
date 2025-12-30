@@ -74,7 +74,7 @@ class NavActionButton extends StatelessWidget {
         showModalBottomSheetUtil(
           context,
           builder: (_) => const TransactionFormModal(),
-          modalFractionalHeight: 0.85, // Taller modal for all fields
+          modalFractionalHeight: 0.78, // Taller modal for all fields
         );
         break;
       case NavActionType.addBudget:

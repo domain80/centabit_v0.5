@@ -97,7 +97,6 @@ class TransactionBudgetDropdown extends StatelessWidget {
                 },
                 itemBuilder: (context, budget, isSelected) {
                   final isNoneOption = budget.id.isEmpty;
-
                   return Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: spacing.md,
