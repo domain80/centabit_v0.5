@@ -155,7 +155,7 @@ class _BudgetDetailsContent extends StatelessWidget {
                 ),
                 SizedBox(height: spacing.md),
                 Container(
-                  height: 300,
+                  height: 220,
                   padding: EdgeInsets.all(spacing.md),
                   decoration: BoxDecoration(
                     color: colorScheme.surface.withOpacity(0.5),
