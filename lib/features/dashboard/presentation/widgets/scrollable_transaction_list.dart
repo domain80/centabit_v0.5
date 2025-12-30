@@ -1,9 +1,12 @@
 import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/localizations/app_localizations.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
+import 'package:centabit/core/utils/show_modal.dart';
+import 'package:centabit/data/models/transaction_model.dart';
 import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_cubit.dart';
 import 'package:centabit/features/dashboard/presentation/cubits/date_filter_state.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_form_modal.dart';
 import 'package:centabit/shared/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -111,11 +114,42 @@ class _ScrollableTransactionListState extends State<ScrollableTransactionList> {
                     .map(
                       (transaction) => TransactionTile(
                         transaction: transaction,
+                        onEdit: () {
+                          final transactionModel =
+                              transactionRepository.transactions
+                                  .firstWhere((t) => t.id == transaction.id);
+
+                          showModalBottomSheetUtil(
+                            context,
+                            builder: (_) => TransactionFormModal(
+                              initialValue: transactionModel,
+                            ),
+                            modalFractionalHeight: 0.78,
+                          );
+                        },
                         onDelete: () {
                           transactionRepository.deleteTransaction(transaction.id);
                         },
-                        onEdit: null, // TODO: Navigate to edit form
-                        onCopy: null, // TODO: Duplicate transaction
+                        onCopy: () {
+                          final original = transactionRepository.transactions
+                              .firstWhere((t) => t.id == transaction.id);
+                          final copy = TransactionModel.create(
+                            name: '${original.name} (Copy)',
+                            amount: original.amount,
+                            type: original.type,
+                            transactionDate: DateTime.now(),
+                            categoryId: original.categoryId,
+                            budgetId: original.budgetId,
+                            notes: original.notes,
+                          );
+
+                          showModalBottomSheetUtil(
+                            context,
+                            builder: (_) =>
+                                TransactionFormModal(initialValue: copy),
+                            modalFractionalHeight: 0.78,
+                          );
+                        },
                       ),
                     )
                     .toList(),

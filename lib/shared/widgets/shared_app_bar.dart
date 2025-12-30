@@ -5,7 +5,11 @@ import 'package:centabit/shared/widgets/sync_status_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-AppBar sharedAppBar(BuildContext context, {required Widget title}) {
+AppBar sharedAppBar(
+  BuildContext context, {
+  required Widget title,
+  List<Widget>? actions,
+}) {
   final theme = Theme.of(context);
   final colorScheme = theme.colorScheme;
   final spacing = theme.extension<AppSpacing>()!;
@@ -19,6 +23,9 @@ AppBar sharedAppBar(BuildContext context, {required Widget title}) {
       child: title,
     ),
     actions: [
+      // Custom actions (if provided)
+      if (actions != null) ...actions,
+      // Standard actions
       const SyncStatusIndicator(), // Sync status indicator (top-right)
       IconButton(
         icon: const Icon(TablerIcons.logout),

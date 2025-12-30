@@ -108,7 +108,7 @@ class _TransactionFormContent extends StatelessWidget {
               ? TimeOfDay.fromDateTime(initialValue!.transactionDate)
               : TimeOfDay.now(),
           'date': initialValue?.transactionDate ?? DateTime.now(),
-          'isDebit': !(initialValue?.type == TransactionType.debit),
+          'isDebit': (initialValue?.type == TransactionType.debit),
           'amount': initialValue?.amount.toStringAsFixed(2) ?? '',
           'budgetId': defaultBudgetId,
           'categoryId': initialValue?.categoryId ?? '',

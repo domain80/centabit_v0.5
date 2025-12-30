@@ -4,6 +4,7 @@ import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/core/utils/show_modal.dart';
+import 'package:centabit/features/budgets/presentation/widgets/budget_form_modal.dart';
 import 'package:centabit/features/transactions/presentation/widgets/transaction_form_modal.dart';
 import 'package:flutter/material.dart';
 
@@ -78,11 +79,10 @@ class NavActionButton extends StatelessWidget {
         );
         break;
       case NavActionType.addBudget:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Add budget - coming soon'),
-            duration: Duration(milliseconds: 800),
-          ),
+        showModalBottomSheetUtil(
+          context,
+          builder: (_) => const BudgetFormModal(initialBudget: null),
+          modalFractionalHeight: 0.78, // Same height as transaction form
         );
         break;
       default:

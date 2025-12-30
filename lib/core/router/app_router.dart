@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -72,6 +73,23 @@ class AppRouter {
                 path: budgets,
                 name: 'budgets',
                 builder: (context, state) => const BudgetsPage(),
+                routes: [
+                  // Budget details sub-route (Phase 2 - placeholder for now)
+                  GoRoute(
+                    path: ':id',
+                    name: 'budget-details',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return Scaffold(
+                        appBar: AppBar(title: const Text('Budget Details')),
+                        body: Center(
+                          child: Text('Budget Details\nID: $id\n\nComing in Phase 2'),
+                        ),
+                      );
+                      // TODO Phase 2: Replace with BudgetDetailsPage(budgetId: id)
+                    },
+                  ),
+                ],
               ),
             ],
           ),
