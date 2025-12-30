@@ -170,11 +170,24 @@ class DashboardCubit extends Cubit<DashboardState> {
     // Get allocations for this budget
     final allocations = _allocationRepository.getAllocationsForBudget(budget.id);
 
-    // Get transactions for this budget
-    // Note: Currently transactions have null budgetId (user decision)
-    // So we get ALL transactions for now
-    // TODO: Once transactions are linked to budgets, filter by budgetId
-    final transactions = _transactionRepository.transactions;
+    // Get transactions for this budget with proper filtering
+    final transactions = _transactionRepository.transactions.where((t) {
+      // Transaction must be in budget's date range
+      final isInDateRange = !t.transactionDate.isBefore(budget.startDate) &&
+          !t.transactionDate.isAfter(budget.endDate);
+
+      if (!isInDateRange) return false;
+
+      // If transaction has explicit budgetId, ONLY include if it matches this budget
+      if (t.budgetId != null) {
+        return t.budgetId == budget.id;
+      }
+
+      // If no budgetId, include as fallback if category is in allocations
+      final categoryInAllocations =
+          allocations.any((a) => a.categoryId == t.categoryId);
+      return categoryInAllocations;
+    }).toList();
 
     // Get all categories for chart display
     final categories = _categoryRepository.categories;
