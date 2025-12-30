@@ -51,12 +51,10 @@ class CategoryFormCubit extends Cubit<CategoryFormState> {
   void _subscribeToCategories() {
     // Initialize with current value IMMEDIATELY (don't wait for stream)
     _categories = _categoryRepository.categories;
-    print('🟢 CategoryFormCubit initialized with ${_categories.length} categories');
 
     _categorySubscription =
         _categoryRepository.categoriesStream.listen((categories) {
       _categories = categories;
-      print('🟢 CategoryFormCubit updated via stream: ${_categories.length} categories');
     });
   }
 
@@ -135,71 +133,42 @@ class CategoryFormCubit extends Cubit<CategoryFormState> {
 
   /// Create new category
   Future<void> createCategory(String name, String iconName) async {
-    print('🟢 CategoryFormCubit.createCategory called');
-    print('🟢 Name: "$name", Icon: "$iconName"');
-
     if (!formKey.currentState!.saveAndValidate()) {
-      print('🔴 Form validation FAILED in cubit');
       return; // Validation failed
     }
-    print('🟢 Form validation PASSED in cubit');
 
-    print('🟢 Emitting loading state');
     emit(const CategoryFormState.loading());
 
     try {
-      print('🟢 Creating category model');
       final category = CategoryModel.create(
         name: name,
         iconName: iconName,
       );
-      print('🟢 Category model created: $category');
-
-      print('🟢 Calling repository.createCategory');
       await _categoryRepository.createCategory(category);
-
-      print('🟢 Repository call successful, emitting success state');
       emit(const CategoryFormState.success());
-    } catch (e, stackTrace) {
-      print('🔴 Error creating category: $e');
-      print('🔴 Stack trace: $stackTrace');
+    } catch (e) {
       emit(CategoryFormState.error('Failed to create category: $e'));
     }
   }
 
   /// Update existing category
   Future<void> updateCategory(String id, String name, String iconName) async {
-    print('🟢 CategoryFormCubit.updateCategory called');
-    print('🟢 ID: "$id", Name: "$name", Icon: "$iconName"');
-
     if (!formKey.currentState!.saveAndValidate()) {
-      print('🔴 Form validation FAILED in updateCategory');
       return; // Validation failed
     }
 
-    print('🟢 Emitting loading state');
     emit(const CategoryFormState.loading());
 
     try {
-      print('🟢 Finding existing category with ID: $id');
-      print('🟢 Available categories: ${_categories.map((c) => c.id).toList()}');
-
       final existing = _categories.firstWhere((c) => c.id == id);
-      print('🟢 Found existing category: ${existing.name}');
-
       final updated = existing.copyWith(
         name: name,
         iconName: iconName,
         updatedAt: DateTime.now(),
       );
-      print('🟢 Calling repository.updateCategory');
       await _categoryRepository.updateCategory(updated);
-
-      print('🟢 Repository call successful, emitting success state');
       emit(const CategoryFormState.success());
-    } catch (e, stackTrace) {
-      print('🔴 Error updating category: $e');
-      print('🔴 Stack trace: $stackTrace');
+    } catch (e) {
       emit(CategoryFormState.error('Failed to update category: $e'));
     }
   }

@@ -233,10 +233,8 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
 
   /// Handle form submission (create or update)
   void _handleSubmit(BuildContext context) {
-    print('🟢 CategoryFormModal: _handleSubmit called');
     final cubit = context.read<CategoryFormCubit>();
 
-    print('🟢 Selected icon: ${widget.selectedIconName}');
     if (widget.selectedIconName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select an icon')),
@@ -244,28 +242,21 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
       return;
     }
 
-    print('🟢 Form key current state: ${cubit.formKey.currentState}');
     // Validate form first
     if (!cubit.formKey.currentState!.saveAndValidate()) {
-      print('🔴 Form validation FAILED');
       return; // Validation failed
     }
-    print('🟢 Form validation PASSED');
 
     final formData = cubit.formKey.currentState?.value ?? {};
     final name = (formData['categoryName'] as String?) ?? '';
-    print('🟢 Category name: "$name"');
 
     if (name.isEmpty) {
-      print('🔴 Name is empty after validation');
       return; // Should not happen after validation, but safety check
     }
 
     if (widget.initialValue != null) {
-      print('🟢 Calling updateCategory');
       cubit.updateCategory(widget.initialValue!.id, name, widget.selectedIconName!);
     } else {
-      print('🟢 Calling createCategory');
       cubit.createCategory(name, widget.selectedIconName!);
     }
   }

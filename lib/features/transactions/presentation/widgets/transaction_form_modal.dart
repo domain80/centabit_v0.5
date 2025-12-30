@@ -182,15 +182,12 @@ class _TransactionFormContent extends StatelessWidget {
 
   /// Handle form submission (create or update)
   void _handleSubmit(BuildContext context) {
-    print('🔵 TransactionFormModal: _handleSubmit called');
     final cubit = context.read<TransactionFormCubit>();
 
     // Let the cubit handle validation and data extraction
     if (initialValue != null) {
-      print('🔵 Calling updateTransaction');
       cubit.updateTransaction(initialValue!.id);
     } else {
-      print('🔵 Calling createTransaction');
       cubit.createTransaction();
     }
   }

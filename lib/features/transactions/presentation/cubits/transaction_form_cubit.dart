@@ -70,33 +70,20 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
   /// Validates form, combines date + time, and calls repository.
   /// Emits loading → success/error states.
   Future<void> createTransaction() async {
-    print('🔵 TransactionFormCubit.createTransaction called');
-
     if (!_validateForm()) {
-      print('🔴 Form validation FAILED in cubit');
       return;
     }
-    print('🔵 Form validation PASSED in cubit');
 
     // Get form data AFTER validation
     final formData = formKey.currentState?.value ?? {};
-    print('🔵 Form data after validation: $formData');
 
-    print('🔵 Emitting loading state');
     emit(const TransactionFormState.loading());
 
     try {
-      print('🔵 Building transaction from form');
       final transaction = _buildTransactionFromForm(formData);
-      print('🔵 Transaction built: ${transaction.toJson()}');
-
-      print('🔵 Calling repository.createTransaction');
       await _transactionRepository.createTransaction(transaction);
-
-      print('🟢 Repository call successful, emitting success state');
       emit(const TransactionFormState.success());
     } catch (e, stackTrace) {
-      print('🔴 Error creating transaction: $e');
       emit(TransactionFormState.error('Failed to create transaction: ${e.toString()}'));
       // TODO: Log error with AppLogger
       debugPrint('createTransaction error: $e\n$stackTrace');
@@ -143,18 +130,7 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
 
   /// Validate form using FormBuilder's built-in validation
   bool _validateForm() {
-    final isValid = formKey.currentState?.saveAndValidate() ?? false;
-
-    if (!isValid) {
-      // Log which fields have errors
-      final errors = formKey.currentState?.fields.entries
-          .where((entry) => entry.value.errorText != null)
-          .map((entry) => '${entry.key}: ${entry.value.errorText}')
-          .toList();
-      print('🔴 Validation errors: $errors');
-    }
-
-    return isValid;
+    return formKey.currentState?.saveAndValidate() ?? false;
   }
 
   /// Build TransactionModel from form data

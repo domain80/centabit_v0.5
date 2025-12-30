@@ -48,11 +48,13 @@ class TransactionDatePicker extends StatelessWidget {
                 maximumDateTime: DateTime.now().add(
                   const Duration(days: 365 * 10),
                 ),
-                formatter: (dateTime) => DateFormatter.formatHeaderDate(dateTime),
+                formatter: (dateTime) =>
+                    DateFormatter.formatHeaderDate(dateTime),
                 initialDateTime: field.value ?? DateTime.now(),
                 onDateTimeChanged: (dateTime) {
                   field.didChange(dateTime);
                 },
+                mainColor: Theme.of(context).colorScheme.secondary,
                 buttonDecoration: PickerButtonDecoration(
                   textStyle: textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface,
