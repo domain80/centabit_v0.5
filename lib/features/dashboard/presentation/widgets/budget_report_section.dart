@@ -281,38 +281,40 @@ class _BudgetPageContent extends StatelessWidget {
               color: theme.colorScheme.onSurface,
             ),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // BAR definition
-              Text(l10n.barDefinition, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 8),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // BAR definition
+                Text(l10n.barDefinition, style: theme.textTheme.bodyMedium),
+                const SizedBox(height: 8),
 
-              // Usage explanation
-              Text(l10n.barUsageExplanation, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 12),
+                // Usage explanation
+                Text(l10n.barUsageExplanation, style: theme.textTheme.bodyMedium),
+                const SizedBox(height: 12),
 
-              // Key Rule
-              Text(
-                l10n.barKeyRule,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.secondary,
+                // Key Rule
+                Text(
+                  l10n.barKeyRule,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.secondary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
-              // Higher/Lower explanation
-              Text(
-                l10n.barHigherLowerExplanation,
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 12),
+                // Higher/Lower explanation
+                Text(
+                  l10n.barHigherLowerExplanation,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 12),
 
-              // Update frequency
-              Text(l10n.barUpdateFrequency, style: theme.textTheme.bodyMedium),
-            ],
+                // Update frequency
+                Text(l10n.barUpdateFrequency, style: theme.textTheme.bodyMedium),
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
