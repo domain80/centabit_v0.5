@@ -65,6 +65,10 @@ class TransactionFormCubit extends Cubit<TransactionFormState> {
   List<BudgetModel> get activeBudgets => _activeBudgets;
   List<CategoryModel> get categories => _categories;
 
+  /// Default budget ID for new transactions (first active budget)
+  String? get defaultBudgetId =>
+      _activeBudgets.isNotEmpty ? _activeBudgets.first.id : null;
+
   /// Create new transaction from form data
   ///
   /// Validates form, combines date + time, and calls repository.

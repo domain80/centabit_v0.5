@@ -91,10 +91,8 @@ class _TransactionFormContent extends StatelessWidget {
     final cubit = context.read<TransactionFormCubit>();
     final theme = Theme.of(context);
 
-    // Get default budget ID (first active budget or null)
-    final defaultBudgetId =
-        initialValue?.budgetId ??
-        (cubit.activeBudgets.isNotEmpty ? cubit.activeBudgets.first.id : null);
+    // Get default budget ID (edit mode: use existing, create mode: use first active budget)
+    final defaultBudgetId = initialValue?.budgetId ?? cubit.defaultBudgetId;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -126,7 +124,7 @@ class _TransactionFormContent extends StatelessWidget {
                   Expanded(
                     child: Text(
                       initialValue != null
-                          ? 'Update Transaction'
+                          ? 'Transaction'
                           : 'Add Transaction',
                       style: TextStyle(
                         fontSize: 28, // v4's h2
