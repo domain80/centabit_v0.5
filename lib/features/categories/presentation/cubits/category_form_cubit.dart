@@ -1,24 +1,12 @@
 import 'dart:async';
 
+import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/data/models/category_model.dart';
 import 'package:centabit/data/repositories/category_repository.dart';
 import 'package:centabit/features/categories/presentation/cubits/category_form_state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-
-/// Searchable icon with tags and display name
-class SearchableIcon {
-  final String name;
-  final String displayName;
-  final List<String> tags;
-
-  const SearchableIcon({
-    required this.name,
-    required this.displayName,
-    required this.tags,
-  });
-}
 
 /// Cubit for category form (create/edit/delete)
 ///
@@ -33,14 +21,42 @@ class CategoryFormCubit extends Cubit<CategoryFormState> {
 
   StreamSubscription? _categorySubscription;
   List<CategoryModel> _categories = [];
-  List<SearchableIcon> _availableIcons = [];
+
+  /// IconSearcher instance for searching ALL TablerIcons (5000+)
+  late final IconSearcher _iconSearcher;
+
+  /// Filtered icon names based on search query
   List<String> _filteredIcons = [];
+
+  /// Common category icons shown by default (max 20)
+  static const _defaultIcons = [
+    'shoppingCart',
+    'toolsKitchen2',
+    'home',
+    'car',
+    'firstAidKit',
+    'deviceTv',
+    'wallet',
+    'coffee',
+    'shirt',
+    'plane',
+    'book',
+    'dumbbell',
+    'gift',
+    'heart',
+    'phone',
+    'laptop',
+    'music',
+    'camera',
+    'briefcase',
+    'receipt',
+  ];
 
   CategoryFormCubit(this._categoryRepository)
       : formKey = GlobalKey<FormBuilderState>(),
         super(const CategoryFormState.initial()) {
     _subscribeToCategories();
-    _initializeIcons();
+    _initializeIconSearcher();
   }
 
   // Public getters for UI
@@ -58,57 +74,36 @@ class CategoryFormCubit extends Cubit<CategoryFormState> {
     });
   }
 
-  /// Initialize available icons with searchable tags
-  void _initializeIcons() {
-    _availableIcons = [
-      const SearchableIcon(name: 'shoppingCart', displayName: 'Shopping Cart', tags: ['shopping', 'cart', 'groceries', 'store', 'retail', 'supermarket', 'buy']),
-      const SearchableIcon(name: 'toolsKitchen2', displayName: 'Kitchen', tags: ['kitchen', 'food', 'cooking', 'dining', 'restaurant', 'meal', 'eat']),
-      const SearchableIcon(name: 'home', displayName: 'Home', tags: ['home', 'house', 'rent', 'mortgage', 'property', 'utilities']),
-      const SearchableIcon(name: 'car', displayName: 'Car', tags: ['car', 'transport', 'vehicle', 'gas', 'fuel', 'auto', 'drive', 'parking']),
-      const SearchableIcon(name: 'firstAidKit', displayName: 'Medical', tags: ['medical', 'health', 'doctor', 'hospital', 'medicine', 'healthcare', 'pharmacy']),
-      const SearchableIcon(name: 'deviceTv', displayName: 'Entertainment', tags: ['entertainment', 'tv', 'movies', 'streaming', 'netflix', 'fun', 'leisure']),
-      const SearchableIcon(name: 'category', displayName: 'Category', tags: ['category', 'general', 'other', 'misc', 'miscellaneous']),
-      const SearchableIcon(name: 'wallet', displayName: 'Wallet', tags: ['wallet', 'money', 'cash', 'finance', 'bank', 'savings', 'budget']),
-      const SearchableIcon(name: 'coffee', displayName: 'Coffee', tags: ['coffee', 'cafe', 'drink', 'beverage', 'tea', 'breakfast']),
-      const SearchableIcon(name: 'gas', displayName: 'Gas Station', tags: ['gas', 'fuel', 'petrol', 'station', 'car', 'transport']),
-      const SearchableIcon(name: 'shirt', displayName: 'Clothing', tags: ['clothing', 'clothes', 'fashion', 'apparel', 'shopping', 'wardrobe', 'outfit']),
-      const SearchableIcon(name: 'plane', displayName: 'Travel', tags: ['travel', 'flight', 'vacation', 'trip', 'holiday', 'tourism', 'airplane']),
-      const SearchableIcon(name: 'book', displayName: 'Education', tags: ['education', 'book', 'study', 'school', 'learning', 'reading', 'course']),
-      const SearchableIcon(name: 'dumbbell', displayName: 'Fitness', tags: ['fitness', 'gym', 'exercise', 'workout', 'health', 'sport', 'training']),
-      const SearchableIcon(name: 'gift', displayName: 'Gifts', tags: ['gift', 'present', 'celebration', 'birthday', 'party', 'surprise']),
-      const SearchableIcon(name: 'heart', displayName: 'Personal Care', tags: ['personal', 'care', 'beauty', 'health', 'wellness', 'self-care']),
-      const SearchableIcon(name: 'phone', displayName: 'Phone', tags: ['phone', 'mobile', 'cell', 'communication', 'bills', 'subscription']),
-      const SearchableIcon(name: 'laptop', displayName: 'Electronics', tags: ['electronics', 'computer', 'tech', 'technology', 'gadgets', 'devices']),
-      const SearchableIcon(name: 'music', displayName: 'Music', tags: ['music', 'audio', 'streaming', 'spotify', 'entertainment', 'concert']),
-      const SearchableIcon(name: 'camera', displayName: 'Photography', tags: ['photography', 'camera', 'photo', 'pictures', 'hobby']),
-      const SearchableIcon(name: 'briefcase', displayName: 'Business', tags: ['business', 'work', 'office', 'professional', 'job', 'career']),
-      const SearchableIcon(name: 'creditCard', displayName: 'Credit Card', tags: ['credit', 'card', 'payment', 'finance', 'banking', 'debt']),
-      const SearchableIcon(name: 'piggyBank', displayName: 'Savings', tags: ['savings', 'save', 'piggy', 'bank', 'money', 'invest', 'future']),
-      const SearchableIcon(name: 'receipt', displayName: 'Bills', tags: ['bills', 'receipt', 'invoice', 'expenses', 'payment', 'utilities']),
-    ];
-    _filteredIcons = _availableIcons.map((icon) => icon.name).toList();
+  /// Initialize IconSearcher with full TablerIcons
+  ///
+  /// Sets up IconSearcher with ALL 5000+ icons and comprehensive tagsMap.
+  /// Starts with default common category icons.
+  void _initializeIconSearcher() {
+    // Initialize IconSearcher with full TablerIcons
+    _iconSearcher = IconSearcher(
+      all: TablerIcons.all,        // ALL 5000+ icons
+      tagsMap: TablerIcons.tagsMap, // ALL tags
+    );
+
+    // Start with common category icons
+    _filteredIcons = _defaultIcons;
   }
 
-  /// Search/filter icons by query (searches name, displayName, and tags)
+  /// Search icons using IconSearcher - NO FILTERING
+  ///
+  /// Returns ALL matching icons from the full 5000+ icon set.
+  /// Shows default common icons when query is empty.
   void searchIcons(String query) {
     if (query.isEmpty) {
-      _filteredIcons = _availableIcons.map((icon) => icon.name).toList();
+      // Show default common category icons
+      _filteredIcons = _defaultIcons;
     } else {
-      final lowerQuery = query.toLowerCase();
-      _filteredIcons = _availableIcons
-          .where((icon) {
-            // Search in technical name
-            if (icon.name.toLowerCase().contains(lowerQuery)) return true;
-            // Search in display name
-            if (icon.displayName.toLowerCase().contains(lowerQuery)) return true;
-            // Search in tags
-            if (icon.tags.any((tag) => tag.toLowerCase().contains(lowerQuery))) {
-              return true;
-            }
-            return false;
-          })
-          .map((icon) => icon.name)
-          .toList();
+      // Use IconSearcher - returns ALL matching icons from 5000+ set
+      // No filtering - users can select any icon
+      final searchResults = _iconSearcher.search(query);
+
+      // Deduplicate (safety measure, though IconSearcher shouldn't produce duplicates)
+      _filteredIcons = searchResults.toSet().toList();
     }
     // Re-emit current state to trigger rebuild
     emit(state);
