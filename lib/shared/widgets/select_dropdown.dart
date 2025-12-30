@@ -39,8 +39,13 @@ class SelectDropdownButton<T> extends StatelessWidget {
           OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(
               horizontal: _horizontalPadding,
-              vertical: 6,
+              vertical: 0,
             ),
+            minimumSize: const Size(
+              0,
+              40,
+            ), // Override Material's default 48px height
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             side: BorderSide(
               color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
               width: 1,
@@ -121,7 +126,7 @@ class SelectDropdownMenu<T> extends StatelessWidget {
                     ).colorScheme.onSurface.withAlpha(80),
                   ),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 80),
+                  constraints: const BoxConstraints(maxHeight: 140),
                   child: SingleChildScrollView(
                     primary: false,
                     child: Column(
