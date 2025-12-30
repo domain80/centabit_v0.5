@@ -15,12 +15,44 @@ import 'package:go_router/go_router.dart';
 ///   1. Simple Nav (no search capability)
 ///   2. Searchable Nav (with animated search mode)
 /// - Proper spacing and padding
+/// - Auto-shows navbar on route changes
 ///
 /// Follows v0.4 semantic patterns for clean, composable architecture.
-class AppNavShell extends StatelessWidget {
+class AppNavShell extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
   const AppNavShell({super.key, required this.navigationShell});
+
+  @override
+  State<AppNavShell> createState() => _AppNavShellState();
+}
+
+class _AppNavShellState extends State<AppNavShell> {
+  String? _previousRoute;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkRouteChange();
+  }
+
+  @override
+  void didUpdateWidget(AppNavShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _checkRouteChange();
+  }
+
+  /// Check if route changed and show navbar
+  void _checkRouteChange() {
+    final currentRoute = GoRouterState.of(context).uri.toString();
+
+    if (_previousRoute != null && _previousRoute != currentRoute) {
+      // Route changed - show navbar
+      context.read<NavCubit>().setNavBarVisible(true);
+    }
+
+    _previousRoute = currentRoute;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +64,7 @@ class AppNavShell extends StatelessWidget {
           prev.searchEnabled != curr.searchEnabled,
       builder: (context, state) {
         return Scaffold(
-          body: navigationShell,
+          body: widget.navigationShell,
           extendBody: true,
           bottomNavigationBar: Padding(
             padding: MediaQuery.of(context).viewInsets,
@@ -96,7 +128,7 @@ class AppNavShell extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SearchableNavContainer(navigationShell: navigationShell),
+                SearchableNavContainer(navigationShell: widget.navigationShell),
               ],
             ),
           ),
