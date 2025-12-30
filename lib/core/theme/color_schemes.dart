@@ -21,8 +21,8 @@ class AppColorSchemes {
     onPrimary: const Color(0xFFFFFFFF),
     primaryContainer: const Color(0xFFDFE6E9),
     onPrimaryContainer: const Color(0xFF0B0E0F),
-    // Secondary colors - medium gray for less emphasis
-    secondary: const Color(0xFF95A5A6),
+    // Secondary colors - coral/peachy orange from v4
+    secondary: const Color(0xFFE17A60),
     onSecondary: const Color(0xFFFFFFFF),
     secondaryContainer: const Color(0xFFECF0F1),
     onSecondaryContainer: const Color(0xFF2C3539),
@@ -66,8 +66,8 @@ class AppColorSchemes {
     onPrimary: const Color(0xFF1A2E3F),
     primaryContainer: const Color(0xFF34495E),
     onPrimaryContainer: const Color(0xFFDBEDFF),
-    // Secondary colors
-    secondary: const Color(0xFF95A5A6),
+    // Secondary colors - coral/peachy orange from v4
+    secondary: const Color(0xFFE17A60),
     onSecondary: const Color(0xFF2D3436),
     secondaryContainer: const Color(0xFF4A5559),
     onSecondaryContainer: const Color(0xFFECF0F1),
