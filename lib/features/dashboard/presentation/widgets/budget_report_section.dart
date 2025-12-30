@@ -147,15 +147,15 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
 
           // Success state: show budget cards
           success: (budgetPages) {
-            const height = 330.0;
+            const height = 300.0;
 
             // Empty state: no budgets or no chart data
             if (budgetPages.isEmpty || budgetPages.first.chartData.isEmpty) {
               return Container(
                 width: double.infinity,
                 height: height,
-                padding: const EdgeInsets.symmetric(horizontal: 26),
-                margin: const EdgeInsets.symmetric(horizontal: 26),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                margin: const EdgeInsets.symmetric(horizontal: 18),
                 decoration: BoxDecoration(
                   color: colorScheme.onSurface.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
@@ -210,7 +210,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
           error: (message) => Container(
             width: double.infinity,
             height: 330.0,
-            padding: const EdgeInsets.symmetric(horizontal: 26),
+            padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Center(
               child: Text(
                 'Error: $message',

@@ -214,6 +214,7 @@ SyncManager (isolate-based background sync)
    - Coordinate local (and future remote) sources
    - Sync stubs ready for API integration
    - Synchronous getters for immediate access
+   - Logging mixin for operation tracking and debugging
 
 4. **SyncManager** (`lib/data/sync/sync_manager.dart`):
    - Isolate-based background sync (non-blocking)
@@ -603,6 +604,65 @@ class DashboardState with _$DashboardState {
 - **LocalSources**: `[entity_name]_local_source.dart` (e.g., `transaction_local_source.dart`)
 - **View Models** (non-freezed): `[entity]_chart_data.dart` (e.g., `transactions_chart_data.dart`)
 
+### Logging Infrastructure
+
+- **Package**: `talker_flutter` (comprehensive logging solution)
+- **Location**: `lib/core/logging/`
+- **Singleton**: `AppLogger.instance` for centralized logging
+- **Features**:
+  - Environment-aware log levels (verbose in debug, error in release)
+  - In-app log viewer support (TalkerScreen)
+  - Automatic BLoC event/state logging via observer
+  - Repository operation tracking with metadata
+  - No ANSI colors for cleaner Flutter console output
+
+**Key Components**:
+
+1. **AppLogger** (`lib/core/logging/app_logger.dart`):
+   - Singleton wrapper around Talker
+   - Methods: `verbose`, `debug`, `info`, `warning`, `error`, `critical`
+   - Context logging: `logWithContext()` for structured metadata
+   - History: Stores up to 1000 log entries
+
+2. **CubitLogger** (`lib/core/logging/interceptors/cubit_logger.dart`):
+   - BlocObserver implementation
+   - Automatically logs all cubit events, state changes, errors
+   - Integrated in `main.dart` via `Bloc.observer = CubitLogger()`
+
+3. **RepositoryLogger** (`lib/core/logging/interceptors/repository_logger.dart`):
+   - Mixin for repository operation tracking
+   - Pattern: `trackRepositoryOperation(operation: 'createTransaction', execute: () async { ... })`
+   - Logs operation start, success, duration, and errors with metadata
+
+**Usage Patterns**:
+```dart
+// Basic logging
+final logger = AppLogger.instance;
+logger.info('User logged in');
+logger.error('Failed to save', error: e, stackTrace: st);
+
+// Structured context logging
+logger.logWithContext(
+  message: 'Transaction created',
+  context: {'id': '123', 'amount': 50.00},
+  level: LogLevel.info,
+);
+
+// Repository operation tracking (via mixin)
+class TransactionRepository with RepositoryLogger {
+  @override
+  String get repositoryName => 'TransactionRepository';
+
+  Future<void> createTransaction(TransactionModel model) async {
+    return trackRepositoryOperation(
+      operation: 'createTransaction',
+      execute: () async { /* ... */ },
+      metadata: {'transactionId': model.id},
+    );
+  }
+}
+```
+
 ### Key App-Specific Concepts
 
 **BAR (Budget Adherence Ratio)**:
@@ -630,4 +690,3 @@ class DashboardState with _$DashboardState {
 - Both widgets maintain same styling and date range constraints
 - Icon-based version used in navigation filter actions for compact UI
 - Text-based version used in content areas where date context is helpful
-- we will be using tabler icons from @lib/core/theme/tabler_icons.dart

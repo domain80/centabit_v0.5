@@ -1,0 +1,232 @@
+import 'package:centabit/core/di/injection.dart';
+import 'package:centabit/core/theme/tabler_icons.dart';
+import 'package:centabit/data/models/transaction_model.dart';
+import 'package:centabit/features/transactions/presentation/cubits/transaction_form_cubit.dart';
+import 'package:centabit/features/transactions/presentation/cubits/transaction_form_state.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_amount_input.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_budget_dropdown.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_category_dropdown.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_date_picker.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_time_picker.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_type_switch.dart';
+import 'package:centabit/shared/widgets/form/custom_text_input.dart';
+import 'package:centabit/shared/widgets/form/form_actions_row.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+
+/// Main transaction form modal widget
+///
+/// Supports three modes via initialValue parameter:
+/// - Create (initialValue = null): Creates new transaction
+/// - Edit (initialValue = existing): Updates existing transaction with delete button
+/// - Copy (initialValue = existing with new ID/date): Duplicates transaction
+///
+/// Uses BlocProvider to scope TransactionFormCubit to modal lifecycle.
+/// BlocListener handles navigation (close on success) and error display.
+class TransactionFormModal extends StatelessWidget {
+  final TransactionModel? initialValue; // null = create, non-null = edit/copy
+
+  const TransactionFormModal({super.key, this.initialValue});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<TransactionFormCubit>(),
+      child: BlocListener<TransactionFormCubit, TransactionFormState>(
+        listener: (context, state) {
+          state.when(
+            initial: () {},
+            loading: () {
+              // Loading state - could show loading indicator if needed
+            },
+            success: () {
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    initialValue != null
+                        ? 'Transaction updated successfully'
+                        : 'Transaction created successfully',
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              // Close modal on success
+              Navigator.of(context).pop();
+            },
+            error: (message) {
+              // Show error snackbar but keep modal open (preserve form state)
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            },
+          );
+        },
+        child: SafeArea(
+          child: _TransactionFormContent(initialValue: initialValue),
+        ),
+      ),
+    );
+  }
+}
+
+/// Internal form content widget
+///
+/// Manages FormBuilder state and composes all field widgets.
+/// Handles submit, cancel, and delete actions.
+class _TransactionFormContent extends StatelessWidget {
+  final TransactionModel? initialValue;
+
+  const _TransactionFormContent({this.initialValue});
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<TransactionFormCubit>();
+    final theme = Theme.of(context);
+
+    // Get default budget ID (first active budget or null)
+    final defaultBudgetId =
+        initialValue?.budgetId ??
+        (cubit.activeBudgets.isNotEmpty ? cubit.activeBudgets.first.id : null);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 26, // v4 exact
+        vertical: 12,
+      ),
+      child: FormBuilder(
+        key: cubit.formKey,
+        initialValue: {
+          'time': initialValue?.transactionDate != null
+              ? TimeOfDay.fromDateTime(initialValue!.transactionDate)
+              : TimeOfDay.now(),
+          'date': initialValue?.transactionDate ?? DateTime.now(),
+          'isDebit': initialValue?.type == TransactionType.debit,
+          'amount': initialValue?.amount.toStringAsFixed(2) ?? '',
+          'budgetId': defaultBudgetId,
+          'categoryId': initialValue?.categoryId ?? '',
+          'transactionName': initialValue?.name ?? '',
+          'notes': initialValue?.notes ?? '',
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 22, // v4 exact
+            children: [
+              // Form Header with gradient (v4 styling)
+              Row(
+                children: [
+                  Expanded(
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [
+                          theme.colorScheme.primary,
+                          theme.colorScheme.secondary,
+                        ],
+                      ).createShader(bounds),
+                      child: Text(
+                        initialValue != null
+                            ? 'Update Transaction'
+                            : 'Add Transaction',
+                        style: const TextStyle(
+                          fontSize: 28, // v4's h2
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white, // Required for ShaderMask
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (initialValue != null)
+                    IconButton(
+                      icon: Icon(
+                        TablerIcons.trash,
+                        color: theme.colorScheme.error,
+                      ),
+                      onPressed: () => _handleDelete(context, initialValue!.id),
+                    ),
+                ],
+              ),
+              const TransactionTimePicker(),
+              const TransactionDatePicker(),
+              const TransactionBudgetDropdown(), // Prominent placement
+              const TransactionCategoryDropdown(),
+              Row(
+                spacing: 40, // v4 exact
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: const [
+                  Expanded(flex: 4, child: TransactionAmountInput()),
+                  Expanded(flex: 3, child: TransactionTypeSwitch()),
+                ],
+              ),
+              CustomTextInput(
+                name: 'transactionName',
+                hintText: 'Transaction name',
+                validator: FormBuilderValidators.required(
+                  errorText: 'Transaction name is required',
+                ),
+              ),
+              const CustomTextInput(
+                name: 'notes',
+                hintText: 'Notes (optional)',
+              ),
+              FormActionsRow(
+                actionWidget: Text(initialValue != null ? 'Update' : 'Add'),
+                actionHandler: () => _handleSubmit(context),
+                onCancel: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Handle form submission (create or update)
+  void _handleSubmit(BuildContext context) {
+    print('🔵 TransactionFormModal: _handleSubmit called');
+    final cubit = context.read<TransactionFormCubit>();
+
+    // Let the cubit handle validation and data extraction
+    if (initialValue != null) {
+      print('🔵 Calling updateTransaction');
+      cubit.updateTransaction(initialValue!.id);
+    } else {
+      print('🔵 Calling createTransaction');
+      cubit.createTransaction();
+    }
+  }
+
+  /// Handle delete with confirmation dialog
+  void _handleDelete(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Transaction?'),
+        content: const Text('This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.read<TransactionFormCubit>().deleteTransaction(id);
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

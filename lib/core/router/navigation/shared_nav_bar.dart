@@ -57,10 +57,14 @@ class SharedNavBar extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 0.5, sigmaY: 2.0),
               child: Container(
-                color: colorScheme.surface.withValues(alpha: 0.95),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface.withValues(alpha: 0.95),
+                  border: .all(color: colorScheme.primary.withAlpha(50)),
+                  borderRadius: BorderRadius.circular(radius.xl2),
+                ),
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.xs,
-                  // vertical: spacing.xs,
+                  vertical: spacing.xs,
                 ),
                 child: GNav(
                   selectedIndex: navigationShell.currentIndex,

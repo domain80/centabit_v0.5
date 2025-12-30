@@ -5,8 +5,12 @@ import 'package:centabit/core/router/navigation/nav_cubit.dart';
 import 'package:centabit/core/router/navigation/nav_scroll_behavior.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/core/utils/date_formatter.dart';
+import 'package:centabit/core/utils/show_modal.dart';
+import 'package:centabit/data/models/transaction_model.dart';
+import 'package:centabit/data/repositories/transaction_repository.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_cubit.dart';
 import 'package:centabit/features/transactions/presentation/cubits/transaction_list_state.dart';
+import 'package:centabit/features/transactions/presentation/widgets/transaction_form_modal.dart';
 import 'package:centabit/shared/v_models/transaction_v_model.dart';
 import 'package:centabit/shared/widgets/custom_date_picker_icon.dart';
 import 'package:centabit/shared/widgets/shared_app_bar.dart';
@@ -179,13 +183,42 @@ class _TransactionsViewState extends State<_TransactionsView> {
                           child: TransactionTile(
                             transaction: transaction,
                             onEdit: () {
-                              // TODO: Implement edit transaction
+                              final transactionModel = getIt<TransactionRepository>()
+                                  .transactions
+                                  .firstWhere((t) => t.id == transaction.id);
+
+                              showModalBottomSheetUtil(
+                                context,
+                                builder: (_) => TransactionFormModal(
+                                  initialValue: transactionModel,
+                                ),
+                                modalFractionalHeight: 0.85,
+                              );
                             },
                             onDelete: () => context
                                 .read<TransactionListCubit>()
                                 .deleteTransaction(transaction.id),
                             onCopy: () {
-                              // TODO: Implement copy transaction
+                              final original = getIt<TransactionRepository>()
+                                  .transactions
+                                  .firstWhere((t) => t.id == transaction.id);
+                              final copy = TransactionModel.create(
+                                name: '${original.name} (Copy)',
+                                amount: original.amount,
+                                type: original.type,
+                                transactionDate: DateTime.now(),
+                                categoryId: original.categoryId,
+                                budgetId: original.budgetId,
+                                notes: original.notes,
+                              );
+
+                              showModalBottomSheetUtil(
+                                context,
+                                builder: (_) => TransactionFormModal(
+                                  initialValue: copy,
+                                ),
+                                modalFractionalHeight: 0.85,
+                              );
                             },
                           ),
                         );
