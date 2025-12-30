@@ -60,9 +60,6 @@ class TransactionBudgetDropdown extends StatelessWidget {
 
               return SelectDropdown<BudgetModel>(
                 items: dropdownItems,
-                buttonStyle: ButtonStyle(
-                  padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                ),
                 selected: selected,
                 onItemTap: (budget) {
                   if (budget != null) {

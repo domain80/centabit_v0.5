@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 const _horizontalPadding = 12.0;
@@ -120,7 +121,7 @@ class SelectDropdownMenu<T> extends StatelessWidget {
                     ).colorScheme.onSurface.withAlpha(80),
                   ),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 165),
+                  constraints: const BoxConstraints(maxHeight: 80),
                   child: SingleChildScrollView(
                     primary: false,
                     child: Column(

@@ -116,12 +116,12 @@ class _TransactionAmountInputState extends State<TransactionAmountInput> {
                   },
                   style: TextStyle(
                     fontSize: 36, // v4's h1
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w900,
                     color: colorScheme.onSurface,
                   ),
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
-                      horizontal: -spacing.xs,
+                      horizontal: -spacing.sm,
                     ),
                     fillColor: Colors.transparent,
                     border: InputBorder.none,
@@ -133,7 +133,7 @@ class _TransactionAmountInputState extends State<TransactionAmountInput> {
                     hintText: '0.00',
                     hintStyle: TextStyle(
                       fontSize: 36,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       color: hasError
                           ? colorScheme.error.withValues(
                               alpha: 180 / 255,
