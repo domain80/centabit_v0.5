@@ -214,8 +214,10 @@ class _TransactionsViewState extends State<_TransactionsView> {
 
                               showModalBottomSheetUtil(
                                 context,
-                                builder: (_) =>
-                                    TransactionFormModal(initialValue: copy),
+                                builder: (_) => TransactionFormModal(
+                                  initialValue: copy,
+                                  isCopy: true,
+                                ),
                                 modalFractionalHeight: 0.78,
                               );
                             },

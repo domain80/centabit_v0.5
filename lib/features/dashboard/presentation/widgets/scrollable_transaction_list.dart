@@ -147,8 +147,10 @@ class _ScrollableTransactionListState extends State<ScrollableTransactionList> {
 
                           showModalBottomSheetUtil(
                             context,
-                            builder: (_) =>
-                                TransactionFormModal(initialValue: copy),
+                            builder: (_) => TransactionFormModal(
+                              initialValue: copy,
+                              isCopy: true,
+                            ),
                             modalFractionalHeight: 0.78,
                           );
                         },

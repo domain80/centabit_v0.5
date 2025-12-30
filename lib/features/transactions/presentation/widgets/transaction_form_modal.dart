@@ -18,17 +18,22 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 
 /// Main transaction form modal widget
 ///
-/// Supports three modes via initialValue parameter:
-/// - Create (initialValue = null): Creates new transaction
-/// - Edit (initialValue = existing): Updates existing transaction with delete button
-/// - Copy (initialValue = existing with new ID/date): Duplicates transaction
+/// Supports three modes:
+/// - Create (initialValue = null, isCopy = false): Creates new transaction
+/// - Edit (initialValue = existing, isCopy = false): Updates existing transaction with delete button
+/// - Copy (initialValue = existing with new ID/date, isCopy = true): Duplicates transaction
 ///
 /// Uses BlocProvider to scope TransactionFormCubit to modal lifecycle.
 /// BlocListener handles navigation (close on success) and error display.
 class TransactionFormModal extends StatelessWidget {
   final TransactionModel? initialValue; // null = create, non-null = edit/copy
+  final bool isCopy; // true = copy mode (create with pre-filled data)
 
-  const TransactionFormModal({super.key, this.initialValue});
+  const TransactionFormModal({
+    super.key,
+    this.initialValue,
+    this.isCopy = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +49,14 @@ class TransactionFormModal extends StatelessWidget {
                 // Loading state - could show loading indicator if needed
               },
               success: () {
-                // Show success message
+                // Show success message based on mode
+                final message = isCopy || initialValue == null
+                    ? 'Transaction created successfully'
+                    : 'Transaction updated successfully';
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      initialValue != null
-                          ? 'Transaction updated successfully'
-                          : 'Transaction created successfully',
-                    ),
+                    content: Text(message),
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     duration: const Duration(seconds: 2),
                   ),
@@ -72,7 +77,10 @@ class TransactionFormModal extends StatelessWidget {
             );
           },
           child: SafeArea(
-            child: _TransactionFormContent(initialValue: initialValue),
+            child: _TransactionFormContent(
+              initialValue: initialValue,
+              isCopy: isCopy,
+            ),
           ),
         ),
       ),
@@ -86,8 +94,12 @@ class TransactionFormModal extends StatelessWidget {
 /// Handles submit, cancel, and delete actions.
 class _TransactionFormContent extends StatelessWidget {
   final TransactionModel? initialValue;
+  final bool isCopy;
 
-  const _TransactionFormContent({this.initialValue});
+  const _TransactionFormContent({
+    this.initialValue,
+    this.isCopy = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -128,9 +140,7 @@ class _TransactionFormContent extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      initialValue != null
-                          ? 'Transaction'
-                          : 'Add Transaction',
+                      _getFormTitle(),
                       style: TextStyle(
                         fontSize: 28, // v4's h2
                         fontWeight: FontWeight.w700,
@@ -138,7 +148,8 @@ class _TransactionFormContent extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (initialValue != null)
+                  // Only show delete button in edit mode (not copy or create)
+                  if (initialValue != null && !isCopy)
                     IconButton(
                       icon: Icon(
                         TablerIcons.trash,
@@ -183,12 +194,20 @@ class _TransactionFormContent extends StatelessWidget {
     );
   }
 
-  /// Handle form submission (create or update)
+  /// Get form title based on mode
+  String _getFormTitle() {
+    if (isCopy) return 'Copy Transaction';
+    if (initialValue != null) return 'Edit Transaction';
+    return 'Add Transaction';
+  }
+
+  /// Handle form submission (create or update based on mode)
   void _handleSubmit(BuildContext context) {
     final cubit = context.read<TransactionFormCubit>();
 
-    // Let the cubit handle validation and data extraction
-    if (initialValue != null) {
+    // Copy and Create modes both call createTransaction
+    // Only Edit mode calls updateTransaction
+    if (initialValue != null && !isCopy) {
       cubit.updateTransaction(initialValue!.id);
     } else {
       cubit.createTransaction();
