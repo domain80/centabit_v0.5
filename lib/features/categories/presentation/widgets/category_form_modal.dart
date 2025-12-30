@@ -290,57 +290,11 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
     );
   }
 
-  /// Map iconName string to TablerIcons (same as grid)
+  /// Map iconName string to TablerIcons using centralized lookup
+  ///
+  /// Uses TablerIcons.all map for dynamic icon resolution.
+  /// Falls back to category icon if iconName not found.
   IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'shoppingCart':
-        return TablerIcons.shoppingCart;
-      case 'toolsKitchen2':
-        return TablerIcons.toolsKitchen2;
-      case 'home':
-        return TablerIcons.home;
-      case 'car':
-        return TablerIcons.car;
-      case 'firstAidKit':
-        return TablerIcons.firstAidKit;
-      case 'deviceTv':
-        return TablerIcons.deviceTv;
-      case 'wallet':
-        return TablerIcons.wallet;
-      case 'coffee':
-        return TablerIcons.coffee;
-      case 'gas':
-        return TablerIcons.car; // Fallback to car icon
-      case 'shirt':
-        return TablerIcons.shirt;
-      case 'plane':
-        return TablerIcons.plane;
-      case 'book':
-        return TablerIcons.book;
-      case 'dumbbell':
-        return TablerIcons.barbell;
-      case 'gift':
-        return TablerIcons.gift;
-      case 'heart':
-        return TablerIcons.heart;
-      case 'phone':
-        return TablerIcons.phone;
-      case 'laptop':
-        return TablerIcons.deviceLaptop;
-      case 'music':
-        return TablerIcons.music;
-      case 'camera':
-        return TablerIcons.camera;
-      case 'briefcase':
-        return TablerIcons.briefcase;
-      case 'creditCard':
-        return TablerIcons.creditCard;
-      case 'piggyBank':
-        return TablerIcons.wallet; // Fallback to wallet icon
-      case 'receipt':
-        return TablerIcons.receipt;
-      default:
-        return TablerIcons.category;
-    }
+    return TablerIcons.all[iconName] ?? TablerIcons.category;
   }
 }

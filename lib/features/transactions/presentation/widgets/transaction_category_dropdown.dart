@@ -200,33 +200,11 @@ class _TransactionCategoryDropdownState
     );
   }
 
-  /// Map iconName string to TablerIcons
+  /// Map iconName string to TablerIcons using centralized lookup
   ///
-  /// TODO: Implement proper icon mapping from category.iconName
-  /// For now, returns default category icon
+  /// Uses TablerIcons.all map for dynamic icon resolution.
+  /// Falls back to category icon if iconName not found.
   IconData _getIconData(String iconName) {
-    // Basic icon mapping - can be expanded later
-    switch (iconName.toLowerCase()) {
-      case 'cart':
-      case 'shopping':
-        return TablerIcons.shoppingCart;
-      case 'food':
-      case 'restaurant':
-        return TablerIcons.toolsKitchen2;
-      case 'home':
-      case 'house':
-        return TablerIcons.home;
-      case 'car':
-      case 'transport':
-        return TablerIcons.car;
-      case 'health':
-      case 'medical':
-        return TablerIcons.firstAidKit;
-      case 'entertainment':
-      case 'movie':
-        return TablerIcons.deviceTv;
-      default:
-        return TablerIcons.category;
-    }
+    return TablerIcons.all[iconName] ?? TablerIcons.category;
   }
 }
