@@ -96,8 +96,8 @@ class _TransactionFormContent extends StatelessWidget {
 
     // Budget ID logic:
     // - Edit/copy mode: preserve original budget (even if null)
-    // - Create mode: start with null (user must select)
-    final defaultBudgetId = initialValue?.budgetId;
+    // - Create mode: auto-select first active budget (user can clear)
+    final defaultBudgetId = initialValue?.budgetId ?? cubit.defaultBudgetId;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
