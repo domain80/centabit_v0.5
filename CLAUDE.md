@@ -175,6 +175,46 @@ lib/
 - **Linting**: Uses `flutter_lints ^6.0.0` with default Flutter linter rules
 - **Platforms**: Supports Android, iOS, Web, macOS, Windows, Linux
 - **Theme**: Material 3 design system with custom light/dark themes
+- **Key Dependencies**:
+  - `flutter_bloc` - State management
+  - `drift` - Type-safe SQLite database
+  - `freezed` - Immutable data classes
+  - `get_it` - Dependency injection
+  - `go_router` - Declarative routing
+  - `fl_chart` - Chart visualizations
+  - `talker_flutter` - Logging
+
+## Common Development Workflows
+
+### Adding a New Feature
+
+1. **Create feature directory** in `lib/features/[feature_name]/`
+2. **Define data models** in `lib/data/models/` using `@freezed`
+3. **Add database table** in `lib/data/local/database.dart` (run build_runner after)
+4. **Create LocalSource** in `lib/data/local/[entity]_local_source.dart` with userId filtering
+5. **Create Repository** in `lib/data/repositories/[entity]_repository.dart` with broadcast streams
+6. **Define state** in `lib/features/[feature]/presentation/cubits/[feature]_state.dart` using `@freezed`
+7. **Create cubit** in `lib/features/[feature]/presentation/cubits/[feature]_cubit.dart`
+8. **Register in DI** in `lib/core/di/injection.dart` (repositories as singletons, cubits as factories)
+9. **Build UI** in `lib/features/[feature]/presentation/pages/` and `widgets/`
+10. **Add routes** in `lib/core/router/app_router.dart`
+11. **Run code generation**: `flutter pub run build_runner build --delete-conflicting-outputs`
+
+### Modifying Database Schema
+
+1. Update table definition in `lib/data/local/database.dart`
+2. Run: `flutter pub run build_runner build --delete-conflicting-outputs`
+3. Update corresponding LocalSource queries if needed
+4. Test with hot restart (not hot reload - database changes require full restart)
+
+### Adding Modal Forms
+
+Pattern used in BudgetFormModal, TransactionFormModal:
+- Use `showModalBottomSheetUtil()` helper
+- Provide BlocProvider scoped to modal lifecycle
+- Use FormBuilder for form state
+- BlocListener for navigation (close on success) and error display
+- Separate content widget for cleaner code organization
 
 ## Architecture Notes
 
@@ -415,8 +455,10 @@ BlocProvider(
 **Current Routes** (`AppRouter`):
 - `/login` - Login page (unauthenticated)
 - `/` - Dashboard (authenticated, nav index 0)
+  - `/monthly-overview` - Monthly spending detail page (sub-route)
 - `/transactions` - Transactions list (authenticated, nav index 1, search-enabled)
 - `/budgets` - Budget management (authenticated, nav index 2)
+  - `/budgets/:id` - Budget detail page with allocations and charts
 
 **Navigation Features**:
 - **StatefulShellRoute**: Maintains state across tab switches with indexed stack
@@ -663,6 +705,84 @@ class TransactionRepository with RepositoryLogger {
 }
 ```
 
+### Critical Patterns for State Management
+
+**Preventing setState-During-Build Errors**:
+
+When cubit methods emit states that trigger UI rebuilds, use `scheduleMicrotask()` to defer emissions:
+
+```dart
+void updateAllocation(String id, String categoryId, double amount) {
+  _allocations = _allocations.map((alloc) {
+    if (alloc.id == id) {
+      return AllocationEditModel(/* ... */);
+    }
+    return alloc;
+  }).toList();
+
+  // Defer state emission to avoid setState-during-build errors
+  scheduleMicrotask(() {
+    _rebuildCounter++;
+    emit(BudgetFormState.initial(rebuildCounter: _rebuildCounter));
+  });
+}
+```
+
+**Critical**: This pattern is required when:
+- Cubit methods are called from widget callbacks (onTap, onChange)
+- Those callbacks might fire during widget build phase
+- The state emission triggers BlocBuilder rebuilds
+
+**Inline Form Editing Pattern**:
+
+For inline editable fields (like AllocationTile amount editing):
+- Use `StatefulWidget` with `TextEditingController`
+- Implement debouncing (500ms) to prevent excessive cubit calls
+- Use `didUpdateWidget` to sync controller with external changes
+- Always dispose controller and cancel timers
+
+```dart
+class _AllocationTileState extends State<AllocationTile> {
+  late TextEditingController _amountController;
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController(
+      text: widget.allocation.amount.toStringAsFixed(2),
+    );
+  }
+
+  @override
+  void didUpdateWidget(AllocationTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update if amount changed externally (prevents cursor jumping)
+    if (widget.allocation.amount != oldWidget.allocation.amount &&
+        _amountController.text != widget.allocation.amount.toStringAsFixed(2)) {
+      _amountController.text = widget.allocation.amount.toStringAsFixed(2);
+    }
+  }
+
+  void _handleAmountChange(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      final amount = double.tryParse(value);
+      if (amount != null && amount >= 0) {
+        widget.onAmountChanged(amount);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _amountController.dispose();
+    super.dispose();
+  }
+}
+```
+
 ### Key App-Specific Concepts
 
 **BAR (Budget Adherence Ratio)**:
@@ -683,6 +803,15 @@ class TransactionRepository with RepositoryLogger {
 - Tracks planned spending per category
 - Compared against actual transactions in charts
 - Managed by `AllocationRepository` with userId filtering
+- **Budget Deallocation**: Transactions can have `budgetId = null` to exclude from budget tracking
+- Explicit deallocation is different from "no budget assigned" - it's intentional exclusion
+
+**Transaction-Budget Relationship**:
+- Transactions link to budgets via `budgetId` (nullable)
+- `budgetId != null`: Transaction counts toward that budget's spending
+- `budgetId == null`: Unassigned/deallocated transaction (not counted in any budget)
+- Budget filtering uses strict `budgetId.equals(budgetId)` matching (no category fallback)
+- Auto-select first active budget for new transactions for better UX
 
 **Custom Date Pickers**:
 - `CustomDatePicker` (text-based): Uses `CupertinoCalendarPickerButton` for text display with calendar picker
