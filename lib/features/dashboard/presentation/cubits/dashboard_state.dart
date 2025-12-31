@@ -44,15 +44,17 @@ abstract class DashboardState with _$DashboardState {
   /// - Any underlying data changes (budget, allocation, transaction, category)
   const factory DashboardState.loading() = _Loading;
 
-  /// Success state with loaded budget pages.
+  /// Success state with loaded budget pages and monthly overview.
   ///
-  /// Contains the aggregated data for all active budgets.
+  /// Contains the aggregated data for all active budgets and monthly spending overview.
   /// Each [BudgetPageModel] has all the data needed to render one budget card.
   ///
   /// **Parameters**:
   /// - `budgetPages`: List of aggregated budget data (can be empty if no active budgets)
+  /// - `monthlyOverview`: Monthly spending overview for current calendar month
   const factory DashboardState.success({
     required List<BudgetPageModel> budgetPages,
+    required MonthlyOverviewModel monthlyOverview,
   }) = _Success;
 
   /// Error state when data loading fails.
@@ -242,4 +244,181 @@ class BudgetPageModel {
 
   @override
   int get hashCode => budget.id.hashCode;
+}
+
+/// View model for monthly spending overview.
+///
+/// Provides a summary of spending for the current calendar month,
+/// breaking down transactions into budgeted vs unassigned categories.
+///
+/// **Purpose**:
+/// This model enables users to see all spending for the month regardless
+/// of budget assignments, addressing the selective BAR calculation issue
+/// where users need visibility into unassigned transactions.
+///
+/// **Time Period**: Current calendar month (not budget period)
+/// - Month starts: 1st day at 00:00:00
+/// - Month ends: Last day at 23:59:59
+///
+/// **Data Breakdown**:
+/// - **Budgeted**: Transactions with `budgetId != null`
+/// - **Unassigned**: Transactions with `budgetId == null`
+/// - **Total**: Sum of both categories
+///
+/// **Example**:
+/// ```dart
+/// MonthlyOverviewModel(
+///   month: DateTime(2024, 12, 1),
+///   totalSpent: 1523.45,
+///   budgetedSpent: 1245.30,
+///   unassignedSpent: 278.15,
+///   budgetedCount: 23,
+///   unassignedCount: 5,
+///   percentageSpent: 80.3, // 1245.30 / 1550.00 total budget
+///   hasUnassignedSpending: true,
+/// )
+/// ```
+class MonthlyOverviewModel {
+  /// The month this overview represents (normalized to first day of month).
+  ///
+  /// Always set to: `DateTime(year, month, 1)`
+  final DateTime month;
+
+  /// Total amount spent in the month (budgeted + unassigned).
+  ///
+  /// Includes only debit transactions. Credit transactions are excluded
+  /// from monthly overview calculations.
+  final double totalSpent;
+
+  /// Amount spent on budgeted transactions.
+  ///
+  /// Transactions where `budgetId != null`.
+  final double budgetedSpent;
+
+  /// Amount spent on unassigned transactions.
+  ///
+  /// Transactions where `budgetId == null`.
+  /// This is highlighted with a warning if > 0 to encourage budget assignment.
+  final double unassignedSpent;
+
+  /// Number of budgeted transactions.
+  ///
+  /// Count of transactions with `budgetId != null`.
+  final int budgetedCount;
+
+  /// Number of unassigned transactions.
+  ///
+  /// Count of transactions with `budgetId == null`.
+  final int unassignedCount;
+
+  /// Percentage of budgeted spending vs total budget allocations.
+  ///
+  /// **Calculation**:
+  /// ```dart
+  /// percentageSpent = (budgetedSpent / totalBudgetedAmount) * 100
+  /// ```
+  ///
+  /// Where `totalBudgetedAmount` is the sum of all allocations for active
+  /// budgets overlapping with this month.
+  ///
+  /// **Special Cases**:
+  /// - Returns 0% if no active budgets
+  /// - Can exceed 100% if overspending
+  final double percentageSpent;
+
+  /// Whether there are any unassigned transactions.
+  ///
+  /// `true` if `unassignedSpent > 0`, used to trigger warning UI.
+  final bool hasUnassignedSpending;
+
+  /// Creates a monthly overview model.
+  ///
+  /// All fields are required and must be computed by [DashboardCubit].
+  const MonthlyOverviewModel({
+    required this.month,
+    required this.totalSpent,
+    required this.budgetedSpent,
+    required this.unassignedSpent,
+    required this.budgetedCount,
+    required this.unassignedCount,
+    required this.percentageSpent,
+    required this.hasUnassignedSpending,
+  });
+
+  /// Total number of transactions (budgeted + unassigned).
+  int get totalCount => budgetedCount + unassignedCount;
+
+  /// Percentage of unassigned spending vs total spending.
+  ///
+  /// Returns: `(unassignedSpent / totalSpent) * 100`
+  ///
+  /// **Special Cases**:
+  /// - Returns 0% if totalSpent is 0
+  double get unassignedPercentage {
+    if (totalSpent <= 0) return 0.0;
+    return (unassignedSpent / totalSpent) * 100;
+  }
+
+  /// Percentage of budgeted spending vs total spending.
+  ///
+  /// Returns: `(budgetedSpent / totalSpent) * 100`
+  ///
+  /// **Special Cases**:
+  /// - Returns 0% if totalSpent is 0
+  double get budgetedPercentage {
+    if (totalSpent <= 0) return 0.0;
+    return (budgetedSpent / totalSpent) * 100;
+  }
+
+  /// Returns a string representation for debugging.
+  ///
+  /// **Example Output**:
+  /// ```
+  /// MonthlyOverviewModel(
+  ///   December 2024: total=$1523.45, budgeted=$1245.30 (81.7%), unassigned=$278.15 (18.3%)
+  /// )
+  /// ```
+  @override
+  String toString() {
+    final monthName = _getMonthName(month.month);
+    return 'MonthlyOverviewModel('
+        '$monthName ${month.year}: '
+        'total=\$${totalSpent.toStringAsFixed(2)}, '
+        'budgeted=\$${budgetedSpent.toStringAsFixed(2)} (${budgetedPercentage.toStringAsFixed(1)}%), '
+        'unassigned=\$${unassignedSpent.toStringAsFixed(2)} (${unassignedPercentage.toStringAsFixed(1)}%)'
+        ')';
+  }
+
+  /// Helper to get month name from month number.
+  String _getMonthName(int month) {
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return monthNames[month - 1];
+  }
+
+  /// Equality based on month.
+  ///
+  /// Two models are equal if they represent the same month/year.
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is MonthlyOverviewModel &&
+        other.month.year == month.year &&
+        other.month.month == month.month;
+  }
+
+  @override
+  int get hashCode => month.hashCode;
 }

@@ -123,7 +123,8 @@ class DashboardCubit extends Cubit<DashboardState> {
   /// 1. Emit loading state
   /// 2. Get all active budgets
   /// 3. For each budget, build a BudgetPageModel
-  /// 4. Emit success state with all pages
+  /// 4. Build monthly overview for current month
+  /// 5. Emit success state with all pages and monthly overview
   ///
   /// **Error Handling**:
   /// Catches any exceptions and emits error state with message.
@@ -139,7 +140,13 @@ class DashboardCubit extends Cubit<DashboardState> {
         return _buildBudgetPageModel(budget);
       }).toList();
 
-      emit(DashboardState.success(budgetPages: budgetPages));
+      // Build monthly overview for current calendar month
+      final monthlyOverview = _buildMonthlyOverviewModel(DateTime.now());
+
+      emit(DashboardState.success(
+        budgetPages: budgetPages,
+        monthlyOverview: monthlyOverview,
+      ));
     } catch (e) {
       emit(DashboardState.error(e.toString()));
     }
@@ -374,6 +381,84 @@ class DashboardCubit extends Cubit<DashboardState> {
     // Calculate and return BAR
     // Higher value = spending faster than time passing
     return spendRatio / timeRatio;
+  }
+
+  /// Builds monthly spending overview for current calendar month.
+  ///
+  /// **Purpose**:
+  /// Provides visibility into all spending for the month, breaking down
+  /// transactions by budget assignment status (budgeted vs unassigned).
+  ///
+  /// **Algorithm**:
+  /// 1. Calculate month's date range (1st day 00:00 to last day 23:59:59)
+  /// 2. Filter transactions for current month (debit only)
+  /// 3. Separate budgeted (budgetId != null) vs unassigned (budgetId == null)
+  /// 4. Calculate spending totals for each category
+  /// 5. Calculate percentage vs total budgeted amount
+  ///
+  /// **Parameters**:
+  /// - `month`: The month to build overview for (typically DateTime.now())
+  ///
+  /// **Returns**: Complete [MonthlyOverviewModel] with all metrics
+  ///
+  /// **Example**:
+  /// ```dart
+  /// final overview = _buildMonthlyOverviewModel(DateTime(2024, 12, 15));
+  /// // Returns data for entire December 2024 (Dec 1 - Dec 31)
+  /// ```
+  MonthlyOverviewModel _buildMonthlyOverviewModel(DateTime month) {
+    // Get current month's date range (normalized to full month)
+    final monthStart = DateTime(month.year, month.month, 1);
+    final monthEnd = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+
+    // Filter transactions for current month (debit only)
+    // Credit transactions are excluded from monthly overview
+    final monthTransactions = _transactionRepository.transactions.where((t) {
+      return !t.transactionDate.isBefore(monthStart) &&
+          !t.transactionDate.isAfter(monthEnd) &&
+          t.type == TransactionType.debit;
+    }).toList();
+
+    // Separate budgeted vs unassigned transactions
+    final budgetedTransactions =
+        monthTransactions.where((t) => t.budgetId != null).toList();
+    final unassignedTransactions =
+        monthTransactions.where((t) => t.budgetId == null).toList();
+
+    // Calculate spending totals
+    final budgetedSpent =
+        budgetedTransactions.fold<double>(0, (sum, t) => sum + t.amount);
+    final unassignedSpent =
+        unassignedTransactions.fold<double>(0, (sum, t) => sum + t.amount);
+    final totalSpent = budgetedSpent + unassignedSpent;
+
+    // Calculate total budgeted amount for active budgets overlapping this month
+    final activeBudgets = _budgetRepository.getActiveBudgets().where((b) {
+      // Budget overlaps with month if it doesn't end before month starts
+      // AND doesn't start after month ends
+      return !(b.endDate.isBefore(monthStart) || b.startDate.isAfter(monthEnd));
+    }).toList();
+
+    final totalBudgetedAmount = activeBudgets.fold<double>(0, (sum, budget) {
+      final allocations = _allocationRepository.getAllocationsForBudget(budget.id);
+      return sum + allocations.fold<double>(0, (s, a) => s + a.amount);
+    });
+
+    // Calculate percentage of budgeted spending vs total budget
+    final percentageSpent = totalBudgetedAmount > 0
+        ? (budgetedSpent / totalBudgetedAmount * 100)
+        : 0.0;
+
+    return MonthlyOverviewModel(
+      month: monthStart,
+      totalSpent: totalSpent,
+      budgetedSpent: budgetedSpent,
+      unassignedSpent: unassignedSpent,
+      budgetedCount: budgetedTransactions.length,
+      unassignedCount: unassignedTransactions.length,
+      percentageSpent: percentageSpent,
+      hasUnassignedSpending: unassignedSpent > 0,
+    );
   }
 
   /// Public method to manually refresh dashboard data.

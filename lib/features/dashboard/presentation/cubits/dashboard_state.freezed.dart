@@ -128,12 +128,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<BudgetPageModel> budgetPages)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<BudgetPageModel> budgetPages,  MonthlyOverviewModel monthlyOverview)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.budgetPages);case _Error() when error != null:
+return success(_that.budgetPages,_that.monthlyOverview);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +152,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<BudgetPageModel> budgetPages)  success,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<BudgetPageModel> budgetPages,  MonthlyOverviewModel monthlyOverview)  success,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Success():
-return success(_that.budgetPages);case _Error():
+return success(_that.budgetPages,_that.monthlyOverview);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +175,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<BudgetPageModel> budgetPages)?  success,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<BudgetPageModel> budgetPages,  MonthlyOverviewModel monthlyOverview)?  success,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.budgetPages);case _Error() when error != null:
+return success(_that.budgetPages,_that.monthlyOverview);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -257,7 +257,7 @@ String toString() {
 
 
 class _Success implements DashboardState {
-  const _Success({required final  List<BudgetPageModel> budgetPages}): _budgetPages = budgetPages;
+  const _Success({required final  List<BudgetPageModel> budgetPages, required this.monthlyOverview}): _budgetPages = budgetPages;
   
 
  final  List<BudgetPageModel> _budgetPages;
@@ -267,6 +267,7 @@ class _Success implements DashboardState {
   return EqualUnmodifiableListView(_budgetPages);
 }
 
+ final  MonthlyOverviewModel monthlyOverview;
 
 /// Create a copy of DashboardState
 /// with the given fields replaced by the non-null parameter values.
@@ -278,16 +279,16 @@ _$SuccessCopyWith<_Success> get copyWith => __$SuccessCopyWithImpl<_Success>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other._budgetPages, _budgetPages));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other._budgetPages, _budgetPages)&&(identical(other.monthlyOverview, monthlyOverview) || other.monthlyOverview == monthlyOverview));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_budgetPages));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_budgetPages),monthlyOverview);
 
 @override
 String toString() {
-  return 'DashboardState.success(budgetPages: $budgetPages)';
+  return 'DashboardState.success(budgetPages: $budgetPages, monthlyOverview: $monthlyOverview)';
 }
 
 
@@ -298,7 +299,7 @@ abstract mixin class _$SuccessCopyWith<$Res> implements $DashboardStateCopyWith<
   factory _$SuccessCopyWith(_Success value, $Res Function(_Success) _then) = __$SuccessCopyWithImpl;
 @useResult
 $Res call({
- List<BudgetPageModel> budgetPages
+ List<BudgetPageModel> budgetPages, MonthlyOverviewModel monthlyOverview
 });
 
 
@@ -315,10 +316,11 @@ class __$SuccessCopyWithImpl<$Res>
 
 /// Create a copy of DashboardState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? budgetPages = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? budgetPages = null,Object? monthlyOverview = null,}) {
   return _then(_Success(
 budgetPages: null == budgetPages ? _self._budgetPages : budgetPages // ignore: cast_nullable_to_non_nullable
-as List<BudgetPageModel>,
+as List<BudgetPageModel>,monthlyOverview: null == monthlyOverview ? _self.monthlyOverview : monthlyOverview // ignore: cast_nullable_to_non_nullable
+as MonthlyOverviewModel,
   ));
 }
 

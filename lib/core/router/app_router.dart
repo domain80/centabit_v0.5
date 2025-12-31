@@ -8,6 +8,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/budgets/presentation/pages/budget_details_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
+import '../../features/dashboard/presentation/pages/monthly_overview_detail_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 
 /// Application router configuration using go_router
@@ -51,6 +52,15 @@ class AppRouter {
                 path: dashboard,
                 name: 'dashboard',
                 builder: (context, state) => const DashboardPage(),
+                routes: [
+                  // Monthly overview detail sub-route
+                  GoRoute(
+                    path: 'monthly-overview',
+                    name: 'monthly-overview-detail',
+                    builder: (context, state) =>
+                        const MonthlyOverviewDetailPage(),
+                  ),
+                ],
               ),
             ],
           ),
