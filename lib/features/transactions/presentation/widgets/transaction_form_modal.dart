@@ -96,10 +96,7 @@ class _TransactionFormContent extends StatelessWidget {
   final TransactionModel? initialValue;
   final bool isCopy;
 
-  const _TransactionFormContent({
-    this.initialValue,
-    this.isCopy = false,
-  });
+  const _TransactionFormContent({this.initialValue, this.isCopy = false});
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +180,13 @@ class _TransactionFormContent extends StatelessWidget {
                 hintText: 'Notes (optional)',
               ),
               FormActionsRow(
-                actionWidget: Text(initialValue != null ? 'Update' : 'Add'),
+                actionWidget: Text(
+                  initialValue == null
+                      ? "Add"
+                      : isCopy
+                      ? "Copy"
+                      : "Update",
+                ),
                 actionHandler: () => _handleSubmit(context),
                 onCancel: () => Navigator.of(context).pop(),
               ),

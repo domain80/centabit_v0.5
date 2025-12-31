@@ -20,10 +20,7 @@ import 'package:flutter/material.dart';
 class AllocationsPieChart extends StatefulWidget {
   final List<TransactionsChartData> data;
 
-  const AllocationsPieChart({
-    super.key,
-    required this.data,
-  });
+  const AllocationsPieChart({super.key, required this.data});
 
   @override
   State<AllocationsPieChart> createState() => _AllocationsPieChartState();
@@ -46,7 +43,7 @@ class _AllocationsPieChartState extends State<AllocationsPieChart> {
             PieChartData(
               sections: _buildSections(),
               sectionsSpace: 2,
-              centerSpaceRadius: 60,
+              centerSpaceRadius: 26,
               pieTouchData: PieTouchData(
                 touchCallback: (FlTouchEvent event, pieTouchResponse) {
                   setState(() {
@@ -55,8 +52,8 @@ class _AllocationsPieChartState extends State<AllocationsPieChart> {
                       touchedIndex = null;
                       return;
                     }
-                    touchedIndex = pieTouchResponse!
-                        .touchedSection!.touchedSectionIndex;
+                    touchedIndex =
+                        pieTouchResponse!.touchedSection!.touchedSectionIndex;
                   });
 
                   // Auto-clear highlight after 1 second
@@ -87,15 +84,13 @@ class _AllocationsPieChartState extends State<AllocationsPieChart> {
       final index = entry.key;
       final item = entry.value;
       final isTouched = index == touchedIndex;
-      final radius = isTouched ? 70.0 : 60.0;
-      final fontSize = isTouched ? 18.0 : 14.0;
+      final radius = isTouched ? 50.0 : 40.0;
+      final fontSize = isTouched ? 12.0 : 10.0;
 
       return PieChartSectionData(
         color: colors[index],
         value: item.allocationAmount,
-        title: isTouched
-            ? '\$${item.allocationAmount.toStringAsFixed(0)}'
-            : '',
+        title: isTouched ? '\$${item.allocationAmount.toStringAsFixed(0)}' : '',
         radius: radius,
         titleStyle: TextStyle(
           fontSize: fontSize,

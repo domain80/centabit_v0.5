@@ -146,7 +146,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
           ),
 
           // Success state: show budget cards
-          success: (budgetPages) {
+          success: (budgetPages, monthlyOverview) {
             const height = 300.0;
 
             // Empty state: no budgets or no chart data
