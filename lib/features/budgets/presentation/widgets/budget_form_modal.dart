@@ -3,12 +3,13 @@ import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/core/utils/date_formatter.dart';
 import 'package:centabit/data/models/budget_model.dart';
+import 'package:centabit/data/models/category_model.dart';
 import 'package:centabit/features/budgets/presentation/cubits/budget_form_cubit.dart';
 import 'package:centabit/features/budgets/presentation/cubits/budget_form_state.dart';
-import 'package:centabit/features/budgets/presentation/widgets/allocation_form_dialog.dart';
 import 'package:centabit/features/budgets/presentation/widgets/allocation_tile.dart';
 import 'package:centabit/shared/widgets/form/custom_text_input.dart';
 import 'package:centabit/shared/widgets/form/form_actions_row.dart';
+import 'package:centabit/shared/widgets/select_dropdown.dart';
 import 'package:cupertino_calendar_picker/cupertino_calendar_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -248,7 +249,9 @@ class _BudgetFormContent extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.2,
+                                  ),
                                   width: 1,
                                 ),
                               ),
@@ -261,15 +264,17 @@ class _BudgetFormContent extends StatelessWidget {
                                 ),
                                 formatter: (dateTime) =>
                                     DateFormatter.formatHeaderDate(dateTime),
-                                initialDateTime: field.value ?? defaultStartDate,
+                                initialDateTime:
+                                    field.value ?? defaultStartDate,
                                 onDateTimeChanged: (dateTime) {
                                   field.didChange(dateTime);
                                 },
                                 mainColor: theme.colorScheme.secondary,
                                 buttonDecoration: PickerButtonDecoration(
-                                  textStyle: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface,
-                                  ),
+                                  textStyle: theme.textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: theme.colorScheme.onSurface,
+                                      ),
                                   backgroundColor: theme.colorScheme.surface,
                                 ),
                               ),
@@ -304,7 +309,9 @@ class _BudgetFormContent extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.2,
+                                  ),
                                   width: 1,
                                 ),
                               ),
@@ -339,27 +346,122 @@ class _BudgetFormContent extends StatelessWidget {
                 ],
               ),
 
-              // Allocations Section
+              const SizedBox(height: 4),
               const Divider(),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Allocations',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.9,
+
+              // Category Selection Section
+              BlocBuilder<BudgetFormCubit, BudgetFormState>(
+                buildWhen: (previous, current) => true,
+                builder: (context, state) {
+                  final cubit = context.read<BudgetFormCubit>();
+                  final allocations = cubit.allocations;
+                  final categories = cubit.categories;
+
+                  // Filter out already-allocated categories
+                  final availableCategories = categories
+                      .where(
+                        (cat) => !allocations
+                            .map((a) => a.categoryId)
+                            .contains(cat.id),
+                      )
+                      .toList();
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Allocations',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.9,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => _handleAddAllocation(context),
-                    icon: const Icon(TablerIcons.plus, size: 18),
-                    label: const Text('Add'),
-                  ),
-                ],
+                      const SizedBox(width: 36),
+                      Expanded(
+                        child: SelectDropdown<CategoryModel>(
+                          items: availableCategories,
+                          onItemTap: (category) {
+                            if (category != null) {
+                              cubit.addAllocation(category.id, 0.0);
+                            }
+                          },
+                          buttonBuilder: (context, selected) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (selected != null) ...[
+                                  Icon(
+                                    TablerIcons.all[selected.iconName] ??
+                                        TablerIcons.category,
+                                    size: 18,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                                Expanded(
+                                  child: Text(
+                                    availableCategories.isEmpty
+                                        ? 'All categories allocated'
+                                        : 'Add an allocation',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: availableCategories.isEmpty
+                                          ? theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.4)
+                                          : null,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Icon(
+                                  TablerIcons.chevronDown,
+                                  size: 16,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ],
+                            );
+                          },
+                          itemBuilder: (context, category, isSelected) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    TablerIcons.all[category.iconName] ??
+                                        TablerIcons.category,
+                                    size: 18,
+                                    color: isSelected
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      category.name,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                            color: isSelected
+                                                ? theme.colorScheme.primary
+                                                : theme.colorScheme.onSurface,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
 
               // Allocation List (reactive to cubit state changes)
@@ -402,8 +504,13 @@ class _BudgetFormContent extends StatelessWidget {
                       return AllocationTile(
                         allocation: allocation,
                         categories: cubit.categories,
-                        onEdit: () =>
-                            _handleEditAllocation(context, allocation),
+                        onAmountChanged: (amount) {
+                          cubit.updateAllocation(
+                            allocation.id,
+                            allocation.categoryId,
+                            amount,
+                          );
+                        },
                         onDelete: () => cubit.removeAllocation(allocation.id),
                       );
                     }).toList(),
@@ -524,66 +631,20 @@ class _BudgetFormContent extends StatelessWidget {
 
   /// Handle form submission (create or update).
   void _handleSubmit(BuildContext context) {
+    // Capture cubit reference before async gap
     final cubit = context.read<BudgetFormCubit>();
 
-    if (initialBudget != null) {
-      cubit.updateBudget(initialBudget!.id);
-    } else {
-      cubit.createBudget();
-    }
-  }
+    // Unfocus all fields to trigger pending debounced updates
+    FocusScope.of(context).unfocus();
 
-  /// Handle add allocation button tap.
-  void _handleAddAllocation(BuildContext context) {
-    final cubit = context.read<BudgetFormCubit>();
-    final existingIds = cubit.allocations.map((a) => a.categoryId).toList();
-
-    // Debug logging
-    print('🔍 Opening allocation dialog');
-    print('   Total categories: ${cubit.categories.length}');
-    print('   Current allocations: ${cubit.allocations.length}');
-    print('   Existing category IDs: $existingIds');
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AllocationFormDialog(
-        categories: cubit.categories,
-        existingCategoryIds: existingIds,
-        onSave: (categoryId, amount) {
-          print('💾 Saving allocation: category=$categoryId, amount=$amount');
-          cubit.addAllocation(categoryId, amount);
-          print('   Allocations after save: ${cubit.allocations.length}');
-        },
-      ),
-    );
-  }
-
-  /// Handle edit allocation.
-  void _handleEditAllocation(
-    BuildContext context,
-    AllocationEditModel allocation,
-  ) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AllocationFormDialog(
-        categories: context.read<BudgetFormCubit>().categories,
-        existingCategoryIds: context
-            .read<BudgetFormCubit>()
-            .allocations
-            .where((a) => a.id != allocation.id) // Exclude self
-            .map((a) => a.categoryId)
-            .toList(),
-        initialCategoryId: allocation.categoryId,
-        initialAmount: allocation.amount,
-        onSave: (categoryId, amount) {
-          context.read<BudgetFormCubit>().updateAllocation(
-            allocation.id,
-            categoryId,
-            amount,
-          );
-        },
-      ),
-    );
+    // Delay submission slightly to allow debounced updates to complete
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (initialBudget != null) {
+        cubit.updateBudget(initialBudget!.id);
+      } else {
+        cubit.createBudget();
+      }
+    });
   }
 
   /// Handle delete with confirmation dialog.

@@ -146,10 +146,12 @@ class BudgetFormCubit extends Cubit<BudgetFormState> {
     print('   After: ${_allocations.length} allocations');
     print('   Allocations: ${_allocations.map((a) => a.categoryId).toList()}');
 
-    // Re-emit state to trigger UI rebuild
-    _rebuildCounter++;
-    emit(BudgetFormState.initial(rebuildCounter: _rebuildCounter));
-    print('   State emitted with counter: $_rebuildCounter');
+    // Defer state emission to avoid setState-during-build errors
+    scheduleMicrotask(() {
+      _rebuildCounter++;
+      emit(BudgetFormState.initial(rebuildCounter: _rebuildCounter));
+      print('   State emitted with counter: $_rebuildCounter');
+    });
   }
 
   /// Updates an existing allocation in the list.
@@ -171,9 +173,12 @@ class BudgetFormCubit extends Cubit<BudgetFormState> {
       return alloc;
     }).toList();
 
-    // Re-emit state to trigger UI rebuild
-    _rebuildCounter++;
-    emit(BudgetFormState.initial(rebuildCounter: _rebuildCounter));
+    // Defer state emission to avoid setState-during-build errors
+    // This ensures emission happens after current frame completes
+    scheduleMicrotask(() {
+      _rebuildCounter++;
+      emit(BudgetFormState.initial(rebuildCounter: _rebuildCounter));
+    });
   }
 
   /// Removes an allocation from the list.
@@ -183,9 +188,11 @@ class BudgetFormCubit extends Cubit<BudgetFormState> {
   void removeAllocation(String id) {
     _allocations = _allocations.where((alloc) => alloc.id != id).toList();
 
-    // Re-emit state to trigger UI rebuild
-    _rebuildCounter++;
-    emit(BudgetFormState.initial(rebuildCounter: _rebuildCounter));
+    // Defer state emission to avoid setState-during-build errors
+    scheduleMicrotask(() {
+      _rebuildCounter++;
+      emit(BudgetFormState.initial(rebuildCounter: _rebuildCounter));
+    });
   }
 
   /// Validates budget name (required, unique for same period).
