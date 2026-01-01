@@ -90,71 +90,74 @@ class _TransactionAmountInputState extends State<TransactionAmountInput> {
               _controller.value = newControllerValue;
             }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: _controller,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: [_formatter],
-                  onChanged: (val) {
-                    final filtered = _applyFormatterTo(
-                      val,
-                      _controller.value,
-                    ).text;
-                    if (filtered != val) {
-                      _controller.value = TextEditingValue(
-                        text: filtered,
-                        selection: TextSelection.collapsed(
-                          offset: filtered.length,
+            return SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _controller,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [_formatter],
+                      onChanged: (val) {
+                        final filtered = _applyFormatterTo(
+                          val,
+                          _controller.value,
+                        ).text;
+                        if (filtered != val) {
+                          _controller.value = TextEditingValue(
+                            text: filtered,
+                            selection: TextSelection.collapsed(
+                              offset: filtered.length,
+                            ),
+                          );
+                        }
+                        field.didChange(filtered);
+                      },
+                      style: TextStyle(
+                        fontSize: 36, // v4's h1
+                        fontWeight: FontWeight.w900,
+                        color: colorScheme.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.only(left: -spacing.xs),
+                        fillColor: Colors.transparent,
+                        border: InputBorder.none,
+                        enabledBorder: .none,
+                        focusedBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        errorText:
+                            null, // Suppress inline error text (shown below)
+                        hintText: '0.00',
+                        hintStyle: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w800,
+                          color: hasError
+                              ? colorScheme.error.withValues(
+                                  alpha: 180 / 255,
+                                ) // v4: alpha 180
+                              : colorScheme.onSurface.withValues(
+                                  alpha: 100 / 255,
+                                ), // v4: alpha 100
                         ),
-                      );
-                    }
-                    field.didChange(filtered);
-                  },
-                  style: TextStyle(
-                    fontSize: 36, // v4's h1
-                    fontWeight: FontWeight.w900,
-                    color: colorScheme.onSurface,
-                  ),
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: -spacing.sm,
+                      ),
                     ),
-                    fillColor: Colors.transparent,
-                    border: InputBorder.none,
-                    enabledBorder: .none,
-                    focusedBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    focusedErrorBorder: InputBorder.none,
-                    errorText: null, // Suppress inline error text (shown below)
-                    hintText: '0.00',
-                    hintStyle: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w800,
-                      color: hasError
-                          ? colorScheme.error.withValues(
-                              alpha: 180 / 255,
-                            ) // v4: alpha 180
-                          : colorScheme.onSurface.withValues(
-                              alpha: 100 / 255,
-                            ), // v4: alpha 100
-                    ),
-                  ),
+                    // Show error message below input
+                    if (hasError) ...[
+                      SizedBox(height: spacing.xs),
+                      Text(
+                        field.errorText!,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                // Show error message below input
-                if (hasError) ...[
-                  SizedBox(height: spacing.xs),
-                  Text(
-                    field.errorText!,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
-                  ),
-                ],
-              ],
+              ),
             );
           },
         ),

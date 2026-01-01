@@ -47,52 +47,54 @@ class BudgetFormModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) {
-        final cubit = getIt<BudgetFormCubit>();
-        // Load existing allocations if editing
-        if (initialBudget != null) {
-          cubit.loadExistingAllocations(initialBudget!.id);
-        }
-        return cubit;
-      },
-      child: BlocListener<BudgetFormCubit, BudgetFormState>(
-        listener: (context, state) {
-          state.when(
-            initial: (rebuildCounter) {},
-            loading: () {
-              // Loading state - could show loading indicator if needed
-            },
-            success: () {
-              // Show success message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    initialBudget != null
-                        ? 'Budget updated successfully'
-                        : 'Budget created successfully',
-                  ),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-              // Close modal on success
-              Navigator.of(context).pop();
-            },
-            error: (message) {
-              // Show error snackbar but keep modal open (preserve form state)
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
-            },
-          );
+    return Scaffold(
+      body: BlocProvider(
+        create: (_) {
+          final cubit = getIt<BudgetFormCubit>();
+          // Load existing allocations if editing
+          if (initialBudget != null) {
+            cubit.loadExistingAllocations(initialBudget!.id);
+          }
+          return cubit;
         },
-        child: SafeArea(
-          child: _BudgetFormContent(initialBudget: initialBudget),
+        child: BlocListener<BudgetFormCubit, BudgetFormState>(
+          listener: (context, state) {
+            state.when(
+              initial: (rebuildCounter) {},
+              loading: () {
+                // Loading state - could show loading indicator if needed
+              },
+              success: () {
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      initialBudget != null
+                          ? 'Budget updated successfully'
+                          : 'Budget created successfully',
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+                // Close modal on success
+                Navigator.of(context).pop();
+              },
+              error: (message) {
+                // Show error snackbar but keep modal open (preserve form state)
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
+              },
+            );
+          },
+          child: SafeArea(
+            child: _BudgetFormContent(initialBudget: initialBudget),
+          ),
         ),
       ),
     );
@@ -401,11 +403,12 @@ class _BudgetFormContent extends StatelessWidget {
                                     ),
                                     SizedBox(width: spacing.xs),
                                     Text(
-                                      'Create your first category',
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: theme.colorScheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      'Create a category',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                   ],
                                 )
@@ -420,10 +423,11 @@ class _BudgetFormContent extends StatelessWidget {
                                     SizedBox(width: spacing.xs),
                                     Text(
                                       'Create category',
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: theme.colorScheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                   ],
                                 ),

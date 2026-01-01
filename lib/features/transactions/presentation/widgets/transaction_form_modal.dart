@@ -161,7 +161,7 @@ class _TransactionFormContent extends StatelessWidget {
               const TransactionBudgetDropdown(), // Prominent placement
               const TransactionCategoryDropdown(),
               Row(
-                spacing: 40, // v4 exact
+                spacing: 0, // v4 exact
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: const [
                   Expanded(flex: 4, child: TransactionAmountInput()),
