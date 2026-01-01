@@ -2,11 +2,13 @@ import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/core/utils/date_formatter.dart';
+import 'package:centabit/core/utils/show_modal.dart';
 import 'package:centabit/data/models/budget_model.dart';
 import 'package:centabit/data/models/category_model.dart';
 import 'package:centabit/features/budgets/presentation/cubits/budget_form_cubit.dart';
 import 'package:centabit/features/budgets/presentation/cubits/budget_form_state.dart';
 import 'package:centabit/features/budgets/presentation/widgets/allocation_tile.dart';
+import 'package:centabit/features/categories/presentation/widgets/category_form_modal.dart';
 import 'package:centabit/shared/widgets/form/custom_text_input.dart';
 import 'package:centabit/shared/widgets/form/form_actions_row.dart';
 import 'package:centabit/shared/widgets/select_dropdown.dart';
@@ -387,6 +389,22 @@ class _BudgetFormContent extends StatelessWidget {
                               cubit.addAllocation(category.id, 0.0);
                             }
                           },
+                          // Action widget for inline category creation
+                          actionWidget: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(TablerIcons.plus, size: 16),
+                              SizedBox(width: spacing.xs),
+                              Text('Create category'),
+                            ],
+                          ),
+                          onActionTap: () => _showCreateCategoryModal(context),
+                          // Long-press to edit category
+                          onItemLongPress: (category) {
+                            if (category != null) {
+                              _showEditCategoryModal(context, category);
+                            }
+                          },
                           buttonBuilder: (context, selected) {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -673,6 +691,24 @@ class _BudgetFormContent extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Show category creation modal.
+  void _showCreateCategoryModal(BuildContext context) {
+    showModalBottomSheetUtil(
+      context,
+      builder: (_) => const CategoryFormModal(),
+      modalFractionalHeight: 0.7, // Category form is shorter than budget form
+    );
+  }
+
+  /// Show category edit modal.
+  void _showEditCategoryModal(BuildContext context, CategoryModel category) {
+    showModalBottomSheetUtil(
+      context,
+      builder: (_) => CategoryFormModal(initialValue: category),
+      modalFractionalHeight: 0.7,
     );
   }
 }
