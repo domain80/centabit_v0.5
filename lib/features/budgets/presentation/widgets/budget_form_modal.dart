@@ -56,46 +56,43 @@ class BudgetFormModal extends StatelessWidget {
         }
         return cubit;
       },
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: BlocListener<BudgetFormCubit, BudgetFormState>(
-          listener: (context, state) {
-            state.when(
-              initial: (rebuildCounter) {},
-              loading: () {
-                // Loading state - could show loading indicator if needed
-              },
-              success: () {
-                // Show success message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      initialBudget != null
-                          ? 'Budget updated successfully'
-                          : 'Budget created successfully',
-                    ),
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    duration: const Duration(seconds: 2),
+      child: BlocListener<BudgetFormCubit, BudgetFormState>(
+        listener: (context, state) {
+          state.when(
+            initial: (rebuildCounter) {},
+            loading: () {
+              // Loading state - could show loading indicator if needed
+            },
+            success: () {
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    initialBudget != null
+                        ? 'Budget updated successfully'
+                        : 'Budget created successfully',
                   ),
-                );
-                // Close modal on success
-                Navigator.of(context).pop();
-              },
-              error: (message) {
-                // Show error snackbar but keep modal open (preserve form state)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(message),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                    duration: const Duration(seconds: 4),
-                  ),
-                );
-              },
-            );
-          },
-          child: SafeArea(
-            child: _BudgetFormContent(initialBudget: initialBudget),
-          ),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              // Close modal on success
+              Navigator.of(context).pop();
+            },
+            error: (message) {
+              // Show error snackbar but keep modal open (preserve form state)
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            },
+          );
+        },
+        child: SafeArea(
+          child: _BudgetFormContent(initialBudget: initialBudget),
         ),
       ),
     );
@@ -392,17 +389,45 @@ class _BudgetFormContent extends StatelessWidget {
                               cubit.addAllocation(category.id, 0.0);
                             }
                           },
-                          // Action widget for inline category creation
-                          actionWidget: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(TablerIcons.plus, size: 16),
-                              SizedBox(width: spacing.xs),
-                              Text('Create category'),
-                            ],
-                          ),
+                          // Conditional action widget based on category existence
+                          actionWidget: cubit.categories.isEmpty
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      TablerIcons.plus,
+                                      size: 16,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    SizedBox(width: spacing.xs),
+                                    Text(
+                                      'Create your first category',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      TablerIcons.plus,
+                                      size: 16,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    SizedBox(width: spacing.xs),
+                                    Text(
+                                      'Create category',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                           onActionTap: () => _showCreateCategoryModal(context),
-                          // Long-press to edit category
                           onItemLongPress: (category) {
                             if (category != null) {
                               _showEditCategoryModal(context, category);
@@ -697,16 +722,16 @@ class _BudgetFormContent extends StatelessWidget {
     );
   }
 
-  /// Show category creation modal.
+  /// Show modal for creating a new category.
   void _showCreateCategoryModal(BuildContext context) {
     showModalBottomSheetUtil(
       context,
       builder: (_) => const CategoryFormModal(),
-      modalFractionalHeight: 0.7, // Category form is shorter than budget form
+      modalFractionalHeight: 0.7,
     );
   }
 
-  /// Show category edit modal.
+  /// Show modal for editing an existing category.
   void _showEditCategoryModal(BuildContext context, CategoryModel category) {
     showModalBottomSheetUtil(
       context,
