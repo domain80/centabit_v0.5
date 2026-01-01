@@ -56,43 +56,46 @@ class BudgetFormModal extends StatelessWidget {
         }
         return cubit;
       },
-      child: BlocListener<BudgetFormCubit, BudgetFormState>(
-        listener: (context, state) {
-          state.when(
-            initial: (rebuildCounter) {},
-            loading: () {
-              // Loading state - could show loading indicator if needed
-            },
-            success: () {
-              // Show success message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    initialBudget != null
-                        ? 'Budget updated successfully'
-                        : 'Budget created successfully',
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: BlocListener<BudgetFormCubit, BudgetFormState>(
+          listener: (context, state) {
+            state.when(
+              initial: (rebuildCounter) {},
+              loading: () {
+                // Loading state - could show loading indicator if needed
+              },
+              success: () {
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      initialBudget != null
+                          ? 'Budget updated successfully'
+                          : 'Budget created successfully',
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    duration: const Duration(seconds: 2),
                   ),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-              // Close modal on success
-              Navigator.of(context).pop();
-            },
-            error: (message) {
-              // Show error snackbar but keep modal open (preserve form state)
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
-            },
-          );
-        },
-        child: SafeArea(
-          child: _BudgetFormContent(initialBudget: initialBudget),
+                );
+                // Close modal on success
+                Navigator.of(context).pop();
+              },
+              error: (message) {
+                // Show error snackbar but keep modal open (preserve form state)
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
+              },
+            );
+          },
+          child: SafeArea(
+            child: _BudgetFormContent(initialBudget: initialBudget),
+          ),
         ),
       ),
     );
