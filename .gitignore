@@ -39,3 +39,7 @@ ios/Flutter/GeneratedPluginRegistrant.*
 # Misc
 *.log
 .DS_Store
+
+# Large source video files in docs (keep only demo.gif and demo.mp4)
+docs/*.mov
+docs/Centabit*.mp4

@@ -2,6 +2,16 @@
 
 A budgeting app that gets better with each iteration.
 
+**[Join the FREE Waitlist](https://tally.so/r/eqQo4k)** to be notified when we launch!
+
+## Demo
+
+<div align="center">
+  <img src="docs/demo.gif" alt="Centabit v0.5 Demo" width="350">
+  <br>
+  <a href="docs/demo.mp4">📹 Watch Full Demo Video (3 min, 2.6MB)</a>
+</div>
+
 ---
 
 ## Why v0.5? The Architectural Evolution
@@ -555,4 +565,4 @@ Centabit v0.5 represents a fundamental shift from a prototype to a production-re
 
 The feature-first organization, repository pattern, Cubit state management, isolate-based sync, and explicit dependency injection create a codebase that's easier to understand, test, and extend. With userId filtering, soft deletes, and sync-ready architecture, v0.5 is positioned to support multi-user collaboration, real-time sync, and advanced features that weren't possible in v0.4.
 
-**v0.4 was a successful prototype. v0.5 is built for the long haul.**
+**v0.4 was a successful prototype. v0.5 is built for a longer haul (until v0.6) 😜**
