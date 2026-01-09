@@ -23,19 +23,51 @@ Expected = TotalBudget × (1.2t - 0.2t²)
 
 ## Interactive Calculator
 
-Try the BAR calculator below to see how your spending compares to expectations:
+Try our interactive BAR calculator to see how your spending compares to expectations:
 
-<iframe src="https://claude.ai/public/artifacts/c6d58d89-1da3-4257-aede-2fb9d5d4a066/embed" title="BAR Calculator" width="100%" height="600" frameborder="0" allow="clipboard-write" allowfullscreen style="border: 1px solid var(--vp-c-divider); border-radius: 8px; margin: 2rem 0;"></iframe>
+<div style="text-align: center; margin: 2rem 0;">
+  <a href="/user-guide/bar-calculator" class="calculator-link">
+    <span class="calculator-icon">🧮</span>
+    <span class="calculator-text">Open BAR Calculator</span>
+  </a>
+</div>
 
-**How to use:**
-1. Enter your total budget amount
-2. Set the budget period (start and end dates)
-3. Input how much you've spent so far
-4. See your BAR calculation and visual progress instantly
+**Calculator features:**
+- Adjust budget amount, period, and spending
+- See real-time BAR calculation
+- Visualize spending curves (linear vs front-loaded)
+- Customize front-load factor for different spending patterns
+- Interactive chart showing expected vs actual spending
 
-[Open calculator in full page →](https://claude.ai/public/artifacts/c6d58d89-1da3-4257-aede-2fb9d5d4a066)
+<style scoped>
+.calculator-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: var(--vp-c-brand-1);
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.125rem;
+  transition: all 0.2s;
+}
 
-*Calculator built using Claude AI*
+.calculator-link:hover {
+  background: var(--vp-c-brand-2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.calculator-icon {
+  font-size: 1.5rem;
+}
+
+.calculator-text {
+  color: white;
+}
+</style>
 
 ## How It Works
 

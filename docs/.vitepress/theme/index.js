@@ -7,10 +7,12 @@ import '@fontsource/fira-code/400.css'
 import '@fontsource/fira-code/500.css'
 import '@fontsource/fira-code/600.css'
 import './custom.css'
+import BARCalculator from '../components/BARCalculator.vue'
 
 export default {
   extends: DefaultTheme,
   enhanceApp({ app, router, siteData }) {
-    // You can register custom components here if needed
+    // Register custom components
+    app.component('BARCalculator', BARCalculator)
   }
 }
