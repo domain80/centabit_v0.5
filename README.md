@@ -7,16 +7,34 @@ A budgeting app that gets better with each iteration.
 ## Demo
 
 <div align="center">
-  <img src="docs/demo.gif" alt="Centabit v0.5 Demo" width="350">
+  <img src="docs/public/demo.gif" alt="Centabit v0.5 Demo" width="350">
   <br>
-  <a href="docs/demo.mp4">📹 Watch Full Demo Video (3 min, 2.6MB)</a>
+  <a href="docs/public/demo.mp4">📹 Watch Full Demo Video (3 min, 2.6MB)</a>
 </div>
+
+---
+
+## Documentation
+
+📚 **[Read the Full Documentation →](https://domain80.github.io/centabit_v0.5)**
+
+Comprehensive guides for developers, users, and recruiters:
+
+- **[Getting Started](https://domain80.github.io/centabit_v0.5/getting-started/)** - Quick start guides for different audiences
+- **[Architecture](https://domain80.github.io/centabit_v0.5/architecture/)** - System design, data flow, and patterns
+- **[Development Guide](https://domain80.github.io/centabit_v0.5/development/)** - Setup, project structure, and workflows
+- **[User Guide](https://domain80.github.io/centabit_v0.5/user-guide/)** - How to use Centabit features
+- **[API Reference](https://domain80.github.io/centabit_v0.5/api-reference/)** - Models, repositories, and cubits
+- **[Contributing](https://domain80.github.io/centabit_v0.5/contributing/)** - Guidelines for contributors (developers & designers welcome!)
+- **[Roadmap](https://domain80.github.io/centabit_v0.5/roadmap/)** - Current features and future plans
+
+**Local Docs**: Documentation source files are in `/docs` - see [docs/README.md](docs/README.md) for development instructions.
 
 ---
 
 ## Why v0.5? The Architectural Evolution
 
-Centabit v0.5 represents a complete architectural rewrite of the application, addressing fundamental limitations discovered in [v0.4](https://github.com/domain80/centabit_v0.4). While v0.4 successfully implemented core features (transactions, budgets, categories, authentication), its architecture couldn't support the evolving needs of a production-ready budgeting application.
+Centabit v0.5 represents a complete architectural rewrite of the application, addressing fundamental limitations discovered in [v0.4](https://github.com/domain80/centabit-mobile_v0.4). While v0.4 successfully implemented core features (transactions, budgets, categories, authentication), its architecture couldn't support the evolving needs of a production-ready budgeting application.
 
 ### Problems with v0.4
 

@@ -1,94 +1,48 @@
-# Centabit v0.5 Documentation
+# Centabit Documentation
 
-## Project Overview
+This directory contains the source files for the Centabit documentation site, built with VitePress.
 
-Centabit is a Flutter budgeting application that helps users track expenses, manage budgets, and monitor financial health through the Budget Adherence Ratio (BAR) metric.
+**Live site**: [https://domain80.github.io/centabit_v0.5](https://domain80.github.io/centabit_v0.5)
 
-### Key Features
+## Local Development
 
-- **Budget Management**: Create and track monthly/periodic budgets with category allocations
-- **Transaction Tracking**: Record income and expenses with category tagging and date filtering
-- **Budget Adherence Ratio (BAR)**: Financial health metric comparing spending rate vs time progression
-- **Interactive Charts**: Visualize budget allocations vs actual spending by category
-- **Offline-First**: Works fully offline with local SQLite database and background sync
-- **Material 3 Design**: Modern UI with custom theme, glassmorphic navigation, and smooth animations
+```bash
+# Install dependencies (from project root)
+npm install
 
-### Project Synopsis
+# Start dev server (from project root)
+npm run docs:dev
+# Opens at http://localhost:5173
 
-Centabit v0.5 represents a complete architectural evolution from in-memory data management to a production-ready **local-first architecture**. The app is built with Flutter using the MVVM pattern and implements an offline-first approach where all data is stored locally in a SQLite database (via Drift) and synchronized to a backend API in the background using isolates.
+# Build for production
+npm run docs:build
 
-**Architecture Highlights**:
-- **Offline-First**: Local database is the single source of truth
-- **Reactive Streams**: Automatic UI updates via BLoC pattern and Drift's reactive queries
-- **Multi-User Ready**: All database queries filter by userId for future OAuth integration
-- **Background Sync**: Non-blocking sync operations run in isolates
-- **Type-Safe Database**: Drift provides compile-time query validation
-- **Optimistic Updates**: Changes appear immediately, sync happens asynchronously
-
-### Project Structure
-
-```
-centabit_v0.5/
-├── lib/
-│   ├── main.dart                   # App entry point
-│   ├── core/                       # Shared functionality
-│   │   ├── auth/                   # Authentication (anonymous + OAuth prep)
-│   │   ├── di/                     # Dependency injection (GetIt)
-│   │   ├── router/                 # Navigation (GoRouter)
-│   │   ├── theme/                  # Material 3 theme system
-│   │   └── utils/                  # Helpers and utilities
-│   │
-│   ├── data/                       # Data layer (v5 local-first)
-│   │   ├── models/                 # Domain models (Freezed)
-│   │   ├── local/                  # Drift database & LocalSources
-│   │   ├── repositories/           # Repository layer
-│   │   └── sync/                   # Background sync manager
-│   │
-│   ├── features/                   # Feature modules (MVVM)
-│   │   ├── auth/                   # Login/authentication
-│   │   ├── dashboard/              # Budget reports & BAR
-│   │   ├── transactions/           # Transaction list & management
-│   │   ├── budgets/                # Budget creation & editing
-│   │   └── categories/             # Category management
-│   │
-│   └── shared/                     # Shared UI components
-│       └── widgets/                # Reusable widgets
-│
-├── docs/                           # Architecture documentation
-│   ├── README.md                   # This file
-│   ├── architecture.md             # System architecture overview
-│   ├── data-flow.md                # Data flow patterns
-│   ├── user-filtering.md           # Multi-user userId pattern
-│   └── sync-strategy.md            # Background sync with isolates
-│
-└── test/                           # Tests (not yet implemented)
+# Preview production build
+npm run docs:preview
 ```
 
-## Documentation Index
+## Documentation Structure
 
-This documentation is organized into focused topics, each starting with diagrams followed by explanations:
+- `/getting-started/` - Onboarding guides for developers, users, and recruiters
+- `/user-guide/` - End-user documentation
+- `/architecture/` - System architecture and design patterns
+- `/development/` - Development guides and workflows
+- `/api-reference/` - API documentation for models, repositories, and cubits
+- `/contributing/` - Contribution guidelines
+- `/roadmap/` - Product roadmap and changelog
 
-1. **[Architecture Overview](./architecture.md)** - High-level system architecture, layers, and components
-2. **[Data Flow](./data-flow.md)** - How data moves through the system from UI to database
-3. **[User Filtering](./user-filtering.md)** - Multi-user support with userId filtering pattern
-4. **[Sync Strategy](./sync-strategy.md)** - Background synchronization using isolates
+## Adding Documentation
 
-## Quick Start
+1. Create a new `.md` file in the appropriate directory
+2. Add front matter if needed (VitePress uses minimal front matter)
+3. Update the sidebar configuration in `.vitepress/config.js`
+4. Test locally with `npm run docs:dev`
 
-For development commands and setup instructions, see the main [CLAUDE.md](../CLAUDE.md) file.
+See the [Documentation Guide](https://domain80.github.io/centabit_v0.5/contributing/documentation-guide.html) for detailed instructions.
 
-## Architecture Quick Reference
+## Technology
 
-```
-Presentation Layer (Cubits)
-        ↓ (stream subscriptions)
-Repository Layer (coordinate local + future remote)
-        ↓
-LocalSource Layer (userId-filtered Drift queries)
-        ↓
-Drift Database (SQLite with reactive queries)
-        ↓
-SyncManager (isolate-based background sync)
-```
-
-**Key Principle**: Data flows down through layers, changes bubble up through reactive streams.
+- **VitePress**: Fast, Vue-powered static site generator
+- **Theme**: Default VitePress theme with custom Material 3 colors
+- **Deployment**: GitHub Actions → GitHub Pages
+- **Build time**: <5 seconds (vs 30+ seconds with Jekyll)

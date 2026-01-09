@@ -1,0 +1,28 @@
+{
+  "name": "centabit-docs",
+  "version": "0.5.0",
+  "description": "Centabit v0.5 documentation site",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0"
+  },
+  "keywords": [
+    "budgeting",
+    "flutter",
+    "documentation",
+    "finance",
+    "mobile-app"
+  ],
+  "author": "Centabit",
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource/fira-code": "^5.2.7",
+    "@fontsource/hubot-sans": "^5.2.8",
+    "@fontsource/rubik": "^5.2.8"
+  }
+}

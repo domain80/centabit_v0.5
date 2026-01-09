@@ -1,0 +1,324 @@
+/**
+ * Centabit Brand Colors
+ * Based on Material 3 theme from the Flutter app
+ * /lib/core/theme/color_schemes.dart
+ */
+
+:root {
+  /* Brand Colors */
+  --centabit-primary: #2D9D8F;
+  --centabit-charcoal: #2D3436;
+  --centabit-coral: #E17A60;
+  --centabit-blue: #74B9FF;
+  --centabit-teal-bright: #55E6C1;
+
+  /* VitePress custom variable overrides */
+  --vp-c-brand-1: var(--centabit-primary);
+  --vp-c-brand-2: #26877B;
+  --vp-c-brand-3: #1F6F65;
+
+  /* Light mode brand colors */
+  --vp-c-brand-soft: rgba(45, 157, 143, 0.14);
+
+  /* Link colors */
+  --vp-c-text-1: var(--centabit-charcoal);
+
+  /* Hero gradient */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg,
+      var(--centabit-primary) 30%,
+      var(--centabit-blue));
+
+  /* Typography - Rubik for body */
+  --vp-font-family-base: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --vp-font-family-mono: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* Dark mode overrides */
+.dark {
+  --vp-c-brand-1: var(--centabit-primary);
+  --vp-c-brand-2: #39B8A8;
+  --vp-c-brand-3: #4DCABB;
+  --vp-c-brand-soft: rgba(45, 157, 143, 0.16);
+
+  /* Dark mode hero gradient */
+  --vp-home-hero-name-background: linear-gradient(120deg,
+      var(--centabit-teal-bright) 30%,
+      var(--centabit-blue));
+
+  /* Dark mode text colors - high contrast */
+  --vp-c-text-1: rgba(230, 230, 230, 0.95);
+  --vp-c-text-2: rgba(235, 235, 235, 0.7);
+  --vp-c-text-3: rgba(235, 235, 235, 0.5);
+}
+
+/* Custom hero styling */
+.VPHero .name {
+  background: var(--vp-home-hero-name-background);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: var(--vp-home-hero-name-color);
+}
+
+/* Custom button styling */
+.VPButton.brand {
+  background-color: var(--centabit-primary);
+  border-color: var(--centabit-primary);
+}
+
+.VPButton.brand:hover {
+  background-color: var(--vp-c-brand-2);
+  border-color: var(--vp-c-brand-2);
+}
+
+.VPButton.alt {
+  background-color: transparent;
+  border-color: var(--centabit-coral);
+  color: var(--centabit-coral);
+}
+
+.VPButton.alt:hover {
+  background-color: rgba(225, 122, 96, 0.1);
+  border-color: var(--centabit-coral);
+}
+
+/* Video container styling */
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 16rem;
+  margin: 2rem auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.video-container video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Feature cards enhancement */
+.VPFeature {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.VPFeature:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(45, 157, 143, 0.15);
+}
+
+/* Code block enhancements */
+div[class*='language-'] {
+  border-radius: 8px;
+}
+
+/* Code font and styling improvements */
+code {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  /* Enable ligatures */
+  font-size: 0.9em;
+}
+
+/* Light mode code improvements */
+:root {
+  --vp-code-block-bg: #f6f8fa;
+  --vp-code-bg: rgba(45, 45, 45, 0.08);
+  --vp-code-color: #24292f;
+}
+
+/* Inline code styling - light mode */
+.vp-doc :not(pre)>code {
+  color: #24292f;
+  background-color: rgba(175, 184, 193, 0.2);
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Dark mode code improvements */
+.dark {
+  --vp-code-block-bg: #1e1e1e;
+  --vp-code-bg: rgba(255, 255, 255, 0.1);
+  --vp-code-color: #e6e6e6;
+}
+
+/* Inline code styling - dark mode */
+.dark .vp-doc :not(pre)>code {
+  color: #e6e6e6;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Table styling */
+table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Badge styling */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.badge.primary {
+  background-color: var(--centabit-primary);
+  color: white;
+}
+
+.badge.info {
+  background-color: var(--centabit-blue);
+  color: white;
+}
+
+.badge.coral {
+  background-color: var(--centabit-coral);
+  color: white;
+}
+
+/* Waitlist CTA styling */
+.waitlist-cta {
+  text-align: center;
+  margin: 3rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(45, 157, 143, 0.1), rgba(116, 185, 255, 0.1));
+  border-radius: 12px;
+  border: 2px solid rgba(45, 157, 143, 0.2);
+}
+
+.waitlist-cta .VPButton {
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 28px;
+  margin-top: 1rem;
+  background-color: var(--centabit-primary);
+  border-color: var(--centabit-primary);
+  color: white;
+  font-weight: 600;
+  transition: all 0.25s;
+}
+
+.waitlist-cta .VPButton:hover {
+  background-color: var(--vp-c-brand-2);
+  border-color: var(--vp-c-brand-2);
+  transform: translateY(-2px);
+}
+
+/* Dark mode button fixes */
+.dark .waitlist-cta {
+  background: linear-gradient(135deg, rgba(45, 157, 143, 0.15), rgba(116, 185, 255, 0.15));
+  border-color: rgba(45, 157, 143, 0.3);
+}
+
+.dark .waitlist-cta .VPButton {
+  background-color: var(--centabit-primary);
+  border-color: var(--centabit-primary);
+  color: white;
+}
+
+.dark .waitlist-cta .VPButton:hover {
+  background-color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+}
+
+/* Architecture diagram enhancements */
+pre code {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* Enable ligatures */
+  font-size: 0.9em;
+}
+
+/* Sticky Video Layout (2-column on large screens) */
+.sticky-layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 16rem) 1fr;
+  gap: 3rem;
+  margin: 2rem 0;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh; /* Ensure enough height for sticky to work */
+}
+
+.sticky-video-column {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: fit-content; /* Allow video to have natural height */
+}
+
+.video-container-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: calc(var(--vp-nav-height) + 1rem); /* Stick below navbar */
+  width: 100%;
+  max-width: 16rem;
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1;
+  will-change: transform; /* Optimize for sticky positioning */
+}
+
+.video-container-sticky video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.scrollable-content-column {
+  min-width: 0; /* Prevent grid blowout */
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .sticky-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 0;
+  }
+
+  .sticky-video-column {
+    order: -1;
+    /* Video first on mobile */
+    padding: 0;
+  }
+
+  .video-container-sticky {
+    position: relative;
+    /* Not sticky on mobile */
+    top: auto;
+    max-width: min(16rem, 100%);
+    margin: 0 auto;
+  }
+
+  .scrollable-content-column {
+    padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .video-container {
+    max-width: 100%;
+    margin: 1rem auto;
+  }
+
+  .waitlist-cta {
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .sticky-layout {
+    gap: 1.5rem;
+  }
+}
