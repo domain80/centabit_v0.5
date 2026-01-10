@@ -1,3 +1,8 @@
+---
+layout: doc
+aside: false
+---
+
 # BAR Calculator
 
 <BARCalculator />

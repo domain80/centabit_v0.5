@@ -22,7 +22,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bar => 'BAR';
 
   @override
-  String get barFull => 'Budget Available Ratio (BAR)';
+  String get barFull => 'Budget Adherence Ratio (BAR)';
 
   @override
   String get barDefinition =>

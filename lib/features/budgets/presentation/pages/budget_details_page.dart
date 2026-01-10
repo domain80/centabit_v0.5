@@ -138,101 +138,101 @@ class _BudgetDetailsContent extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
             padding: EdgeInsets.all(spacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BudgetSummaryCard(details: details),
-              SizedBox(height: spacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BudgetSummaryCard(details: details),
+                SizedBox(height: spacing.lg),
 
-              // Chart section with toggle
-              if (details.chartData.isNotEmpty) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildSectionHeader(context, 'Budget Breakdown'),
-                    const ChartTypeToggle(),
-                  ],
-                ),
-                SizedBox(height: spacing.md),
-                Container(
-                  height: 220,
-                  padding: EdgeInsets.all(spacing.md),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(radius.md),
-                    border: Border.all(
-                      color: colorScheme.outline.withOpacity(0.2),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.onSurface.withOpacity(0.04),
-                        spreadRadius: 2,
-                        blurRadius: 1,
-                        offset: const Offset(0, 1),
-                      ),
+                // Chart section with toggle
+                if (details.chartData.isNotEmpty) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSectionHeader(context, 'Breakdown'),
+                      const ChartTypeToggle(),
                     ],
                   ),
-                  child: BlocBuilder<BudgetDetailsCubit, BudgetDetailsState>(
-                    buildWhen: (previous, current) => true,
-                    builder: (context, state) {
-                      final cubit = context.read<BudgetDetailsCubit>();
-
-                      return state.maybeWhen(
-                        success: (details) {
-                          switch (cubit.selectedChartType) {
-                            case ChartType.bar:
-                              return BudgetBarChart(data: details.chartData);
-                            case ChartType.pie:
-                              return AllocationsPieChart(
-                                data: details.chartData,
-                              );
-                          }
-                        },
-                        orElse: () => const SizedBox.shrink(),
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(height: spacing.lg),
-              ],
-
-              if (details.allocations.isNotEmpty) ...[
-                _buildSectionHeader(context, 'Allocations Breakdown'),
-                SizedBox(height: spacing.md),
-                ...details.allocations.map(
-                  (allocation) => Padding(
-                    padding: EdgeInsets.only(bottom: spacing.md),
-                    child: AllocationDetailTile(allocation: allocation),
-                  ),
-                ),
-              ],
-
-              if (details.transactions.isNotEmpty) ...[
-                SizedBox(height: spacing.lg),
-                _buildSectionHeader(
-                  context,
-                  'Recent Transactions (${details.transactions.length})',
-                ),
-                SizedBox(height: spacing.md),
-                ...details.transactions
-                    .take(15)
-                    .map(
-                      (transaction) =>
-                          TransactionTile(transaction: transaction),
+                  SizedBox(height: spacing.md),
+                  Container(
+                    height: 220,
+                    padding: EdgeInsets.all(spacing.md),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface.withAlpha(125),
+                      borderRadius: BorderRadius.circular(radius.md),
+                      border: Border.all(
+                        color: colorScheme.outline.withAlpha(50),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.onSurface.withAlpha(10),
+                          spreadRadius: 2,
+                          blurRadius: 1,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
                     ),
-              ],
+                    child: BlocBuilder<BudgetDetailsCubit, BudgetDetailsState>(
+                      buildWhen: (previous, current) => true,
+                      builder: (context, state) {
+                        final cubit = context.read<BudgetDetailsCubit>();
 
-              if (details.allocations.isEmpty &&
-                  details.transactions.isEmpty) ...[
-                _buildEmptyState(context),
-              ],
+                        return state.maybeWhen(
+                          success: (details) {
+                            switch (cubit.selectedChartType) {
+                              case ChartType.bar:
+                                return BudgetBarChart(data: details.chartData);
+                              case ChartType.pie:
+                                return AllocationsPieChart(
+                                  data: details.chartData,
+                                );
+                            }
+                          },
+                          orElse: () => const SizedBox.shrink(),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: spacing.lg),
+                ],
 
-              // Bottom spacing for content visibility
-              SizedBox(height: spacing.xl3),
-            ],
+                if (details.allocations.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'Allocations Breakdown'),
+                  SizedBox(height: spacing.md),
+                  ...details.allocations.map(
+                    (allocation) => Padding(
+                      padding: EdgeInsets.only(bottom: spacing.md),
+                      child: AllocationDetailTile(allocation: allocation),
+                    ),
+                  ),
+                ],
+
+                if (details.transactions.isNotEmpty) ...[
+                  SizedBox(height: spacing.lg),
+                  _buildSectionHeader(
+                    context,
+                    'Recent Transactions (${details.transactions.length})',
+                  ),
+                  SizedBox(height: spacing.md),
+                  ...details.transactions
+                      .take(15)
+                      .map(
+                        (transaction) =>
+                            TransactionTile(transaction: transaction),
+                      ),
+                ],
+
+                if (details.allocations.isEmpty &&
+                    details.transactions.isEmpty) ...[
+                  _buildEmptyState(context),
+                ],
+
+                // Bottom spacing for content visibility
+                SizedBox(height: spacing.xl3),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

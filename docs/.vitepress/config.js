@@ -45,6 +45,7 @@ export default defineConfig({
             { text: 'Creating Budgets', link: '/user-guide/creating-budgets' },
             { text: 'Tracking Transactions', link: '/user-guide/tracking-transactions' },
             { text: 'Understanding BAR', link: '/user-guide/understanding-bar' },
+            { text: 'BAR Calculator', link: '/user-guide/bar-calculator' },
             { text: 'Managing Categories', link: '/user-guide/categories' },
             { text: 'FAQ', link: '/user-guide/faq' },
           ]

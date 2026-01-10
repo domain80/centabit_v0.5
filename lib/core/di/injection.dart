@@ -1,6 +1,7 @@
 import 'package:centabit/core/auth/auth_manager.dart';
 import 'package:centabit/core/logging/app_logger.dart';
 import 'package:centabit/core/router/navigation/nav_cubit.dart';
+import 'package:centabit/data/demo/demo_data_seeder.dart';
 import 'package:centabit/data/local/allocation_local_source.dart';
 import 'package:centabit/data/local/budget_local_source.dart';
 import 'package:centabit/data/local/category_local_source.dart';
@@ -224,4 +225,21 @@ Future<void> configureDependencies() async {
       categoryRepository: getIt<CategoryRepository>(),
     ),
   );
+
+  // ========================================
+  // Demo Data Seeder
+  // ========================================
+
+  // Register demo data seeder
+  getIt.registerLazySingleton<DemoDataSeeder>(
+    () => DemoDataSeeder(
+      categoryRepository: getIt<CategoryRepository>(),
+      budgetRepository: getIt<BudgetRepository>(),
+      allocationRepository: getIt<AllocationRepository>(),
+      transactionRepository: getIt<TransactionRepository>(),
+    ),
+  );
+
+  // Seed demo data if database is empty
+  await getIt<DemoDataSeeder>().seedIfEmpty();
 }

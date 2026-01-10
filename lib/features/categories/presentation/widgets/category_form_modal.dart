@@ -46,42 +46,46 @@ class _CategoryFormModalState extends State<CategoryFormModal> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<CategoryFormCubit>(),
-      child: BlocListener<CategoryFormCubit, CategoryFormState>(
-        listener: (context, state) {
-          state.when(
-            initial: () {},
-            loading: () {},
-            success: () {
-              // Show success message
-              ScaffoldMessenger.of(context).showSnackBar(
+    return Scaffold(
+      body: BlocProvider(
+        create: (_) => getIt<CategoryFormCubit>(),
+        child: BlocListener<CategoryFormCubit, CategoryFormState>(
+          listener: (context, state) {
+            state.when(
+              initial: () {},
+              loading: () {},
+              success: () {
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      widget.initialValue != null
+                          ? 'Category updated successfully'
+                          : 'Category created successfully',
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+                Navigator.of(context).pop();
+              },
+              error: (msg) => ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(widget.initialValue != null
-                    ? 'Category updated successfully'
-                    : 'Category created successfully'),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  duration: const Duration(seconds: 2),
+                  content: Text(msg),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  duration: const Duration(seconds: 4),
                 ),
-              );
-              Navigator.of(context).pop();
-            },
-            error: (msg) => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(msg),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                duration: const Duration(seconds: 4),
               ),
+            );
+          },
+          child: SafeArea(
+            child: _CategoryFormContent(
+              initialValue: widget.initialValue,
+              selectedIconName: _selectedIconName,
+              onIconSelected: (iconName) {
+                setState(() => _selectedIconName = iconName);
+              },
             ),
-          );
-        },
-        child: SafeArea(
-          child: _CategoryFormContent(
-            initialValue: widget.initialValue,
-            selectedIconName: _selectedIconName,
-            onIconSelected: (iconName) {
-              setState(() => _selectedIconName = iconName);
-            },
           ),
         ),
       ),
@@ -121,9 +125,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
       ),
       child: FormBuilder(
         key: cubit.formKey,
-        initialValue: {
-          'categoryName': widget.initialValue?.name ?? '',
-        },
+        initialValue: {'categoryName': widget.initialValue?.name ?? ''},
         child: SingleChildScrollView(
           child: Column(
             spacing: 22, // v4 exact (main column spacing)
@@ -141,7 +143,9 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                         ],
                       ).createShader(bounds),
                       child: Text(
-                        widget.initialValue != null ? 'Update Category' : 'Add Category',
+                        widget.initialValue != null
+                            ? 'Update Category'
+                            : 'Add Category',
                         style: const TextStyle(
                           fontSize: 28, // v4's h2
                           fontWeight: FontWeight.w700,
@@ -156,7 +160,8 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                         TablerIcons.trash,
                         color: theme.colorScheme.error,
                       ),
-                      onPressed: () => _handleDelete(context, widget.initialValue!.id),
+                      onPressed: () =>
+                          _handleDelete(context, widget.initialValue!.id),
                     ),
                 ],
               ),
@@ -189,8 +194,9 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                     Container(
                       padding: const EdgeInsets.all(10), // v4 exact
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.secondary
-                            .withValues(alpha: 25 / 255),
+                        color: theme.colorScheme.secondary.withValues(
+                          alpha: 25 / 255,
+                        ),
                         border: Border.all(
                           color: theme.colorScheme.secondary,
                           width: 1.8, // v4 exact
@@ -220,7 +226,9 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
 
               // Actions
               FormActionsRow(
-                actionWidget: Text(widget.initialValue != null ? 'Update' : 'Add'),
+                actionWidget: Text(
+                  widget.initialValue != null ? 'Update' : 'Add',
+                ),
                 actionHandler: () => _handleSubmit(context),
                 onCancel: () => Navigator.of(context).pop(),
               ),
@@ -236,9 +244,9 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
     final cubit = context.read<CategoryFormCubit>();
 
     if (widget.selectedIconName == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an icon')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select an icon')));
       return;
     }
 
@@ -255,7 +263,11 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
     }
 
     if (widget.initialValue != null) {
-      cubit.updateCategory(widget.initialValue!.id, name, widget.selectedIconName!);
+      cubit.updateCategory(
+        widget.initialValue!.id,
+        name,
+        widget.selectedIconName!,
+      );
     } else {
       cubit.createCategory(name, widget.selectedIconName!);
     }
@@ -280,9 +292,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
             },
             child: Text(
               'Delete',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],

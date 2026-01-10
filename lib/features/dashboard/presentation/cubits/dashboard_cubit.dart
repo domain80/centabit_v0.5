@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:centabit/core/utils/smart_budget_calculator.dart';
 import 'package:centabit/data/models/allocation_model.dart';
 import 'package:centabit/data/models/budget_model.dart';
 import 'package:centabit/data/models/category_model.dart';
@@ -60,6 +61,9 @@ class DashboardCubit extends Cubit<DashboardState> {
   final AllocationRepository _allocationRepository;
   final TransactionRepository _transactionRepository;
   final CategoryRepository _categoryRepository;
+
+  // Smart BAR calculator instance
+  final SmartBudgetCalculator _barCalculator = SmartBudgetCalculator();
 
   // Stream subscriptions for reactive updates
   StreamSubscription? _budgetSubscription;
@@ -294,44 +298,39 @@ class DashboardCubit extends Cubit<DashboardState> {
     }).toList();
   }
 
-  /// Calculates Budget Available Ratio (BAR).
+  /// Calculates Budget Adherence Ratio (BAR) using smart calculator.
   ///
-  /// **Ported from v0.4**: `dashboard_view_model.dart` line 36-63
-  /// (calculateBAR function)
+  /// **New in v0.5**: Replaces simple linear calculation with smart
+  /// front-loaded curve that expects more spending early in the period
+  /// (payday effect).
   ///
   /// **Formula**:
   /// ```
-  /// BAR = (totalSpent / totalBudget) / (elapsedDays / totalDays)
+  /// BAR = actualSpent / expectedSpent
+  /// where expectedSpent uses front-loaded curve: a*t - (a-1)*t²
   /// ```
   ///
   /// **Interpretation**:
-  /// - BAR < 1.0: Spending slower than time passing (good!)
-  /// - BAR = 1.0: Spending at exactly expected pace
-  /// - BAR > 1.0: Spending faster than time passing (warning!)
-  /// - BAR > 1.2: Significantly over pace (error color in UI)
+  /// - BAR < 0.85: Well under budget 🎉
+  /// - BAR 0.85-0.95: Slightly under budget ✓
+  /// - BAR 0.95-1.05: Right on track ✓
+  /// - BAR 1.05-1.15: Slightly over budget ⚠️
+  /// - BAR > 1.15: Significantly over budget 🚨
   ///
-  /// **Edge Cases**:
-  /// - `totalBudget <= 0`: Returns 0.0 (avoid division by zero)
-  /// - Before `startDate`: `elapsedDays = 0`, BAR = 0.0
-  /// - After `endDate`: `elapsedDays = totalDays`, normal calculation
-  /// - `timeRatio == 0`: Returns 0.0 (avoid division by zero)
-  ///
-  /// **Special Adjustment**:
-  /// Adds 0.3 days to elapsed time to prevent extreme BAR values at
-  /// the very start of a budget period.
+  /// **Front-Loaded Curve**:
+  /// Unlike linear calculation, this expects 55% of budget spent at
+  /// 50% of time (vs 50% linear). Reflects real spending behavior
+  /// where people spend more right after receiving income.
   ///
   /// **Example**:
   /// ```
-  /// Budget: $1000, Period: 30 days
-  /// Spent: $400 in 10 days
+  /// Budget: $1500, Period: 30 days
+  /// Spent: $800 in 15 days
   ///
-  /// totalDays = 30
-  /// elapsedDays = 10
-  /// spendRatio = 400/1000 = 0.40 (40% of budget)
-  /// timeRatio = (10 + 0.3)/30 = 0.343 (34.3% of time)
-  /// BAR = 0.40 / 0.343 = 1.17 ⚠️
-  ///
-  /// Interpretation: Spending 17% faster than time passing!
+  /// Linear expected: $750 (50% of budget)
+  /// Smart expected: $825 (55% of budget)
+  /// Linear BAR: 1.07 (warning)
+  /// Smart BAR: 0.97 (right on track!)
   /// ```
   ///
   /// **Parameters**:
@@ -341,7 +340,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   /// - `endDate`: Budget period end
   /// - `now`: Current date/time
   ///
-  /// **Returns**: BAR value (typically 0.0 to 2.0, but can be higher)
+  /// **Returns**: BAR value from smart calculator
   double _calculateBAR({
     required double totalBudget,
     required double totalSpent,
@@ -349,9 +348,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     required DateTime endDate,
     required DateTime now,
   }) {
-    // Edge case: No budget allocated
-    if (totalBudget <= 0) return 0.0;
-
     // Calculate total days in budget period (inclusive)
     final totalDays = endDate.difference(startDate).inDays + 1;
 
@@ -368,19 +364,17 @@ class DashboardCubit extends Cubit<DashboardState> {
       elapsedDays = now.difference(startDate).inDays + 1;
     }
 
-    // Calculate spending ratio (how much of budget is spent)
-    final spendRatio = totalSpent / totalBudget;
+    // Use smart calculator with front-loaded curve
+    // TODO: Add historical data when we implement learning feature
+    final calculation = _barCalculator.calculate(
+      daysElapsed: elapsedDays,
+      totalDays: totalDays,
+      actualSpent: totalSpent,
+      totalBudget: totalBudget,
+      // historicalData: [], // Future enhancement
+    );
 
-    // Calculate time ratio (how much of period has elapsed)
-    // Add 0.3 to prevent extreme values at start of period
-    final timeRatio = totalDays > 0 ? (elapsedDays + 0.3) / totalDays : 1.0;
-
-    // Edge case: Avoid division by zero
-    if (timeRatio == 0) return 0.0;
-
-    // Calculate and return BAR
-    // Higher value = spending faster than time passing
-    return spendRatio / timeRatio;
+    return calculation.bar;
   }
 
   /// Builds monthly spending overview for current calendar month.

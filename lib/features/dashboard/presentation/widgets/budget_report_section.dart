@@ -240,7 +240,7 @@ class _BudgetPageContent extends StatelessWidget {
   /// Budget name heading (e.g., "Active Budget: December 2025").
   final String monthTitle;
 
-  /// BAR (Budget Available Ratio) value.
+  /// BAR (Budget Aherance Ratio) value.
   ///
   /// Animates from 0 to this value over 600ms.
   final double barIndexValue;
@@ -291,7 +291,10 @@ class _BudgetPageContent extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 // Usage explanation
-                Text(l10n.barUsageExplanation, style: theme.textTheme.bodyMedium),
+                Text(
+                  l10n.barUsageExplanation,
+                  style: theme.textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 12),
 
                 // Key Rule
@@ -312,7 +315,10 @@ class _BudgetPageContent extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // Update frequency
-                Text(l10n.barUpdateFrequency, style: theme.textTheme.bodyMedium),
+                Text(
+                  l10n.barUpdateFrequency,
+                  style: theme.textTheme.bodyMedium,
+                ),
               ],
             ),
           ),

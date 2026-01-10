@@ -26,7 +26,7 @@ Expected = TotalBudget × (1.2t - 0.2t²)
 Try our interactive BAR calculator to see how your spending compares to expectations:
 
 <div style="text-align: center; margin: 2rem 0;">
-  <a href="/user-guide/bar-calculator" class="calculator-link">
+  <a href="./bar-calculator" class="calculator-link">
     <span class="calculator-icon">🧮</span>
     <span class="calculator-text">Open BAR Calculator</span>
   </a>

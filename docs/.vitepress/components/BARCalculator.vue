@@ -49,6 +49,19 @@ const frontLoadLabel = computed(() => {
   return 'Heavy front-load'
 })
 
+const frontLoadDescription = computed(() => {
+  const f = frontLoadFactor.value
+  if (f === 1.0) {
+    return '1.0 = linear (uniform spending throughout period)'
+  } else if (f > 1.0) {
+    const percentage = Math.round((f - 1.0) * 100)
+    return `${f.toFixed(1)} = front-load factor (spending happens ${percentage}% faster early on, payday effect)`
+  } else {
+    const percentage = Math.round((1.0 - f) * 100)
+    return `${f.toFixed(1)} = back-load factor (spending ${percentage}% slower early on, savers pattern)`
+  }
+})
+
 // Chart data
 const chartData = computed(() => {
   const canvas = chartCanvas.value
@@ -78,6 +91,7 @@ const chartData = computed(() => {
 })
 
 const chartCanvas = ref(null)
+const mousePos = ref(null)
 
 // Draw chart
 const drawChart = () => {
@@ -171,45 +185,131 @@ const drawChart = () => {
   ctx.lineTo(width - padding, height - padding)
   ctx.stroke()
 
-  // Draw labels
+  // Draw X-axis ticks and labels
   ctx.fillStyle = textColor
-  ctx.font = '12px sans-serif'
+  ctx.font = '11px sans-serif'
+  ctx.textAlign = 'center'
+  const xTicks = 5
+  for (let i = 0; i <= xTicks; i++) {
+    const day = Math.round((totalDays.value / xTicks) * i)
+    const x = xScale(day)
+    // Tick mark
+    ctx.beginPath()
+    ctx.moveTo(x, height - padding)
+    ctx.lineTo(x, height - padding + 5)
+    ctx.stroke()
+    // Label
+    ctx.fillText(day.toString(), x, height - padding + 18)
+  }
+
+  // Draw Y-axis ticks and labels
+  ctx.textAlign = 'right'
+  const yTicks = 5
+  for (let i = 0; i <= yTicks; i++) {
+    const value = (totalBudget.value / yTicks) * i
+    const y = yScale(value)
+    // Tick mark
+    ctx.beginPath()
+    ctx.moveTo(padding - 5, y)
+    ctx.lineTo(padding, y)
+    ctx.stroke()
+    // Label
+    ctx.fillText('$' + value.toFixed(0), padding - 10, y + 4)
+  }
+
+  // Draw axis labels
+  ctx.font = 'bold 13px sans-serif'
   ctx.textAlign = 'center'
   ctx.fillText('Days', width / 2, height - 10)
 
   ctx.save()
-  ctx.translate(15, height / 2)
+  ctx.translate(12, height / 2)
   ctx.rotate(-Math.PI / 2)
   ctx.fillText('Amount ($)', 0, 0)
   ctx.restore()
 
-  // Draw legend
-  const legendY = padding + 20
-  const legendItems = [
-    { color: linearColor, label: 'Linear (naive)', dashed: true },
-    { color: expectedColor, label: 'Front-loaded curve', dashed: false },
-    { color: actualColor, label: 'Your actual spending', dashed: false },
-  ]
+  // Draw hover tooltip
+  if (mousePos.value) {
+    const { x: mouseX, y: mouseY } = mousePos.value
 
-  let legendX = width - padding - 200
-  ctx.textAlign = 'left'
-  legendItems.forEach((item, i) => {
-    const y = legendY + i * 20
-    ctx.strokeStyle = item.color
-    ctx.fillStyle = item.color
-    ctx.setLineDash(item.dashed ? [5, 5] : [])
-    ctx.lineWidth = item.label.includes('actual') ? 4 : 2
-    ctx.beginPath()
-    ctx.moveTo(legendX, y)
-    ctx.lineTo(legendX + 30, y)
-    ctx.stroke()
+    // Check if mouse is within plot area
+    if (mouseX >= padding && mouseX <= width - padding &&
+        mouseY >= padding && mouseY <= height - padding) {
 
-    ctx.fillText(item.label, legendX + 40, y + 4)
-  })
+      // Calculate day from mouse X position
+      const day = Math.round(((mouseX - padding) / plotWidth) * totalDays.value)
+      const t = day / totalDays.value
+      const expected = frontLoadedCurve(t, frontLoadFactor.value) * totalBudget.value
+      const linear = (day / totalDays.value) * totalBudget.value
+
+      // Draw crosshair
+      ctx.strokeStyle = textColor
+      ctx.setLineDash([3, 3])
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(mouseX, padding)
+      ctx.lineTo(mouseX, height - padding)
+      ctx.moveTo(padding, mouseY)
+      ctx.lineTo(width - padding, mouseY)
+      ctx.stroke()
+      ctx.setLineDash([])
+
+      // Draw tooltip box
+      const tooltipWidth = 180
+      const tooltipHeight = 70
+      let tooltipX = mouseX + 15
+      let tooltipY = mouseY - tooltipHeight / 2
+
+      // Keep tooltip in bounds
+      if (tooltipX + tooltipWidth > width - padding) {
+        tooltipX = mouseX - tooltipWidth - 15
+      }
+      if (tooltipY < padding) tooltipY = padding
+      if (tooltipY + tooltipHeight > height - padding) {
+        tooltipY = height - padding - tooltipHeight
+      }
+
+      // Draw tooltip background
+      ctx.fillStyle = isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)'
+      ctx.strokeStyle = isDark ? '#555' : '#ccc'
+      ctx.lineWidth = 1
+      ctx.fillRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight)
+      ctx.strokeRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight)
+
+      // Draw tooltip text
+      ctx.fillStyle = textColor
+      ctx.font = '12px sans-serif'
+      ctx.textAlign = 'left'
+      ctx.fillText(`Day: ${day}`, tooltipX + 10, tooltipY + 18)
+      ctx.fillText(`Expected: $${expected.toFixed(2)}`, tooltipX + 10, tooltipY + 36)
+      ctx.fillText(`Linear: $${linear.toFixed(2)}`, tooltipX + 10, tooltipY + 54)
+    }
+  }
 }
 
 onMounted(() => {
   drawChart()
+
+  // Add mouse event listeners
+  const canvas = chartCanvas.value
+  if (canvas) {
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect()
+      mousePos.value = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      }
+      drawChart()
+    }
+
+    const handleMouseLeave = () => {
+      mousePos.value = null
+      drawChart()
+    }
+
+    canvas.addEventListener('mousemove', handleMouseMove)
+    canvas.addEventListener('mouseleave', handleMouseLeave)
+  }
 })
 
 watch([totalBudget, totalDays, currentDay, actualSpent, frontLoadFactor], () => {
@@ -330,14 +430,30 @@ onMounted(() => {
           </label>
           <input type="range" min="0.8" max="2.0" step="0.1" v-model.number="frontLoadFactor" />
           <div class="control-hint">
-            Adjust how aggressively the curve expects early spending. 1.0 = linear, &gt;1.0 = front-loaded (payday effect), &lt;1.0 = back-loaded (savers)
+            {{ frontLoadDescription }}
           </div>
         </div>
       </div>
 
       <!-- Chart -->
       <div class="chart">
-        <h3>Spending Curve Visualization</h3>
+        <div class="chart-header">
+          <h3>Spending Curve Visualization</h3>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-line legend-linear"></span>
+              <span class="legend-label">Linear (naive)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line legend-expected"></span>
+              <span class="legend-label">Front-loaded curve</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line legend-actual"></span>
+              <span class="legend-label">Your actual spending</span>
+            </div>
+          </div>
+        </div>
         <canvas ref="chartCanvas" width="600" height="400"></canvas>
       </div>
     </div>
@@ -490,7 +606,7 @@ onMounted(() => {
 
 .calculator-grid {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: minmax(280px, 350px) 1fr;
   gap: 2rem;
   margin-bottom: 2rem;
 }
@@ -582,10 +698,89 @@ onMounted(() => {
   line-height: 1.4;
 }
 
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chart-header h3 {
+  margin: 0;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+}
+
+.legend-line {
+  display: inline-block;
+  width: 30px;
+  height: 2px;
+}
+
+.legend-linear {
+  background: repeating-linear-gradient(
+    90deg,
+    #9ca3af,
+    #9ca3af 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+.dark .legend-linear {
+  background: repeating-linear-gradient(
+    90deg,
+    #6b7280,
+    #6b7280 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+.legend-expected {
+  background-color: #10b981;
+  height: 3px;
+}
+
+.legend-actual {
+  background-color: #ef4444;
+  height: 4px;
+}
+
+.legend-label {
+  white-space: nowrap;
+}
+
 .chart canvas {
   width: 100%;
   height: auto;
   display: block;
   margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chart-legend {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 </style>
