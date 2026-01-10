@@ -84,6 +84,18 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
   /// Null when no bar is touched.
   int? touchedRodIndex;
 
+  /// Tooltip text to display in fixed position
+  String? tooltipText;
+
+  /// Scroll controller to track horizontal scroll position
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -104,50 +116,37 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
         ),
         // Chart with fixed Y-axis and scrollable content
         Expanded(
-          child: Row(
+          child: Stack(
             children: [
-              // Fixed Y-axis labels
-              SizedBox(
-                width: 40,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 5, bottom: 8),
-                  child: _buildYAxisLabels(context),
-                ),
-              ),
-              // Scrollable chart content
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: chartWidth,
+              Row(
+                children: [
+                  // Fixed Y-axis labels
+                  SizedBox(
+                    width: 40,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8, right: 8, top: 5, bottom: 8),
-                      child: BarChart(
+                      padding: const EdgeInsets.only(top: 5, bottom: 8),
+                      child: _buildYAxisLabels(context),
+                    ),
+                  ),
+                  // Scrollable chart content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      controller: _scrollController,
+                      child: SizedBox(
+                        width: chartWidth,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8, right: 8, top: 5, bottom: 8),
+                          child: BarChart(
                         BarChartData(
                           alignment: BarChartAlignment.spaceAround,
                           maxY: _getMaxY(),
                           barTouchData: BarTouchData(
                             enabled: true,
                             touchCallback: _handleTouch,
+                            // Disable built-in tooltips since we use fixed position tooltip
                             touchTooltipData: BarTouchTooltipData(
-                              tooltipPadding:
-                                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              tooltipBorderRadius: BorderRadius.circular(23),
-                              getTooltipColor: (group) =>
-                                  Theme.of(context).colorScheme.onSurface,
-                              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                                final categoryName = widget.data[groupIndex].categoryName;
-                                // TODO: Replace hardcoded "$" with currency from settings
-                                final amount = '\$${rod.toY.toStringAsFixed(2)}';
-                                return BarTooltipItem(
-                                  '$categoryName: $amount',
-                                  TextStyle(
-                                    color: Theme.of(context).colorScheme.surface,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                );
-                              },
+                              getTooltipItem: (group, groupIndex, rod, rodIndex) => null,
                             ),
                           ),
                           extraLinesData: ExtraLinesData(extraLinesOnTop: true),
@@ -182,14 +181,50 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
                           ),
                           borderData: FlBorderData(show: false),
                           barGroups: _buildGroups(context),
+                          ),
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOutQuad,
+                            ),
+                          ),
                         ),
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeInOutQuad,
+                      ),
+                    ),
+                  ],
+                ),
+              // Floating tooltip (centered in visible viewport)
+              if (tooltipText != null)
+                Positioned(
+                  top: 8,
+                  left: 40, // Y-axis width
+                  right: 0,
+                  child: IgnorePointer(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          tooltipText!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.surface,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -262,29 +297,43 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
   ///
   /// When a bar is touched:
   /// 1. Highlights the bar with tertiary color border
-  /// 2. Shows tooltip with category name and amount
-  /// 3. Resets highlight after 1 second
+  /// 2. Shows tooltip in fixed position above chart
+  /// 3. Resets highlight and tooltip after 1 second
   ///
   /// **Parameters**:
   /// - `event`: Touch event (tap, drag, etc.)
   /// - `response`: Bar chart touch response with touched bar info
   void _handleTouch(FlTouchEvent event, BarTouchResponse? response) {
-    if (!event.isInterestedForInteractions || response?.spot == null) return;
+    if (!event.isInterestedForInteractions || response?.spot == null) {
+      // Clear tooltip when not touching
+      if (tooltipText != null) {
+        setState(() {
+          tooltipText = null;
+        });
+      }
+      return;
+    }
 
     final groupIndex = response!.spot!.touchedBarGroupIndex;
     final rodIndex = response.spot!.touchedRodDataIndex;
+    final categoryName = widget.data[groupIndex].categoryName;
+    final amount = response.spot!.touchedRodData.toY;
+    final label = rodIndex == 0 ? 'Budget' : 'Spending';
 
     setState(() {
       touchedGroupIndex = groupIndex;
       touchedRodIndex = rodIndex;
+      // TODO: Replace hardcoded "$" with currency from settings
+      tooltipText = '$categoryName ($label): \$${amount.toStringAsFixed(2)}';
     });
 
-    // Reset highlight after 1 second
-    Timer(const Duration(seconds: 1), () {
+    // Reset highlight and tooltip after 1.5 seconds
+    Timer(const Duration(milliseconds: 1500), () {
       if (mounted) {
         setState(() {
           touchedGroupIndex = null;
           touchedRodIndex = null;
+          tooltipText = null;
         });
       }
     });
