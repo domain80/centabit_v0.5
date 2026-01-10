@@ -14,19 +14,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-/// Custom navigation shell using PageView for animated tab transitions
+/// Custom navigation shell with fade animations for tab transitions
 ///
 /// **Features**:
-/// - iOS-style slide + fade animations between tabs (300ms slide)
+/// - Smooth fade animations between tabs (300ms)
 /// - Preserves state across tab switches (singleton cubits)
-/// - Bidirectional sync between NavCubit and PageView
-/// - Native swipe gesture support
+/// - Tab state managed by NavCubit
 ///
 /// **Architecture**:
-/// - PageView manages visual transition animations (300ms)
+/// - AnimatedSwitcher with FadeTransition for page changes
 /// - NavCubit manages tab state and nav bar visibility
 /// - Singleton cubits survive page rebuilds (real-time updates work)
-/// - AnimatedBuilder applies fade based on scroll position
+/// - ValueKeys prevent widget recycling during transitions
 class CustomPageViewShell extends StatefulWidget {
   const CustomPageViewShell({super.key});
 
@@ -35,19 +34,7 @@ class CustomPageViewShell extends StatefulWidget {
 }
 
 class _CustomPageViewShellState extends State<CustomPageViewShell> {
-  late PageController _pageController;
-  bool _isAnimating = false;
   String? _previousRoute;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize PageController with current tab from NavCubit
-    final navCubit = context.read<NavCubit>();
-    _pageController = PageController(
-      initialPage: navCubit.state.selectedIndex,
-    );
-  }
 
   @override
   void didChangeDependencies() {
@@ -73,89 +60,57 @@ class _CustomPageViewShellState extends State<CustomPageViewShell> {
     _previousRoute = currentRoute;
   }
 
-  /// Builds a page with fade transition based on scroll position
-  Widget _buildPageWithFade({required int index, required Widget child}) {
-    return AnimatedBuilder(
-      animation: _pageController,
-      builder: (context, child) {
-        double value = 1.0;
-        if (_pageController.position.haveDimensions) {
-          value = _pageController.page ?? 0.0;
-          value = (1 - (value - index).abs()).clamp(0.0, 1.0);
-          // Apply a curve to the opacity for smoother transition
-          value = Curves.easeInOut.transform(value);
-        }
-        return Opacity(
-          opacity: value,
-          child: child!,
+  /// Get the page widget for the given index
+  Widget _getPageForIndex(int index) {
+    switch (index) {
+      case 0:
+        return BlocProvider.value(
+          key: const ValueKey('dashboard'),
+          value: getIt<DashboardCubit>(),
+          child: const DashboardPage(),
         );
-      },
-      child: child,
-    );
+      case 1:
+        return BlocProvider.value(
+          key: const ValueKey('transactions'),
+          value: getIt<TransactionListCubit>(),
+          child: const TransactionsPage(),
+        );
+      case 2:
+        return BlocProvider.value(
+          key: const ValueKey('budgets'),
+          value: getIt<BudgetListCubit>(),
+          child: const BudgetsPage(),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<NavCubit, NavState>(
-      // Listen for tab changes from nav bar taps
-      listenWhen: (prev, curr) =>
-          prev.selectedIndex != curr.selectedIndex && !_isAnimating,
-      listener: (context, state) {
-        // Animate PageView to match nav bar selection
-        _isAnimating = true;
-        _pageController
-            .animateToPage(
-          state.selectedIndex,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        )
-            .then((_) {
-          if (mounted) {
-            _isAnimating = false;
-          }
-        });
+    return BlocBuilder<NavCubit, NavState>(
+      buildWhen: (prev, curr) => prev.selectedIndex != curr.selectedIndex,
+      builder: (context, state) {
+        return Scaffold(
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            child: _getPageForIndex(state.selectedIndex),
+          ),
+          extendBody: true,
+          bottomNavigationBar: Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: _buildNavBar(context),
+          ),
+        );
       },
-      child: Scaffold(
-        body: PageView(
-          controller: _pageController,
-          onPageChanged: (index) {
-            // Sync NavCubit when user swipes PageView
-            if (!_isAnimating) {
-              context.read<NavCubit>().updateTab(index);
-            }
-          },
-          children: [
-            // Use BlocProvider.value() to prevent disposal when swiping
-            // Wrap each page with fade transition
-            _buildPageWithFade(
-              index: 0,
-              child: BlocProvider.value(
-                value: getIt<DashboardCubit>(),
-                child: const DashboardPage(),
-              ),
-            ),
-            _buildPageWithFade(
-              index: 1,
-              child: BlocProvider.value(
-                value: getIt<TransactionListCubit>(),
-                child: const TransactionsPage(),
-              ),
-            ),
-            _buildPageWithFade(
-              index: 2,
-              child: BlocProvider.value(
-                value: getIt<BudgetListCubit>(),
-                child: const BudgetsPage(),
-              ),
-            ),
-          ],
-        ),
-        extendBody: true,
-        bottomNavigationBar: Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: _buildNavBar(context),
-        ),
-      ),
     );
   }
 
@@ -208,11 +163,5 @@ class _CustomPageViewShellState extends State<CustomPageViewShell> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 }

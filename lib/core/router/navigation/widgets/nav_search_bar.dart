@@ -89,14 +89,14 @@ class _NavSearchBarState extends State<NavSearchBar> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(radius.xl3),
                       borderSide: BorderSide(
-                        color: colorScheme.primary.withAlpha(70),
+                        color: colorScheme.primary.withAlpha(140), // Increased from 70 to 140 (27% to 55%)
                         width: 1,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(radius.xl3),
                       borderSide: BorderSide(
-                        color: colorScheme.primary.withAlpha(70),
+                        color: colorScheme.primary.withAlpha(140), // Increased from 70 to 140 (27% to 55%)
                         width: 1,
                       ),
                     ),

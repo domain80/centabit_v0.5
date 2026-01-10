@@ -27,7 +27,7 @@ class BudgetSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(radius.md),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.4)), // Increased from 0.2 to 0.4
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +91,7 @@ class BudgetSummaryCard extends StatelessWidget {
           Text(
             '${_formatDate(details.budget.startDate)} - ${_formatDate(details.budget.endDate)}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
+              color: colorScheme.onSurface.withOpacity(0.7), // Increased from 0.6 to 0.7
             ),
           ),
         ],

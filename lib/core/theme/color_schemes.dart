@@ -64,7 +64,7 @@ class AppColorSchemes {
     seedColor: AppColors.grayGray8, // v0.4 dark primary
     brightness: Brightness.dark,
     // Primary colors - lighter gray for visibility on dark bg
-    primary: AppColors.grayGray6, // #868e96 - lighter for visibility
+    primary: AppColors.grayGray3, // #dee2e6 - much lighter for better contrast
     onPrimary: AppColors.grayGray9, // #212529
     primaryContainer: AppColors.grayGray7, // #495057
     onPrimaryContainer: AppColors.grayGray2, // #e9ecef
@@ -85,8 +85,8 @@ class AppColorSchemes {
     onErrorContainer: AppColors.redRed1, // #ffe3e3
     // Background and surface colors
     surface: AppColors.grayGray9, // #212529 - darkest gray
-    onSurface: AppColors.grayGray1, // #f1f3f5 - light gray
-    onSurfaceVariant: AppColors.grayGray4, // #ced4da
+    onSurface: AppColors.grayGray4, // #ced4da - more muted gray (was grayGray1 #f1f3f5)
+    onSurfaceVariant: AppColors.grayGray5, // #adb5bd - even more muted (was grayGray4)
     surfaceContainerHighest: AppColors.grayGray8, // #343a40
     // Outline colors
     outline: AppColors.grayGray6, // #868e96

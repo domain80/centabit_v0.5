@@ -141,7 +141,7 @@ class _TransactionFormContent extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 28, // v4's h2
                         fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.primary,
+                        color: theme.colorScheme.onSurface, // Changed from primary for better contrast
                       ),
                     ),
                   ),

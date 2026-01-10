@@ -71,7 +71,7 @@ class BudgetTile extends StatelessWidget {
                     budget.budget.name,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: colorScheme.primary,
+                      color: colorScheme.onSurface, // Changed from primary for better contrast
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -136,7 +136,7 @@ class BudgetTile extends StatelessWidget {
               budget.statusText,
               style: textTheme.bodySmall?.copyWith(
                 fontSize: 12,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                color: colorScheme.onSurface.withValues(alpha: 0.7), // Increased from 0.6 to 0.7
               ),
             ),
           ],
@@ -156,7 +156,7 @@ class BudgetTile extends StatelessWidget {
   Color _getStatusColor(ColorScheme colorScheme) {
     if (budget.isUpcoming) return colorScheme.secondary;
     if (budget.isActive) return colorScheme.primary;
-    return colorScheme.onSurface.withValues(alpha: 0.5);
+    return colorScheme.onSurface.withValues(alpha: 0.7); // Increased from 0.5 to 0.7
   }
 
   /// Gets progress bar color.

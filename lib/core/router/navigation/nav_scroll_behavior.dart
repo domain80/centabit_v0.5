@@ -25,6 +25,10 @@ class _NavScrollWrapperState extends State<NavScrollWrapper> {
   bool _onScrollNotification(ScrollNotification notification) {
     if (notification is! ScrollUpdateNotification) return false;
 
+    // Check if NavCubit is available (it won't be on sub-routes like budget details)
+    final navCubit = context.read<NavCubit?>();
+    if (navCubit == null) return false; // Gracefully handle missing NavCubit
+
     final metrics = notification.metrics;
     final currentOffset = metrics.pixels;
     final scrollDelta = currentOffset - _lastScrollOffset;
@@ -46,13 +50,13 @@ class _NavScrollWrapperState extends State<NavScrollWrapper> {
 
     if (isScrollingDown && currentOffset > 50) {
       // Hide immediately when scrolling down
-      context.read<NavCubit>().setNavBarVisible(false);
+      navCubit.setNavBarVisible(false);
     } else if (!isScrollingDown && currentOffset > 0) {
       // Show when explicitly scrolling up (not at top)
-      context.read<NavCubit>().setNavBarVisible(true);
+      navCubit.setNavBarVisible(true);
     } else if (currentOffset <= 0) {
       // Always show when at the very top
-      context.read<NavCubit>().setNavBarVisible(true);
+      navCubit.setNavBarVisible(true);
     }
 
     return false; // Don't absorb the notification

@@ -85,7 +85,7 @@ class SharedNavBar extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   iconSize: 22,
                   gap: 2,
-                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7), // Increased from 0.5 to 0.7
                   // activeColor: colorsch ,
                   tabBackgroundColor: colorScheme.secondary.withValues(alpha: 0.6),
                   padding: EdgeInsets.symmetric(horizontal: 11, vertical: 11),

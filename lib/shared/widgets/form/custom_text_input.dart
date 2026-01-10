@@ -37,7 +37,7 @@ class CustomTextInput extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: colorScheme.onSurface.withValues(alpha: 0.2),
+            color: colorScheme.onSurface.withValues(alpha: 0.4), // Increased from 0.2 to 0.4
             width: 1,
           ),
         ),

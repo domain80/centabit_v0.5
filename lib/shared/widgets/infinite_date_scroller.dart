@@ -204,8 +204,11 @@ class _InfiniteDateScrollerState extends State<InfiniteDateScroller> {
       final newDate = widget.currentDate;
 
       // Check if new date is within current range (excluding edges)
-      final isInRange = _dateRange.length > 10 &&
-          _dateRange.sublist(5, _dateRange.length - 5).any(
+      final isInRange =
+          _dateRange.length > 10 &&
+          _dateRange
+              .sublist(5, _dateRange.length - 5)
+              .any(
                 (date) =>
                     date.year == newDate.year &&
                     date.month == newDate.month &&
@@ -387,7 +390,11 @@ class _DatePill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
       width: 40,
       decoration: BoxDecoration(
-        color: isSelected ? colorScheme.primary : colorScheme.surface,
+        color: isSelected
+            ? colorScheme.onSurface.withAlpha(
+                220,
+              ) // Increased from 50 to 100 for lighter background
+            : colorScheme.surface,
         boxShadow: isSelected
             ? [
                 BoxShadow(
@@ -406,8 +413,12 @@ class _DatePill extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
           color: isSelected
-              ? colorScheme.onSurface.withAlpha(80)
-              : colorScheme.onSurface.withAlpha(40),
+              ? colorScheme.onSurface.withAlpha(
+                  100,
+                ) // Match background for seamless look
+              : colorScheme.onSurface.withAlpha(
+                  100,
+                ), // Increased from 40 to 100
           width: 1,
         ),
       ),
@@ -418,19 +429,26 @@ class _DatePill extends StatelessWidget {
           Text(
             dayName,
             style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected
-                  ? colorScheme.onPrimary
-                  : colorScheme.onSurface.withAlpha(180),
+                  ? colorScheme
+                        .surface // Full brightness for selected text
+                  : colorScheme.onSurface.withAlpha(
+                      200,
+                    ), // Increased from 180 to 200
             ),
           ),
           // Day number (1, 2, 3, etc.)
           Text(
             dayNum,
             style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected
-                  ? colorScheme.onPrimary
-                  : colorScheme.onSurface.withAlpha(180),
+                  ? colorScheme
+                        .surface // Full brightness for selected text
+                  : colorScheme.onSurface.withAlpha(
+                      200,
+                    ), // Increased from 180 to 200
             ),
           ),
         ],

@@ -177,8 +177,8 @@ class TransactionTile extends StatelessWidget {
                   border: GradientBoxBorder(
                     gradient: LinearGradient(
                       colors: [
-                        colorScheme.onSurface.withValues(alpha: 0.35),
-                        colorScheme.onSurface.withValues(alpha: 0.2),
+                        colorScheme.onSurface.withValues(alpha: 0.5), // Increased from 0.35
+                        colorScheme.onSurface.withValues(alpha: 0.35), // Increased from 0.2
                       ],
                     ),
                     width: 1,
@@ -188,7 +188,7 @@ class TransactionTile extends StatelessWidget {
                   padding: EdgeInsets.all(spacing.sm),
                   child: Icon(
                     _getTablerIcon(transaction.categoryIconName),
-                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7), // Increased from 0.6
                     size: spacing.lg + 2,
                   ),
                 ),
