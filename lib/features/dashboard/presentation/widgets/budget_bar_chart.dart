@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 /// - Uses AppLocalizations for legend strings
 /// - Uses Material 3 theme colors
 /// - Maintains all visual design and interactions
+/// - Added horizontal scrolling for many categories (60px per category)
 ///
 /// **Features**:
 /// 1. **Touch Interaction**: Tap a bar to highlight it temporarily (1 second)
@@ -26,6 +27,7 @@ import 'package:flutter/material.dart';
 /// 4. **Icons**: Category icons as bottom axis labels
 /// 5. **Auto-scaling**: Y-axis adjusts to data with 25% buffer
 /// 6. **Animation**: Smooth 500ms animation when data changes
+/// 7. **Horizontal Scroll**: Automatically scrollable when 7+ categories
 ///
 /// **Usage**:
 /// ```dart
@@ -86,6 +88,13 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
+    // Calculate width: 60px per category, with minimum of screen width
+    // This makes the chart scrollable when there are many categories
+    final barWidth = 60.0;
+    final minWidth = MediaQuery.of(context).size.width - 140; // Account for padding and Y-axis
+    final calculatedWidth = widget.data.length * barWidth;
+    final chartWidth = calculatedWidth > minWidth ? calculatedWidth : minWidth;
+
     return Column(
       children: [
         // Legend at top
@@ -93,85 +102,155 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
           budgetLabel: l10n.budget,
           transactionsLabel: l10n.spending,
         ),
-        // Chart fills remaining space
+        // Chart with fixed Y-axis and scrollable content
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8, top: 5, bottom: 8),
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: _getMaxY(),
-                barTouchData: BarTouchData(
-                  enabled: true,
-                  touchCallback: _handleTouch,
-                  touchTooltipData: BarTouchTooltipData(
-                    tooltipPadding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    tooltipBorderRadius: BorderRadius.circular(23),
-                    getTooltipColor: (group) =>
-                        Theme.of(context).colorScheme.onSurface,
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final categoryName = widget.data[groupIndex].categoryName;
-                      // TODO: Replace hardcoded "$" with currency from settings
-                      final amount = '\$${rod.toY.toStringAsFixed(2)}';
-                      return BarTooltipItem(
-                        '$categoryName: $amount',
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.surface,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      );
-                    },
-                  ),
+          child: Row(
+            children: [
+              // Fixed Y-axis labels
+              SizedBox(
+                width: 40,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 5, bottom: 8),
+                  child: _buildYAxisLabels(context),
                 ),
-                extraLinesData: ExtraLinesData(extraLinesOnTop: true),
-                titlesData: FlTitlesData(
-                  // Left axis: Y values (amounts)
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      interval: (_getMaxY() / 3),
-                      getTitlesWidget: (value, meta) => Text(
-                        value.toInt().toString(),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+              ),
+              // Scrollable chart content
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: chartWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8, top: 5, bottom: 8),
+                      child: BarChart(
+                        BarChartData(
+                          alignment: BarChartAlignment.spaceAround,
+                          maxY: _getMaxY(),
+                          barTouchData: BarTouchData(
+                            enabled: true,
+                            touchCallback: _handleTouch,
+                            touchTooltipData: BarTouchTooltipData(
+                              tooltipPadding:
+                                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              tooltipBorderRadius: BorderRadius.circular(23),
+                              getTooltipColor: (group) =>
+                                  Theme.of(context).colorScheme.onSurface,
+                              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                final categoryName = widget.data[groupIndex].categoryName;
+                                // TODO: Replace hardcoded "$" with currency from settings
+                                final amount = '\$${rod.toY.toStringAsFixed(2)}';
+                                return BarTooltipItem(
+                                  '$categoryName: $amount',
+                                  TextStyle(
+                                    color: Theme.of(context).colorScheme.surface,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          extraLinesData: ExtraLinesData(extraLinesOnTop: true),
+                          titlesData: FlTitlesData(
+                            // Left axis: Hide (we render it separately)
+                            leftTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            // Bottom axis: Category icons
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, meta) {
+                                  final index = value.toInt();
+                                  if (index >= widget.data.length) return Container();
+
+                                  final iconName = widget.data[index].categoryIconName;
+                                  return SideTitleWidget(
+                                    meta: meta,
+                                    child: Icon(
+                                      TablerIcons.all[iconName],
+                                      size: 16,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            rightTitles:
+                                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            topTitles:
+                                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          ),
+                          borderData: FlBorderData(show: false),
+                          barGroups: _buildGroups(context),
                         ),
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOutQuad,
                       ),
                     ),
                   ),
-                  // Bottom axis: Category icons
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        if (index >= widget.data.length) return Container();
-
-                        final iconName = widget.data[index].categoryIconName;
-                        return SideTitleWidget(
-                          meta: meta,
-                          child: Icon(
-                            TablerIcons.all[iconName],
-                            size: 16,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  rightTitles:
-                      const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles:
-                      const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                borderData: FlBorderData(show: false),
-                barGroups: _buildGroups(context),
               ),
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOutQuad,
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds fixed Y-axis labels that don't scroll with the chart
+  Widget _buildYAxisLabels(BuildContext context) {
+    final maxY = _getMaxY();
+    final interval = maxY / 3;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Top label
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Text(
+            maxY.toInt().toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        // Middle label
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Text(
+            (maxY - interval).toInt().toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        // Second middle label
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Text(
+            (maxY - interval * 2).toInt().toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        // Bottom label (0)
+        Padding(
+          padding: const EdgeInsets.only(right: 8, bottom: 20), // Extra padding for bottom icons
+          child: Text(
+            '0',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
             ),
           ),
         ),

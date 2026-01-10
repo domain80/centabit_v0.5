@@ -96,8 +96,8 @@ class _BudgetList extends StatelessWidget {
           return BudgetTile(
             budget: budgetViewModel,
             onTap: () {
-              // Navigate to budget details page
-              context.go('/budgets/${budgetViewModel.budget.id}');
+              // Navigate to budget details page (push to maintain back navigation)
+              context.push('/budgets/${budgetViewModel.budget.id}');
             },
           );
         },

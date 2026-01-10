@@ -147,7 +147,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
 
           // Success state: show budget cards
           success: (budgetPages, monthlyOverview) {
-            const height = 300.0;
+            const height = 340.0;
 
             // Empty state: no budgets or no chart data
             if (budgetPages.isEmpty || budgetPages.first.chartData.isEmpty) {
@@ -194,6 +194,8 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
                             monthTitle: l10n.activeBudget(page.budget.name),
                             barIndexValue: page.barIndexValue,
                             data: page.chartData,
+                            totalBudget: page.totalBudget,
+                            totalSpent: page.totalSpent,
                           );
                         },
                       ),
@@ -234,6 +236,7 @@ class _BudgetReportSectionState extends State<BudgetReportSection> {
 /// - Animated BAR value
 /// - Animated progress bar (color changes at threshold)
 /// - Bar chart with allocations vs transactions
+/// - Total spent and remaining amounts
 ///
 /// **Ported from v0.4**: Internal `_BudgetPageContent` class
 class _BudgetPageContent extends StatelessWidget {
@@ -248,10 +251,18 @@ class _BudgetPageContent extends StatelessWidget {
   /// Chart data for all categories.
   final List<TransactionsChartData> data;
 
+  /// Total budgeted amount (sum of allocations).
+  final double totalBudget;
+
+  /// Total spent amount (sum of transactions).
+  final double totalSpent;
+
   const _BudgetPageContent({
     required this.monthTitle,
     required this.barIndexValue,
     required this.data,
+    required this.totalBudget,
+    required this.totalSpent,
   });
 
   /// Shows BAR info dialog with detailed explanation.
@@ -461,6 +472,29 @@ class _BudgetPageContent extends StatelessWidget {
             clipBehavior: Clip.hardEdge,
             child: BudgetBarChart(data: data),
           ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // TOTAL SPENT AND REMAINING
+        Row(
+          mainAxisAlignment: .spaceBetween,
+          children: [
+            Text(
+              'Spent: \$${totalSpent.toStringAsFixed(2)}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.error,
+              ),
+            ),
+            Text(
+              'Remaining: \$${(totalBudget - totalSpent).toStringAsFixed(2)}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: (totalBudget - totalSpent) >= 0
+                    ? colorScheme.primary
+                    : colorScheme.error,
+              ),
+            ),
+          ],
         ),
       ],
     );

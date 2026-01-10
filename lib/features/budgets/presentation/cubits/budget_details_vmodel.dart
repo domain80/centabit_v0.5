@@ -1,3 +1,4 @@
+import 'package:centabit/core/utils/smart_budget_calculator.dart';
 import 'package:centabit/data/models/allocation_model.dart';
 import 'package:centabit/data/models/budget_model.dart';
 import 'package:centabit/data/models/category_model.dart';
@@ -9,6 +10,9 @@ class BudgetDetailsVModel {
   final BudgetModel budget;
   final List<AllocationDetailVModel> allocations;
   final List<TransactionVModel> transactions;
+
+  // Smart BAR calculator instance (shared with Dashboard)
+  static final SmartBudgetCalculator _barCalculator = SmartBudgetCalculator();
 
   const BudgetDetailsVModel({
     required this.budget,
@@ -26,7 +30,7 @@ class BudgetDetailsVModel {
 
   double get unallocated => budget.amount - totalAllocated;
 
-  // BAR calculation (matches Dashboard logic for consistency)
+  // BAR calculation using SmartBudgetCalculator (matches Dashboard logic)
   double get barValue {
     final now = DateTime.now();
 
@@ -49,19 +53,17 @@ class BudgetDetailsVModel {
       elapsedDays = now.difference(budget.startDate).inDays + 1;
     }
 
-    // Calculate spending ratio (how much of allocated budget is spent)
-    final spendRatio = totalSpent / totalAllocated;
+    // Use SmartBudgetCalculator with front-loaded curve
+    // This matches the Dashboard calculation exactly
+    final calculation = _barCalculator.calculate(
+      daysElapsed: elapsedDays,
+      totalDays: totalDays,
+      actualSpent: totalSpent,
+      totalBudget: totalAllocated,
+      // historicalData: [], // Future enhancement
+    );
 
-    // Calculate time ratio (how much of period has elapsed)
-    // Add 0.3 to prevent extreme values at start of period
-    final timeRatio = totalDays > 0 ? (elapsedDays + 0.3) / totalDays : 1.0;
-
-    // Edge case: Avoid division by zero
-    if (timeRatio == 0) return 0.0;
-
-    // Calculate and return BAR
-    // Higher value = spending faster than time passing
-    return spendRatio / timeRatio;
+    return calculation.bar;
   }
 
   // Progress percentage

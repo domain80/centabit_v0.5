@@ -72,7 +72,7 @@ class _BudgetDetailsContent extends StatelessWidget {
 
             // If budget not found, navigate back
             if (message.contains('not found')) {
-              context.go('/budgets');
+              context.pop();
             }
           },
         );
@@ -270,7 +270,7 @@ class _BudgetDetailsContent extends StatelessWidget {
             ),
             SizedBox(height: spacing.lg),
             FilledButton(
-              onPressed: () => context.go('/budgets'),
+              onPressed: () => context.pop(),
               child: const Text('Back to Budgets'),
             ),
           ],
@@ -342,7 +342,7 @@ class _BudgetDetailsContent extends StatelessWidget {
             onPressed: () {
               Navigator.pop(dialogContext);
               context.read<BudgetDetailsCubit>().deleteBudget();
-              context.go('/budgets');
+              context.pop();
             },
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,

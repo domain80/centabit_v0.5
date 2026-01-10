@@ -83,6 +83,13 @@ class DemoDataSeeder {
       CategoryModel.create(name: 'Transportation', iconName: 'car'),
       CategoryModel.create(name: 'Shopping', iconName: 'shoppingCart'),
       CategoryModel.create(name: 'Utilities', iconName: 'bolt'),
+      CategoryModel.create(name: 'Entertainment', iconName: 'movie'),
+      CategoryModel.create(name: 'Healthcare', iconName: 'heart'),
+      CategoryModel.create(name: 'Fitness', iconName: 'barbell'),
+      CategoryModel.create(name: 'Subscriptions', iconName: 'wifi'),
+      CategoryModel.create(name: 'Education', iconName: 'book'),
+      CategoryModel.create(name: 'Pets', iconName: 'paw'),
+      CategoryModel.create(name: 'Coffee & Cafes', iconName: 'coffee'),
       // Income category
       CategoryModel.create(name: 'Income', iconName: 'moneybagPlus'),
     ];
@@ -106,7 +113,7 @@ class DemoDataSeeder {
     final monthName = _getMonthName(now.month);
     final budget = BudgetModel.create(
       name: '$monthName ${now.year}',
-      amount: 3000.0,
+      amount: 4500.0,
       startDate: startDate,
       endDate: endDate,
     );
@@ -152,7 +159,7 @@ class DemoDataSeeder {
         budgetId: budget.id,
       ),
       AllocationModel.create(
-        amount: 500.0,
+        amount: 350.0,
         categoryId: expenseCategories
             .firstWhere((c) => c.name == 'Shopping')
             .id,
@@ -162,6 +169,55 @@ class DemoDataSeeder {
         amount: 600.0,
         categoryId: expenseCategories
             .firstWhere((c) => c.name == 'Utilities')
+            .id,
+        budgetId: budget.id,
+      ),
+      AllocationModel.create(
+        amount: 300.0,
+        categoryId: expenseCategories
+            .firstWhere((c) => c.name == 'Entertainment')
+            .id,
+        budgetId: budget.id,
+      ),
+      AllocationModel.create(
+        amount: 250.0,
+        categoryId: expenseCategories
+            .firstWhere((c) => c.name == 'Healthcare')
+            .id,
+        budgetId: budget.id,
+      ),
+      AllocationModel.create(
+        amount: 200.0,
+        categoryId: expenseCategories
+            .firstWhere((c) => c.name == 'Fitness')
+            .id,
+        budgetId: budget.id,
+      ),
+      AllocationModel.create(
+        amount: 150.0,
+        categoryId: expenseCategories
+            .firstWhere((c) => c.name == 'Subscriptions')
+            .id,
+        budgetId: budget.id,
+      ),
+      AllocationModel.create(
+        amount: 300.0,
+        categoryId: expenseCategories
+            .firstWhere((c) => c.name == 'Education')
+            .id,
+        budgetId: budget.id,
+      ),
+      AllocationModel.create(
+        amount: 200.0,
+        categoryId: expenseCategories
+            .firstWhere((c) => c.name == 'Pets')
+            .id,
+        budgetId: budget.id,
+      ),
+      AllocationModel.create(
+        amount: 150.0,
+        categoryId: expenseCategories
+            .firstWhere((c) => c.name == 'Coffee & Cafes')
             .id,
         budgetId: budget.id,
       ),
@@ -211,13 +267,20 @@ class DemoDataSeeder {
 
     // Expense transactions spread throughout the month
     final expenseData = [
-      // Week 1
+      // Day 1-3
       {
         'name': 'Grocery Shopping',
         'amount': 125.50,
         'category': 'Groceries',
         'day': 2,
         'hour': 18,
+      },
+      {
+        'name': 'Morning Coffee',
+        'amount': 5.25,
+        'category': 'Coffee & Cafes',
+        'day': 2,
+        'hour': 8,
       },
       {
         'name': 'Gas Station',
@@ -227,11 +290,41 @@ class DemoDataSeeder {
         'hour': 8,
       },
       {
-        'name': 'Coffee Shop',
-        'amount': 12.75,
-        'category': 'Dining Out',
-        'day': 4,
+        'name': 'Spotify Premium',
+        'amount': 9.99,
+        'category': 'Subscriptions',
+        'day': 3,
         'hour': 10,
+      },
+      {
+        'name': 'Lunch Out',
+        'amount': 18.75,
+        'category': 'Dining Out',
+        'day': 3,
+        'hour': 13,
+      },
+
+      // Day 4-6
+      {
+        'name': 'Movie Tickets',
+        'amount': 32.00,
+        'category': 'Entertainment',
+        'day': 4,
+        'hour': 19,
+      },
+      {
+        'name': 'Pharmacy',
+        'amount': 45.30,
+        'category': 'Healthcare',
+        'day': 4,
+        'hour': 16,
+      },
+      {
+        'name': 'Coffee Run',
+        'amount': 6.50,
+        'category': 'Coffee & Cafes',
+        'day': 5,
+        'hour': 9,
       },
       {
         'name': 'New Shirt',
@@ -240,8 +333,36 @@ class DemoDataSeeder {
         'day': 5,
         'hour': 16,
       },
+      {
+        'name': 'Gym Membership',
+        'amount': 65.00,
+        'category': 'Fitness',
+        'day': 6,
+        'hour': 7,
+      },
+      {
+        'name': 'Pet Food',
+        'amount': 52.00,
+        'category': 'Pets',
+        'day': 6,
+        'hour': 15,
+      },
 
-      // Week 2
+      // Day 7-10
+      {
+        'name': 'Dinner Date',
+        'amount': 85.50,
+        'category': 'Dining Out',
+        'day': 7,
+        'hour': 19,
+      },
+      {
+        'name': 'Netflix',
+        'amount': 15.99,
+        'category': 'Subscriptions',
+        'day': 8,
+        'hour': 10,
+      },
       {
         'name': 'Lunch at Bistro',
         'amount': 35.20,
@@ -257,11 +378,41 @@ class DemoDataSeeder {
         'hour': 15,
       },
       {
+        'name': 'Book Store',
+        'amount': 42.99,
+        'category': 'Education',
+        'day': 9,
+        'hour': 17,
+      },
+      {
         'name': 'Grocery Store',
         'amount': 98.30,
         'category': 'Groceries',
         'day': 10,
         'hour': 19,
+      },
+      {
+        'name': 'Starbucks',
+        'amount': 7.85,
+        'category': 'Coffee & Cafes',
+        'day': 10,
+        'hour': 8,
+      },
+
+      // Day 11-14
+      {
+        'name': 'Concert Tickets',
+        'amount': 120.00,
+        'category': 'Entertainment',
+        'day': 11,
+        'hour': 20,
+      },
+      {
+        'name': 'Yoga Class',
+        'amount': 25.00,
+        'category': 'Fitness',
+        'day': 11,
+        'hour': 18,
       },
       {
         'name': 'Uber Ride',
@@ -270,8 +421,50 @@ class DemoDataSeeder {
         'day': 12,
         'hour': 22,
       },
+      {
+        'name': 'Doctor Copay',
+        'amount': 30.00,
+        'category': 'Healthcare',
+        'day': 13,
+        'hour': 10,
+      },
+      {
+        'name': 'Coffee Shop',
+        'amount': 5.50,
+        'category': 'Coffee & Cafes',
+        'day': 13,
+        'hour': 14,
+      },
+      {
+        'name': 'Online Course',
+        'amount': 89.00,
+        'category': 'Education',
+        'day': 14,
+        'hour': 20,
+      },
+      {
+        'name': 'Brunch',
+        'amount': 42.30,
+        'category': 'Dining Out',
+        'day': 14,
+        'hour': 11,
+      },
 
-      // Week 3
+      // Day 15-18
+      {
+        'name': 'Apple iCloud',
+        'amount': 2.99,
+        'category': 'Subscriptions',
+        'day': 15,
+        'hour': 9,
+      },
+      {
+        'name': 'Vet Checkup',
+        'amount': 75.00,
+        'category': 'Pets',
+        'day': 15,
+        'hour': 16,
+      },
       {
         'name': 'New Shoes',
         'amount': 89.99,
@@ -280,7 +473,21 @@ class DemoDataSeeder {
         'hour': 16,
       },
       {
-        'name': 'Dinner Date',
+        'name': 'Coffee & Pastry',
+        'amount': 9.25,
+        'category': 'Coffee & Cafes',
+        'day': 16,
+        'hour': 8,
+      },
+      {
+        'name': 'Gas Fill-up',
+        'amount': 58.00,
+        'category': 'Transportation',
+        'day': 17,
+        'hour': 7,
+      },
+      {
+        'name': 'Dinner Out',
         'amount': 78.50,
         'category': 'Dining Out',
         'day': 17,
@@ -294,34 +501,143 @@ class DemoDataSeeder {
         'hour': 10,
       },
       {
-        'name': 'Groceries',
+        'name': 'Personal Trainer',
+        'amount': 80.00,
+        'category': 'Fitness',
+        'day': 18,
+        'hour': 18,
+      },
+
+      // Day 19-22
+      {
+        'name': 'Weekly Groceries',
         'amount': 142.80,
         'category': 'Groceries',
         'day': 19,
         'hour': 17,
       },
-
-      // Week 4
       {
-        'name': 'Gas',
+        'name': 'Streaming Bundle',
+        'amount': 19.99,
+        'category': 'Subscriptions',
+        'day': 19,
+        'hour': 11,
+      },
+      {
+        'name': 'Movie Night',
+        'amount': 65.00,
+        'category': 'Entertainment',
+        'day': 20,
+        'hour': 19,
+      },
+      {
+        'name': 'Pharmacy Refill',
+        'amount': 38.50,
+        'category': 'Healthcare',
+        'day': 20,
+        'hour': 15,
+      },
+      {
+        'name': 'Cafe Latte',
+        'amount': 6.00,
+        'category': 'Coffee & Cafes',
+        'day': 21,
+        'hour': 9,
+      },
+      {
+        'name': 'Books for Course',
+        'amount': 125.00,
+        'category': 'Education',
+        'day': 21,
+        'hour': 13,
+      },
+      {
+        'name': 'Pet Grooming',
+        'amount': 55.00,
+        'category': 'Pets',
+        'day': 22,
+        'hour': 14,
+      },
+      {
+        'name': 'Sushi Dinner',
+        'amount': 92.00,
+        'category': 'Dining Out',
+        'day': 22,
+        'hour': 20,
+      },
+
+      // Day 23-26
+      {
+        'name': 'Gas Station',
         'amount': 60.00,
         'category': 'Transportation',
         'day': 23,
         'hour': 9,
       },
       {
-        'name': 'Brunch',
-        'amount': 42.30,
-        'category': 'Dining Out',
+        'name': 'New Jacket',
+        'amount': 125.00,
+        'category': 'Shopping',
+        'day': 23,
+        'hour': 16,
+      },
+      {
+        'name': 'Morning Coffee',
+        'amount': 5.75,
+        'category': 'Coffee & Cafes',
         'day': 24,
-        'hour': 11,
+        'hour': 8,
+      },
+      {
+        'name': 'Fitness Equipment',
+        'amount': 45.00,
+        'category': 'Fitness',
+        'day': 24,
+        'hour': 12,
       },
       {
         'name': 'Home Decor',
-        'amount': 156.75,
+        'amount': 85.50,
         'category': 'Shopping',
         'day': 25,
         'hour': 15,
+      },
+      {
+        'name': 'Streaming App',
+        'amount': 12.99,
+        'category': 'Subscriptions',
+        'day': 25,
+        'hour': 10,
+      },
+      {
+        'name': 'Concert',
+        'amount': 95.00,
+        'category': 'Entertainment',
+        'day': 26,
+        'hour': 20,
+      },
+      {
+        'name': 'Brunch with Friends',
+        'amount': 48.30,
+        'category': 'Dining Out',
+        'day': 26,
+        'hour': 11,
+      },
+
+      // Day 27-30
+      {
+        'name': 'Grocery Run',
+        'amount': 87.25,
+        'category': 'Groceries',
+        'day': 27,
+        'hour': 18,
+      },
+      {
+        'name': 'Dentist Copay',
+        'amount': 50.00,
+        'category': 'Healthcare',
+        'day': 27,
+        'hour': 14,
       },
 
       // Recent transactions (only if we're past day 28)
@@ -334,11 +650,53 @@ class DemoDataSeeder {
           'hour': 12,
         },
         {
-          'name': 'Groceries',
+          'name': 'Coffee Stop',
+          'amount': 6.50,
+          'category': 'Coffee & Cafes',
+          'day': 28,
+          'hour': 9,
+        },
+        {
+          'name': 'Rideshare',
+          'amount': 18.00,
+          'category': 'Transportation',
+          'day': 28,
+          'hour': 22,
+        },
+        {
+          'name': 'Pet Supplies',
+          'amount': 35.00,
+          'category': 'Pets',
+          'day': 29,
+          'hour': 16,
+        },
+        {
+          'name': 'Fresh Groceries',
           'amount': 76.45,
           'category': 'Groceries',
           'day': 29,
           'hour': 18,
+        },
+        {
+          'name': 'Lunch Out',
+          'amount': 28.50,
+          'category': 'Dining Out',
+          'day': 29,
+          'hour': 13,
+        },
+        {
+          'name': 'Museum Tickets',
+          'amount': 45.00,
+          'category': 'Entertainment',
+          'day': 30,
+          'hour': 15,
+        },
+        {
+          'name': 'Vitamins',
+          'amount': 32.99,
+          'category': 'Healthcare',
+          'day': 30,
+          'hour': 10,
         },
       },
     ];
