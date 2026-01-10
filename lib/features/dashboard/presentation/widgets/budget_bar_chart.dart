@@ -90,9 +90,16 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
   /// Scroll controller to track horizontal scroll position
   final ScrollController _scrollController = ScrollController();
 
+  /// Timestamp when tooltip was shown (for min display duration)
+  DateTime? _tooltipShowTime;
+
+  /// Timer for auto-hiding tooltip
+  Timer? _tooltipTimer;
+
   @override
   void dispose() {
     _scrollController.dispose();
+    _tooltipTimer?.cancel();
     super.dispose();
   }
 
@@ -305,12 +312,38 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
   /// - `response`: Bar chart touch response with touched bar info
   void _handleTouch(FlTouchEvent event, BarTouchResponse? response) {
     if (!event.isInterestedForInteractions || response?.spot == null) {
+      // Only hide if tooltip has been visible for at least 1 second
+      final now = DateTime.now();
+      if (_tooltipShowTime != null && tooltipText != null) {
+        final elapsed = now.difference(_tooltipShowTime!);
+        if (elapsed.inMilliseconds < 1000) {
+          // Tooltip shown less than 1 second ago, delay hiding
+          final remainingTime = 1000 - elapsed.inMilliseconds;
+          _tooltipTimer?.cancel();
+          _tooltipTimer = Timer(Duration(milliseconds: remainingTime), () {
+            if (mounted) {
+              setState(() {
+                touchedGroupIndex = null;
+                touchedRodIndex = null;
+                tooltipText = null;
+                _tooltipShowTime = null;
+              });
+            }
+          });
+          return;
+        }
+      }
+
       // Clear tooltip when not touching
       if (tooltipText != null) {
         setState(() {
+          touchedGroupIndex = null;
+          touchedRodIndex = null;
           tooltipText = null;
+          _tooltipShowTime = null;
         });
       }
+      _tooltipTimer?.cancel();
       return;
     }
 
@@ -325,15 +358,18 @@ class _BudgetBarChartState extends State<BudgetBarChart> {
       touchedRodIndex = rodIndex;
       // TODO: Replace hardcoded "$" with currency from settings
       tooltipText = '$categoryName ($label): \$${amount.toStringAsFixed(2)}';
+      _tooltipShowTime = DateTime.now(); // Track when shown
     });
 
-    // Reset highlight and tooltip after 1.5 seconds
-    Timer(const Duration(milliseconds: 1500), () {
+    // Reset highlight and tooltip after 2 seconds total (1 second min + 1 second grace)
+    _tooltipTimer?.cancel();
+    _tooltipTimer = Timer(const Duration(milliseconds: 2000), () {
       if (mounted) {
         setState(() {
           touchedGroupIndex = null;
           touchedRodIndex = null;
           tooltipText = null;
+          _tooltipShowTime = null;
         });
       }
     });

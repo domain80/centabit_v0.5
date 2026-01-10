@@ -154,8 +154,10 @@ class _BudgetDetailsContent extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: spacing.md),
-                  Container(
-                    height: 220,
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    height: cubit.selectedChartType == ChartType.bar ? 220 : 180,
                     padding: EdgeInsets.all(spacing.md),
                     decoration: BoxDecoration(
                       color: colorScheme.surface.withAlpha(125),
@@ -177,18 +179,36 @@ class _BudgetDetailsContent extends StatelessWidget {
                       builder: (context, state) {
                         final cubit = context.read<BudgetDetailsCubit>();
 
-                        return state.maybeWhen(
-                          success: (details) {
-                            switch (cubit.selectedChartType) {
-                              case ChartType.bar:
-                                return BudgetBarChart(data: details.chartData);
-                              case ChartType.pie:
-                                return AllocationsPieChart(
-                                  data: details.chartData,
-                                );
-                            }
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          switchInCurve: Curves.easeInOut,
+                          switchOutCurve: Curves.easeInOut,
+                          transitionBuilder: (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: ScaleTransition(
+                                scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                                child: child,
+                              ),
+                            );
                           },
-                          orElse: () => const SizedBox.shrink(),
+                          child: state.maybeWhen(
+                            success: (details) {
+                              switch (cubit.selectedChartType) {
+                                case ChartType.bar:
+                                  return BudgetBarChart(
+                                    key: const ValueKey('bar_chart'),
+                                    data: details.chartData,
+                                  );
+                                case ChartType.pie:
+                                  return AllocationsPieChart(
+                                    key: const ValueKey('pie_chart'),
+                                    data: details.chartData,
+                                  );
+                              }
+                            },
+                            orElse: () => const SizedBox.shrink(),
+                          ),
                         );
                       },
                     ),
