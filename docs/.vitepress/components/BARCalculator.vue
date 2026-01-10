@@ -362,40 +362,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- BAR Interpretation Guide -->
-    <div class="interpretation-guide">
-      <h3>BAR Interpretation Guide</h3>
-      <div class="guide-grid">
-        <div class="guide-item guide-green">
-          <span class="guide-range">BAR &lt; 0.8</span>
-          <span class="guide-text">Excellent - spending much slower than planned</span>
-        </div>
-        <div class="guide-item guide-green">
-          <span class="guide-range">BAR 0.8-1.0</span>
-          <span class="guide-text">Good - under budget, healthy pace</span>
-        </div>
-        <div class="guide-item guide-blue">
-          <span class="guide-range">BAR = 1.0</span>
-          <span class="guide-text">Perfect pace - right on track</span>
-        </div>
-        <div class="guide-item guide-yellow">
-          <span class="guide-range">BAR 1.0-1.2</span>
-          <span class="guide-text">Warning - overspending, watch carefully</span>
-        </div>
-        <div class="guide-item guide-orange">
-          <span class="guide-range">BAR 1.2-1.5</span>
-          <span class="guide-text">Critical - significantly over budget</span>
-        </div>
-        <div class="guide-item guide-red">
-          <span class="guide-range">BAR &gt; 1.5</span>
-          <span class="guide-text">Danger - severe overspending, immediate action needed</span>
-        </div>
-      </div>
-
-      <div class="key-rule">
-        <strong>Key Rule:</strong> Stay below 1.0 to ensure you don't run out of budget before the period ends.
-      </div>
-    </div>
+    
 
     <!-- Controls and Chart -->
     <div class="calculator-grid">
@@ -455,6 +422,41 @@ onMounted(() => {
           </div>
         </div>
         <canvas ref="chartCanvas" width="600" height="400"></canvas>
+      </div>
+    </div>
+
+    <!-- BAR Interpretation Guide -->
+<div class="interpretation-guide">
+      <h3>BAR Interpretation Guide</h3>
+      <div class="guide-grid">
+        <div class="guide-item guide-green">
+          <span class="guide-range">BAR &lt; 0.8</span>
+          <span class="guide-text">Excellent - spending much slower than planned</span>
+        </div>
+        <div class="guide-item guide-green">
+          <span class="guide-range">BAR 0.8-1.0</span>
+          <span class="guide-text">Good - under budget, healthy pace</span>
+        </div>
+        <div class="guide-item guide-blue">
+          <span class="guide-range">BAR = 1.0</span>
+          <span class="guide-text">Perfect pace - right on track</span>
+        </div>
+        <div class="guide-item guide-yellow">
+          <span class="guide-range">BAR 1.0-1.2</span>
+          <span class="guide-text">Warning - overspending, watch carefully</span>
+        </div>
+        <div class="guide-item guide-orange">
+          <span class="guide-range">BAR 1.2-1.5</span>
+          <span class="guide-text">Critical - significantly over budget</span>
+        </div>
+        <div class="guide-item guide-red">
+          <span class="guide-range">BAR &gt; 1.5</span>
+          <span class="guide-text">Danger - severe overspending, immediate action needed</span>
+        </div>
+      </div>
+
+      <div class="key-rule">
+        <strong>Key Rule:</strong> Stay below 1.0 to ensure you don't run out of budget before the period ends.
       </div>
     </div>
   </div>
@@ -611,11 +613,25 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1280px) {
   .calculator-grid {
     grid-template-columns: 1fr;
   }
 
+  .controls {
+    padding: 1rem;
+  }
+
+  .control {
+    margin-bottom: 1rem;
+  }
+
+  .control-advanced {
+    padding-top: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
   .bar-score-main {
     flex-direction: column;
     gap: 1rem;
