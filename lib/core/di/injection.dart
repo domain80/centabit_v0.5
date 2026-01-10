@@ -233,6 +233,8 @@ Future<void> configureDependencies() async {
   // Register demo data seeder
   getIt.registerLazySingleton<DemoDataSeeder>(
     () => DemoDataSeeder(
+      database: getIt<AppDatabase>(),
+      categoryLocalSource: getIt<CategoryLocalSource>(),
       categoryRepository: getIt<CategoryRepository>(),
       budgetRepository: getIt<BudgetRepository>(),
       allocationRepository: getIt<AllocationRepository>(),
@@ -240,6 +242,6 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  // Seed demo data if database is empty
-  await getIt<DemoDataSeeder>().seedIfEmpty();
+  // Seed demo data - force clear and reseed for development
+  await getIt<DemoDataSeeder>().seedIfEmpty(forceClear: true);
 }

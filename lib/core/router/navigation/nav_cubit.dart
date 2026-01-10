@@ -10,6 +10,9 @@ class NavState {
   /// Currently selected tab index (0: Dashboard, 1: Transactions, 2: Budgets)
   final int selectedIndex;
 
+  /// Previously selected tab index (for animation direction)
+  final int previousIndex;
+
   /// Action type to display in FAB based on current tab
   final NavActionType actionType;
 
@@ -33,6 +36,7 @@ class NavState {
 
   const NavState({
     required this.selectedIndex,
+    required this.previousIndex,
     required this.actionType,
     this.searchEnabled = false,
     this.isSearching = false,
@@ -45,6 +49,7 @@ class NavState {
   /// Create a copy of this state with optional field replacements
   NavState copyWith({
     int? selectedIndex,
+    int? previousIndex,
     NavActionType? actionType,
     bool? searchEnabled,
     bool? isSearching,
@@ -55,6 +60,7 @@ class NavState {
   }) {
     return NavState(
       selectedIndex: selectedIndex ?? this.selectedIndex,
+      previousIndex: previousIndex ?? this.previousIndex,
       actionType: actionType ?? this.actionType,
       searchEnabled: searchEnabled ?? this.searchEnabled,
       isSearching: isSearching ?? this.isSearching,
@@ -78,6 +84,7 @@ class NavCubit extends Cubit<NavState> {
     : super(
         const NavState(
           selectedIndex: 0,
+          previousIndex: 0,
           actionType: NavActionType.addTransaction,
         ),
       );
@@ -100,6 +107,7 @@ class NavCubit extends Cubit<NavState> {
     // Update all nav state when switching tabs
     emit(
       state.copyWith(
+        previousIndex: state.selectedIndex, // Store current index before changing
         selectedIndex: index,
         actionType: actionType,
         searchEnabled: searchEnabled,

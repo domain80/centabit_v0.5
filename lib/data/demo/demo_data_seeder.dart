@@ -1,4 +1,6 @@
 import 'package:centabit/core/logging/app_logger.dart';
+import 'package:centabit/data/local/category_local_source.dart';
+import 'package:centabit/data/local/database.dart';
 import 'package:centabit/data/models/allocation_model.dart';
 import 'package:centabit/data/models/budget_model.dart';
 import 'package:centabit/data/models/category_model.dart';
@@ -10,6 +12,8 @@ import 'package:centabit/data/repositories/transaction_repository.dart';
 
 /// Service for populating the database with demo data for testing and showcasing
 class DemoDataSeeder {
+  final AppDatabase _database;
+  final CategoryLocalSource _categoryLocalSource;
   final CategoryRepository _categoryRepository;
   final BudgetRepository _budgetRepository;
   final AllocationRepository _allocationRepository;
@@ -17,24 +21,37 @@ class DemoDataSeeder {
   final AppLogger _logger = AppLogger.instance;
 
   DemoDataSeeder({
+    required AppDatabase database,
+    required CategoryLocalSource categoryLocalSource,
     required CategoryRepository categoryRepository,
     required BudgetRepository budgetRepository,
     required AllocationRepository allocationRepository,
     required TransactionRepository transactionRepository,
-  })  : _categoryRepository = categoryRepository,
+  })  : _database = database,
+        _categoryLocalSource = categoryLocalSource,
+        _categoryRepository = categoryRepository,
         _budgetRepository = budgetRepository,
         _allocationRepository = allocationRepository,
         _transactionRepository = transactionRepository;
 
   /// Seeds the database with demo data if it's empty
-  Future<void> seedIfEmpty() async {
+  ///
+  /// Set [forceClear] to true to clear all existing data and reseed
+  Future<void> seedIfEmpty({bool forceClear = false}) async {
     try {
+      if (forceClear) {
+        _logger.info('Force clear requested - dropping all data...');
+        await _database.clearAllData();
+        _logger.info('Database cleared successfully');
+      }
+
       _logger.info('Checking if demo data seeding is needed...');
 
-      // Check if data already exists
-      final existingCategories = _categoryRepository.categories;
+      // Check if data already exists by querying database directly
+      // (repository cache may not be populated yet on app startup)
+      final existingCategories = await _categoryLocalSource.getAllCategories();
       if (existingCategories.isNotEmpty) {
-        _logger.info('Demo data already exists, skipping seed');
+        _logger.info('Demo data already exists (${existingCategories.length} categories found), skipping seed');
         return;
       }
 
@@ -72,10 +89,6 @@ class DemoDataSeeder {
         iconName: 'directions_car',
       ),
       CategoryModel.create(
-        name: 'Entertainment',
-        iconName: 'movie',
-      ),
-      CategoryModel.create(
         name: 'Shopping',
         iconName: 'shopping_bag',
       ),
@@ -83,22 +96,10 @@ class DemoDataSeeder {
         name: 'Utilities',
         iconName: 'bolt',
       ),
+      // Income category
       CategoryModel.create(
-        name: 'Healthcare',
-        iconName: 'local_hospital',
-      ),
-      CategoryModel.create(
-        name: 'Fitness',
-        iconName: 'fitness_center',
-      ),
-      // Income categories
-      CategoryModel.create(
-        name: 'Salary',
+        name: 'Income',
         iconName: 'account_balance_wallet',
-      ),
-      CategoryModel.create(
-        name: 'Freelance',
-        iconName: 'work',
       ),
     ];
 
@@ -141,47 +142,32 @@ class DemoDataSeeder {
 
     // Only allocate to expense categories (not income)
     final expenseCategories = categories.where((cat) =>
-        cat.name != 'Salary' && cat.name != 'Freelance').toList();
+        cat.name != 'Income').toList();
 
     final allocations = <AllocationModel>[
       AllocationModel.create(
-        amount: 600.0,
+        amount: 800.0,
         categoryId: expenseCategories.firstWhere((c) => c.name == 'Groceries').id,
         budgetId: budget.id,
       ),
       AllocationModel.create(
-        amount: 300.0,
+        amount: 400.0,
         categoryId: expenseCategories.firstWhere((c) => c.name == 'Dining Out').id,
         budgetId: budget.id,
       ),
       AllocationModel.create(
-        amount: 400.0,
+        amount: 500.0,
         categoryId: expenseCategories.firstWhere((c) => c.name == 'Transportation').id,
         budgetId: budget.id,
       ),
       AllocationModel.create(
-        amount: 200.0,
-        categoryId: expenseCategories.firstWhere((c) => c.name == 'Entertainment').id,
-        budgetId: budget.id,
-      ),
-      AllocationModel.create(
-        amount: 300.0,
+        amount: 500.0,
         categoryId: expenseCategories.firstWhere((c) => c.name == 'Shopping').id,
         budgetId: budget.id,
       ),
       AllocationModel.create(
-        amount: 500.0,
+        amount: 600.0,
         categoryId: expenseCategories.firstWhere((c) => c.name == 'Utilities').id,
-        budgetId: budget.id,
-      ),
-      AllocationModel.create(
-        amount: 200.0,
-        categoryId: expenseCategories.firstWhere((c) => c.name == 'Healthcare').id,
-        budgetId: budget.id,
-      ),
-      AllocationModel.create(
-        amount: 150.0,
-        categoryId: expenseCategories.firstWhere((c) => c.name == 'Fitness').id,
         budgetId: budget.id,
       ),
     ];
@@ -220,20 +206,10 @@ class DemoDataSeeder {
       name: 'Monthly Salary',
       amount: 4500.0,
       type: TransactionType.credit,
-      categoryId: getCat('Salary').id,
+      categoryId: getCat('Income').id,
       budgetId: null, // Income not counted toward budget
       transactionDate: DateTime(now.year, now.month, 1, 9, 0),
-      notes: 'January paycheck',
-    ));
-
-    transactions.add(TransactionModel.create(
-      name: 'Freelance Project',
-      amount: 800.0,
-      type: TransactionType.credit,
-      categoryId: getCat('Freelance').id,
-      budgetId: null,
-      transactionDate: DateTime(now.year, now.month, 5, 14, 30),
-      notes: 'Website design project',
+      notes: 'Paycheck',
     ));
 
     // Expense transactions spread throughout the month
@@ -242,28 +218,24 @@ class DemoDataSeeder {
       {'name': 'Grocery Shopping', 'amount': 125.50, 'category': 'Groceries', 'day': 2, 'hour': 18},
       {'name': 'Gas Station', 'amount': 55.00, 'category': 'Transportation', 'day': 3, 'hour': 8},
       {'name': 'Coffee Shop', 'amount': 12.75, 'category': 'Dining Out', 'day': 4, 'hour': 10},
-      {'name': 'Gym Membership', 'amount': 50.00, 'category': 'Fitness', 'day': 5, 'hour': 7},
+      {'name': 'New Shirt', 'amount': 45.00, 'category': 'Shopping', 'day': 5, 'hour': 16},
 
       // Week 2
       {'name': 'Lunch at Bistro', 'amount': 35.20, 'category': 'Dining Out', 'day': 8, 'hour': 13},
       {'name': 'Electric Bill', 'amount': 120.00, 'category': 'Utilities', 'day': 9, 'hour': 15},
       {'name': 'Grocery Store', 'amount': 98.30, 'category': 'Groceries', 'day': 10, 'hour': 19},
-      {'name': 'Movie Tickets', 'amount': 45.00, 'category': 'Entertainment', 'day': 11, 'hour': 20},
       {'name': 'Uber Ride', 'amount': 22.50, 'category': 'Transportation', 'day': 12, 'hour': 22},
 
       // Week 3
-      {'name': 'Pharmacy', 'amount': 35.75, 'category': 'Healthcare', 'day': 15, 'hour': 11},
       {'name': 'New Shoes', 'amount': 89.99, 'category': 'Shopping', 'day': 16, 'hour': 16},
       {'name': 'Dinner Date', 'amount': 78.50, 'category': 'Dining Out', 'day': 17, 'hour': 19},
       {'name': 'Water Bill', 'amount': 45.00, 'category': 'Utilities', 'day': 18, 'hour': 10},
       {'name': 'Groceries', 'amount': 142.80, 'category': 'Groceries', 'day': 19, 'hour': 17},
 
       // Week 4
-      {'name': 'Concert Tickets', 'amount': 120.00, 'category': 'Entertainment', 'day': 22, 'hour': 21},
       {'name': 'Gas', 'amount': 60.00, 'category': 'Transportation', 'day': 23, 'hour': 9},
       {'name': 'Brunch', 'amount': 42.30, 'category': 'Dining Out', 'day': 24, 'hour': 11},
       {'name': 'Home Decor', 'amount': 156.75, 'category': 'Shopping', 'day': 25, 'hour': 15},
-      {'name': 'Doctor Visit', 'amount': 85.00, 'category': 'Healthcare', 'day': 26, 'hour': 14},
 
       // Recent transactions (only if we're past day 28)
       if (now.day >= 28) ...{

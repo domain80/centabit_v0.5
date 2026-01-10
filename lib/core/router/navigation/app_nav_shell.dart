@@ -59,6 +59,7 @@ class _AppNavShellState extends State<AppNavShell> {
     return BlocBuilder<NavCubit, NavState>(
       // Only rebuild when relevant state changes (performance optimization)
       buildWhen: (prev, curr) =>
+          prev.selectedIndex != curr.selectedIndex ||
           prev.isNavBarVisible != curr.isNavBarVisible ||
           prev.isSearching != curr.isSearching ||
           prev.searchEnabled != curr.searchEnabled,

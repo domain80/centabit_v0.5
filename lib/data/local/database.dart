@@ -136,4 +136,15 @@ class AppDatabase extends _$AppDatabase {
       return NativeDatabase(file);
     });
   }
+
+  /// Clear all data from all tables (for development/testing)
+  Future<void> clearAllData() async {
+    await transaction(() async {
+      await delete(transactions).go();
+      await delete(categories).go();
+      await delete(budgets).go();
+      await delete(allocations).go();
+      await delete(syncQueue).go();
+    });
+  }
 }
