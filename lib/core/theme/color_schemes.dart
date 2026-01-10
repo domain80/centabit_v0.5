@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 
 /// Color schemes for the Centabit app using Material 3.
 ///
@@ -7,93 +8,95 @@ class AppColorSchemes {
   // Private constructor to prevent instantiation
   AppColorSchemes._();
 
-  /// Light color scheme
+  /// Light color scheme using v0.4 color palette
   ///
   /// Features:
-  /// - White background with clean aesthetic
-  /// - Dark charcoal primary color for buttons and emphasis
+  /// - Gray-dominant aesthetic with coral accents
+  /// - Professional, minimal look from v0.4
   /// - Ensures WCAG AA contrast compliance
   static final ColorScheme light = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF2D9D8F), // Teal seed for Material 3 generation
+    seedColor: AppColors.grayGray7, // v0.4 primary - generates harmonious variants
     brightness: Brightness.light,
-    // Primary colors - dark charcoal for buttons and emphasis
-    primary: const Color(0xFF2D3436),
-    onPrimary: const Color(0xFFFFFFFF),
-    primaryContainer: const Color(0xFFDFE6E9),
-    onPrimaryContainer: const Color(0xFF0B0E0F),
-    // Secondary colors - coral/peachy orange from v4
-    secondary: const Color(0xFFE17A60),
-    onSecondary: const Color(0xFFFFFFFF),
-    secondaryContainer: const Color(0xFFECF0F1),
-    onSecondaryContainer: const Color(0xFF2C3539),
-    // Tertiary colors - soft blue for accents
-    tertiary: const Color(0xFF74B9FF),
-    onTertiary: const Color(0xFFFFFFFF),
-    tertiaryContainer: const Color(0xFFDBEDFF),
-    onTertiaryContainer: const Color(0xFF1A2E3F),
+    // Primary colors - gray dominant (v0.4 style)
+    primary: AppColors.grayGray7, // #495057 - v0.4's main primary
+    onPrimary: AppColors.white, // #ffffff
+    primaryContainer: AppColors.grayGray2, // #e9ecef - lighter gray
+    onPrimaryContainer: AppColors.grayGray9, // #212529 - darkest gray
+    // Secondary colors - coral accent (v0.4 style)
+    secondary: AppColors.secondarySecondary700, // #e17a60 - coral
+    onSecondary: AppColors.white, // #ffffff
+    secondaryContainer: AppColors.secondarySecondary200, // #fbece9 - light coral
+    onSecondaryContainer: AppColors.secondarySecondary800, // #90331b - dark coral
+    // Tertiary colors - blue for accents
+    tertiary: AppColors.blueBlue6, // #228be6
+    onTertiary: AppColors.white, // #ffffff
+    tertiaryContainer: AppColors.blueBlue1, // #d0ebff
+    onTertiaryContainer: AppColors.blueBlue9, // #1864ab
     // Error colors
-    error: const Color(0xFFE74C3C),
-    onError: const Color(0xFFFFFFFF),
-    errorContainer: const Color(0xFFFDEDED),
-    onErrorContainer: const Color(0xFF3D1311),
+    error: AppColors.redRed8, // #e03131
+    onError: AppColors.white, // #ffffff
+    errorContainer: AppColors.redRed1, // #ffe3e3
+    onErrorContainer: AppColors.redRed9, // #c92a2a
     // Background and surface colors
-    surface: const Color(0xFFF8F9FA),
-    onSurface: const Color(0xFF2D3436),
-    onSurfaceVariant: const Color(0xFF636E72),
+    surface: AppColors.grayGray0, // #f8f9fa - lightest gray
+    onSurface: AppColors.grayGray7, // #495057
+    onSurfaceVariant: AppColors.grayGray6, // #868e96
+    surfaceContainerHighest: AppColors.grayGray2, // #e9ecef
     // Outline colors
-    outline: const Color(0xFFB2BEC3),
-    outlineVariant: const Color(0xFFDFE6E9),
+    outline: AppColors.grayGray5, // #adb5bd
+    outlineVariant: AppColors.grayGray3, // #dee2e6
     // Shadow and scrim
-    shadow: const Color(0xFF000000),
-    scrim: const Color(0xFF000000),
-    // Inverse colors for snackbars and tooltips
-    inverseSurface: const Color(0xFF2D3436),
-    onInverseSurface: const Color(0xFFF8F9FA),
-    inversePrimary: const Color(0xFF74B9FF),
+    shadow: AppColors.black,
+    scrim: AppColors.black,
+    // Inverse colors for snackbars/tooltips
+    inverseSurface: AppColors.grayGray8, // #343a40
+    onInverseSurface: AppColors.grayGray0, // #f8f9fa
+    inversePrimary: AppColors.blueBlue3, // #74c0fc
   );
 
-  /// Dark color scheme
+  /// Dark color scheme using v0.4 color palette
   ///
   /// Features:
   /// - Dark charcoal background
-  /// - Lighter colors for visibility
+  /// - Lighter grays for visibility
   /// - Maintains visual hierarchy and accessibility
   static final ColorScheme dark = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF2D9D8F), // Same teal seed for consistency
+    seedColor: AppColors.grayGray8, // v0.4 dark primary
     brightness: Brightness.dark,
-    // Primary colors - lighter blue for visibility on dark background
-    primary: const Color(0xFFECEDF9),
-    onPrimary: const Color(0xFF1A2E3F),
-    primaryContainer: const Color(0xFF34495E),
-    onPrimaryContainer: const Color(0xFFDBEDFF),
-    // Secondary colors - coral/peachy orange from v4
-    secondary: const Color(0xFFE17A60),
-    onSecondary: const Color(0xFF2D3436),
-    secondaryContainer: const Color(0xFF4A5559),
-    onSecondaryContainer: const Color(0xFFECF0F1),
-    // Tertiary colors - bright teal for accents
-    tertiary: const Color(0xFF55E6C1),
-    onTertiary: const Color(0xFF003D32),
-    tertiaryContainer: const Color(0xFF005F4B),
-    onTertiaryContainer: const Color(0xFFB3FFE9),
+    // Primary colors - lighter gray for visibility on dark bg
+    primary: AppColors.grayGray6, // #868e96 - lighter for visibility
+    onPrimary: AppColors.grayGray9, // #212529
+    primaryContainer: AppColors.grayGray7, // #495057
+    onPrimaryContainer: AppColors.grayGray2, // #e9ecef
+    // Secondary colors - coral accent (same as light)
+    secondary: AppColors.secondarySecondary700, // #e17a60
+    onSecondary: AppColors.grayGray9, // #212529
+    secondaryContainer: AppColors.secondarySecondary800, // #90331b
+    onSecondaryContainer: AppColors.secondarySecondary200, // #fbece9
+    // Tertiary colors - brighter blue for dark theme
+    tertiary: AppColors.blueBlue3, // #74c0fc - brighter
+    onTertiary: AppColors.blueBlue9, // #1864ab
+    tertiaryContainer: AppColors.blueBlue8, // #1971c2
+    onTertiaryContainer: AppColors.blueBlue1, // #d0ebff
     // Error colors
-    error: const Color(0xFFE74C3C),
-    onError: const Color(0xFF2D0A07),
-    errorContainer: const Color(0xFF5D1F1A),
-    onErrorContainer: const Color(0xFFFDEDED),
+    error: AppColors.redRed8, // #e03131
+    onError: const Color(0xFF2d0a07), // Dark red
+    errorContainer: AppColors.redRed9, // #c92a2a
+    onErrorContainer: AppColors.redRed1, // #ffe3e3
     // Background and surface colors
-    surface: const Color(0xFF2F3640),
-    onSurface: const Color(0xFFF5F6FA),
-    onSurfaceVariant: const Color(0xFFDFE4EA),
+    surface: AppColors.grayGray9, // #212529 - darkest gray
+    onSurface: AppColors.grayGray1, // #f1f3f5 - light gray
+    onSurfaceVariant: AppColors.grayGray4, // #ced4da
+    surfaceContainerHighest: AppColors.grayGray8, // #343a40
     // Outline colors
-    outline: const Color(0xFF57606F),
-    outlineVariant: const Color(0xFF3C444F),
+    outline: AppColors.grayGray6, // #868e96
+    outlineVariant: AppColors.grayGray7, // #495057
     // Shadow and scrim
-    shadow: const Color(0xFF000000),
-    scrim: const Color(0xFF000000),
+    shadow: AppColors.black,
+    scrim: AppColors.black,
     // Inverse colors
-    inverseSurface: const Color(0xFFF5F6FA),
-    onInverseSurface: const Color(0xFF2F3640),
-    inversePrimary: const Color(0xFF2D3436),
+    inverseSurface: AppColors.grayGray1, // #f1f3f5
+    onInverseSurface: AppColors.grayGray9, // #212529
+    inversePrimary: AppColors.grayGray7, // #495057
   );
 }

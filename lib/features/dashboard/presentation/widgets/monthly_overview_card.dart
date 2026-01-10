@@ -179,7 +179,7 @@ class _MonthlyOverviewCardState extends State<MonthlyOverviewCard> {
               Expanded(
                 flex: (widget.overview.budgetedPercentage * 100).toInt(),
                 child: Container(
-                  color: Colors.green.shade400,
+                  color: customColors.successLight,
                 ),
               ),
 

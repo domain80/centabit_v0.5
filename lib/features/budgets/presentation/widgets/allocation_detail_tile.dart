@@ -15,11 +15,12 @@ class AllocationDetailTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final customColors = theme.extension<AppCustomColors>()!;
     final spacing = theme.extension<AppSpacing>()!;
     final radius = theme.extension<AppRadius>()!;
 
     final percentage = allocation.spentPercentage;
-    final progressColor = _getProgressColor(percentage, colorScheme);
+    final progressColor = _getProgressColor(percentage, colorScheme, customColors);
 
     return Container(
       padding: EdgeInsets.all(spacing.md),
@@ -101,10 +102,14 @@ class AllocationDetailTile extends StatelessWidget {
     );
   }
 
-  Color _getProgressColor(double percentage, ColorScheme colorScheme) {
+  Color _getProgressColor(
+    double percentage,
+    ColorScheme colorScheme,
+    AppCustomColors customColors,
+  ) {
     if (percentage > 100) return colorScheme.error;
-    if (percentage >= 90) return Colors.orange;
-    return Colors.green;
+    if (percentage >= 90) return customColors.warningDark;
+    return customColors.successDark;
   }
 
   String _formatCurrency(double amount) {

@@ -15,11 +15,12 @@ class BudgetSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final customColors = theme.extension<AppCustomColors>()!;
     final spacing = theme.extension<AppSpacing>()!;
     final radius = theme.extension<AppRadius>()!;
 
     final barValue = details.barValue;
-    final barColor = _getBarColor(barValue, colorScheme);
+    final barColor = _getBarColor(barValue, colorScheme, customColors);
 
     return Container(
       padding: EdgeInsets.all(spacing.lg),
@@ -125,10 +126,14 @@ class BudgetSummaryCard extends StatelessWidget {
     );
   }
 
-  Color _getBarColor(double barValue, ColorScheme colorScheme) {
+  Color _getBarColor(
+    double barValue,
+    ColorScheme colorScheme,
+    AppCustomColors customColors,
+  ) {
     if (barValue > 1.0) return colorScheme.error;
-    if (barValue >= 0.9) return Colors.orange;
-    return Colors.green;
+    if (barValue >= 0.9) return customColors.warningDark;
+    return customColors.successDark;
   }
 
   String _getBarStatusText(double barValue) {

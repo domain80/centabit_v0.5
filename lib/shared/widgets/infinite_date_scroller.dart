@@ -391,9 +391,9 @@ class _DatePill extends StatelessWidget {
         boxShadow: isSelected
             ? [
                 BoxShadow(
-                  color: theme.shadowColor,
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
+                  color: theme.shadowColor.withAlpha(40),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
                 ),
               ]
             : [
