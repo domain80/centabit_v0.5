@@ -251,20 +251,20 @@ pre code {
   position: relative;
   width: 100%;
   max-width: 100%;
-  height: fit-content; /* Allow video to have natural height */
+  height: 100%; /* Critical for sticky positioning! */
 }
 
 .video-container-sticky {
   position: -webkit-sticky;
   position: sticky;
-  top: calc(var(--vp-nav-height) + 1rem); /* Stick below navbar */
+  top: calc(var(--vp-nav-height) + 1rem); /* 1rem scroll margin */
   width: 100%;
   max-width: 16rem;
   margin: 0;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  z-index: 1;
+  z-index: 10;
   will-change: transform; /* Optimize for sticky positioning */
 }
 
