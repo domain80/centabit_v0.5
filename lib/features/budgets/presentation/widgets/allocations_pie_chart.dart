@@ -55,6 +55,27 @@ class _AllocationsPieChartState extends State<AllocationsPieChart> {
     );
   }
 
+  void _handleSelection(int index) {
+    setState(() {
+      touchedIndex = index;
+      _selectionShowTime = DateTime.now();
+    });
+
+    // Scroll to item in legend
+    _scrollToItem(index);
+
+    // Auto-clear selection after 3 seconds total (1.5s min + 1.5s grace)
+    _clearTimer?.cancel();
+    _clearTimer = Timer(const Duration(milliseconds: 3000), () {
+      if (mounted) {
+        setState(() {
+          touchedIndex = null;
+          _selectionShowTime = null;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) {
@@ -110,24 +131,7 @@ class _AllocationsPieChartState extends State<AllocationsPieChart> {
                   final section = pieTouchResponse!.touchedSection!;
                   final index = section.touchedSectionIndex;
 
-                  setState(() {
-                    touchedIndex = index;
-                    _selectionShowTime = DateTime.now();
-                  });
-
-                  // Scroll to item in legend
-                  _scrollToItem(index);
-
-                  // Auto-clear selection after 3 seconds total (1.5s min + 1.5s grace)
-                  _clearTimer?.cancel();
-                  _clearTimer = Timer(const Duration(milliseconds: 3000), () {
-                    if (mounted) {
-                      setState(() {
-                        touchedIndex = null;
-                        _selectionShowTime = null;
-                      });
-                    }
-                  });
+                  _handleSelection(index);
                 },
               ),
             ),
@@ -184,7 +188,13 @@ class _AllocationsPieChartState extends State<AllocationsPieChart> {
       itemBuilder: (context, index) {
         final item = widget.data[index];
         final isSelected = index == touchedIndex;
-        return _buildLegendItem(colors[index], item, theme, isSelected);
+        return _buildLegendItem(
+          colors[index],
+          item,
+          theme,
+          isSelected,
+          () => _handleSelection(index),
+        );
       },
     );
   }
@@ -194,46 +204,50 @@ class _AllocationsPieChartState extends State<AllocationsPieChart> {
     TransactionsChartData item,
     ThemeData theme,
     bool isSelected,
+    VoidCallback onTap,
   ) {
     final colorScheme = theme.colorScheme;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? colorScheme.primaryContainer.withAlpha(100)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        border: isSelected
-            ? Border.all(
-                color: colorScheme.primary.withAlpha(150),
-                width: 2,
-              )
-            : null,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '${item.categoryName}: \$${item.allocationAmount.toStringAsFixed(2)}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colorScheme.primaryContainer.withAlpha(100)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected
+              ? Border.all(
+                  color: colorScheme.primary.withAlpha(150),
+                  width: 2,
+                )
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '${item.categoryName}: \$${item.allocationAmount.toStringAsFixed(2)}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
