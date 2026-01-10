@@ -4,11 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Widget that wraps scrollable content and handles nav bar auto-hide
 ///
+/// Can be temporarily disabled during programmatic scrolls to prevent
+/// unwanted navbar hiding.
+///
 /// Usage:
 /// ```dart
+/// final wrapperKey = GlobalKey<_NavScrollWrapperState>();
 /// NavScrollWrapper(
+///   key: wrapperKey,
 ///   child: ListView.builder(...),
 /// )
+///
+/// // Disable during programmatic scroll
+/// wrapperKey.currentState?.setEnabled(false);
+/// await scrollController.animateTo(...);
+/// wrapperKey.currentState?.setEnabled(true);
 /// ```
 class NavScrollWrapper extends StatefulWidget {
   final Widget child;
@@ -16,21 +26,40 @@ class NavScrollWrapper extends StatefulWidget {
   const NavScrollWrapper({super.key, required this.child});
 
   @override
-  State<NavScrollWrapper> createState() => _NavScrollWrapperState();
+  State<NavScrollWrapper> createState() => NavScrollWrapperState();
 }
 
-class _NavScrollWrapperState extends State<NavScrollWrapper> {
+class NavScrollWrapperState extends State<NavScrollWrapper> {
   double _lastScrollOffset = 0;
+  bool _isProgrammaticScroll = false;
+
+  /// Marks the start of a programmatic scroll
+  void beginProgrammaticScroll() {
+    _isProgrammaticScroll = true;
+  }
+
+  /// Marks the end of a programmatic scroll
+  void endProgrammaticScroll() {
+    // Simply flip the flag - position is already tracked during scroll
+    _isProgrammaticScroll = false;
+  }
 
   bool _onScrollNotification(ScrollNotification notification) {
     if (notification is! ScrollUpdateNotification) return false;
+
+    final metrics = notification.metrics;
+    final currentOffset = metrics.pixels;
+
+    // During programmatic scrolls, track position but don't trigger navbar changes
+    if (_isProgrammaticScroll) {
+      _lastScrollOffset = currentOffset;
+      return false;
+    }
 
     // Check if NavCubit is available (it won't be on sub-routes like budget details)
     final navCubit = context.read<NavCubit?>();
     if (navCubit == null) return false; // Gracefully handle missing NavCubit
 
-    final metrics = notification.metrics;
-    final currentOffset = metrics.pixels;
     final scrollDelta = currentOffset - _lastScrollOffset;
 
     // Ignore tiny scroll movements

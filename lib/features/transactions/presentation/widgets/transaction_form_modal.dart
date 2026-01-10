@@ -120,7 +120,9 @@ class _TransactionFormContent extends StatelessWidget {
               ? TimeOfDay.fromDateTime(initialValue!.transactionDate)
               : TimeOfDay.now(),
           'date': initialValue?.transactionDate ?? DateTime.now(),
-          'isDebit': (initialValue?.type == TransactionType.debit),
+          'isDebit': initialValue == null
+              ? true
+              : (initialValue?.type == TransactionType.debit),
           'amount': initialValue?.amount.toStringAsFixed(2) ?? '',
           'budgetId': defaultBudgetId,
           'categoryId': initialValue?.categoryId ?? '',
@@ -141,7 +143,9 @@ class _TransactionFormContent extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 28, // v4's h2
                         fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.onSurface, // Changed from primary for better contrast
+                        color: theme
+                            .colorScheme
+                            .onSurface, // Changed from primary for better contrast
                       ),
                     ),
                   ),

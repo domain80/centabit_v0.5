@@ -32,7 +32,7 @@ class SmartBudgetCalculator {
   /// 1.2 means spending happens 20% faster early in the period.
   /// This reflects the "payday effect" where people spend more right after
   /// receiving income.
-  static const double defaultFrontLoadFactor = 1.2;
+  static const double defaultFrontLoadFactor = 1.4;
 
   /// Minimum number of historical periods needed to enable learning
   ///
@@ -196,7 +196,8 @@ class SmartBudgetCalculator {
     // Interpolate between checkpoints
     if (before != null && after != null && before.day != after.day) {
       final ratio = (targetDay - before.day) / (after.day - before.day);
-      final interpolatedSpent = before.spent + ratio * (after.spent - before.spent);
+      final interpolatedSpent =
+          before.spent + ratio * (after.spent - before.spent);
       return interpolatedSpent / totalBudget;
     } else if (before != null) {
       return before.spent / totalBudget;
@@ -247,11 +248,7 @@ class SmartBudgetCalculator {
       message = 'Significantly over budget! 🚨';
     }
 
-    return BARResult(
-      bar: bar,
-      status: status,
-      message: message,
-    );
+    return BARResult(bar: bar, status: status, message: message);
   }
 
   /// Full calculation with all guards and adaptive learning
@@ -407,8 +404,5 @@ class SpendingCheckpoint {
   /// Amount spent by this day
   final double spent;
 
-  const SpendingCheckpoint({
-    required this.day,
-    required this.spent,
-  });
+  const SpendingCheckpoint({required this.day, required this.spent});
 }

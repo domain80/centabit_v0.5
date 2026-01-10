@@ -19,9 +19,9 @@ class TransactionTypeSwitch extends StatelessWidget {
     return FormBuilderSwitch(
       name: 'isDebit',
       title: Text('Debit', style: textTheme.bodyLarge?.copyWith()),
-      // activeColor: theme.colorScheme.secondary,
+      activeColor: theme.colorScheme.secondary,
       inactiveThumbColor: theme.colorScheme.onSurface,
-      // activeTrackColor: theme.colorScheme.secondary.withValues(alpha: 0.5),
+      activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.1),
       // inactiveTrackColor: theme.colorScheme.onSurface.withValues(alpha: 0.3),
       contentPadding: EdgeInsets.zero,
       decoration: const InputDecoration(

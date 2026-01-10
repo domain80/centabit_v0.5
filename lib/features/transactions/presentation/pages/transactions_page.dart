@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:centabit/core/di/injection.dart';
@@ -45,8 +46,10 @@ class _TransactionsView extends StatefulWidget {
 class _TransactionsViewState extends State<_TransactionsView> {
   final GroupedItemScrollController _scrollController =
       GroupedItemScrollController();
+  final GlobalKey<NavScrollWrapperState> _navScrollKey = GlobalKey();
 
   NavCubit? _navCubit; // Store reference to avoid context access in dispose
+  Timer? _programmaticScrollTimer;
 
   @override
   void initState() {
@@ -72,6 +75,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
   void dispose() {
     // Clear filter action when leaving page (using stored reference)
     _navCubit?.setFilterAction(null);
+    _programmaticScrollTimer?.cancel();
     super.dispose();
   }
 
@@ -87,12 +91,25 @@ class _TransactionsViewState extends State<_TransactionsView> {
     });
 
     if (index != -1) {
+      // Cancel any existing timer to prevent race conditions
+      _programmaticScrollTimer?.cancel();
+
+      // Mark scroll as programmatic to prevent navbar hiding
+      _navScrollKey.currentState?.beginProgrammaticScroll();
+
       _scrollController.scrollTo(
         index: index,
         automaticAlignment: true,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
+
+      // Schedule end of programmatic scroll after animation duration
+      // Timer is cancelled if another scroll starts before completion
+      _programmaticScrollTimer = Timer(const Duration(milliseconds: 500), () {
+        _navScrollKey.currentState?.endProgrammaticScroll();
+        _programmaticScrollTimer = null;
+      });
     }
   }
 
@@ -103,6 +120,7 @@ class _TransactionsViewState extends State<_TransactionsView> {
     return Scaffold(
       appBar: sharedAppBar(context, title: const Text('Transactions')),
       body: NavScrollWrapper(
+        key: _navScrollKey,
         child: BlocBuilder<TransactionListCubit, TransactionListState>(
           builder: (context, state) {
             return BlocListener<NavCubit, NavState>(
