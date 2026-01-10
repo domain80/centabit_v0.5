@@ -30,10 +30,8 @@ class TransactionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<TransactionListCubit>(),
-      child: const _TransactionsView(),
-    );
+    // TransactionListCubit provided by CustomPageViewShell
+    return const _TransactionsView();
   }
 }
 

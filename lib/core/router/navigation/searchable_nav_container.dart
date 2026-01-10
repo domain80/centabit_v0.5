@@ -20,10 +20,25 @@ import 'package:go_router/go_router.dart';
 /// Stack layout with:
 /// - Search bar on top (positioned layer)
 /// - Navigation bar on bottom (positioned layer, scaled when searching)
+///
+/// **Usage**:
+/// - With StatefulNavigationShell: `SearchableNavContainer(navigationShell: shell)`
+/// - With PageView: `SearchableNavContainer(selectedIndex: 0, onTabChange: callback)`
 class SearchableNavContainer extends StatefulWidget {
-  final StatefulNavigationShell navigationShell;
+  final StatefulNavigationShell? navigationShell;
+  final int? selectedIndex;
+  final void Function(int)? onTabChange;
 
-  const SearchableNavContainer({super.key, required this.navigationShell});
+  const SearchableNavContainer({
+    super.key,
+    this.navigationShell,
+    this.selectedIndex,
+    this.onTabChange,
+  }) : assert(
+         (navigationShell != null && selectedIndex == null && onTabChange == null) ||
+         (navigationShell == null && selectedIndex != null && onTabChange != null),
+         'Either provide navigationShell OR (selectedIndex + onTabChange)',
+       );
 
   @override
   State<SearchableNavContainer> createState() => _SearchableNavContainerState();
@@ -65,7 +80,7 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
                   scale: navState.searchEnabled
                       ? (navState.isSearching ? 1.0 : 0.45)
                       : 0.0,
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
                   alignment: Alignment.center,
                   child: SizedBox(
@@ -86,13 +101,19 @@ class _SearchableNavContainerState extends State<SearchableNavContainer> {
                 absorbing: navState.isSearching,
                 child: AnimatedScale(
                   scale: navState.isSearching ? 0.45 : 1.0,
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
                   alignment: Alignment.center,
-                  child: SharedNavBar(
-                    navigationShell: widget.navigationShell,
-                    actionType: navState.actionType,
-                  ),
+                  child: widget.navigationShell != null
+                      ? SharedNavBar(
+                          navigationShell: widget.navigationShell,
+                          actionType: navState.actionType,
+                        )
+                      : SharedNavBar(
+                          selectedIndex: widget.selectedIndex,
+                          actionType: navState.actionType,
+                          onTabChange: widget.onTabChange,
+                        ),
                 ),
               ),
             ),

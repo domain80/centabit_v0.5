@@ -71,11 +71,9 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => getIt<DashboardCubit>()),
-        BlocProvider(create: (_) => getIt<DateFilterCubit>()),
-      ],
+    // DashboardCubit provided by CustomPageViewShell
+    return BlocProvider(
+      create: (_) => getIt<DateFilterCubit>(),
       child: const _DashboardView(),
     );
   }

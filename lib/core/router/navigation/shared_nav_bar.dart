@@ -14,15 +14,27 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 /// Combines navigation tabs and contextual action button in a row,
 /// following the v0.4 semantic pattern where nav and action are siblings.
 /// Includes glassmorphic styling with backdrop blur.
+///
+/// **Usage**:
+/// - With StatefulNavigationShell: `SharedNavBar(navigationShell: shell, actionType: type)`
+/// - With PageView: `SharedNavBar(selectedIndex: 0, actionType: type, onTabChange: callback)`
 class SharedNavBar extends StatelessWidget {
-  final StatefulNavigationShell navigationShell;
+  final StatefulNavigationShell? navigationShell;
+  final int? selectedIndex;
   final NavActionType actionType;
+  final void Function(int)? onTabChange;
 
   const SharedNavBar({
     super.key,
-    required this.navigationShell,
+    this.navigationShell,
+    this.selectedIndex,
     required this.actionType,
-  });
+    this.onTabChange,
+  }) : assert(
+         (navigationShell != null && selectedIndex == null && onTabChange == null) ||
+         (navigationShell == null && selectedIndex != null && onTabChange != null),
+         'Either provide navigationShell OR (selectedIndex + onTabChange)',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +79,7 @@ class SharedNavBar extends StatelessWidget {
                   vertical: spacing.xs,
                 ),
                 child: GNav(
-                  selectedIndex: navigationShell.currentIndex,
+                  selectedIndex: selectedIndex ?? navigationShell!.currentIndex,
                   onTabChange: (index) => _onTabChange(context, index),
                   tabBorderRadius: radius.xl2,
                   duration: const Duration(milliseconds: 200),
@@ -95,10 +107,17 @@ class SharedNavBar extends StatelessWidget {
   }
 
   void _onTabChange(BuildContext context, int index) {
+    // PageView mode: use callback
+    if (onTabChange != null) {
+      onTabChange!(index);
+      return;
+    }
+
+    // StatefulNavigationShell mode: use goBranch
     context.read<NavCubit>().updateTab(index);
-    navigationShell.goBranch(
+    navigationShell!.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == navigationShell!.currentIndex,
     );
   }
 }

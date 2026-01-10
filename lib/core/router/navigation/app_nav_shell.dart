@@ -113,7 +113,7 @@ class _AppNavShellState extends State<AppNavShell> {
 
     return AnimatedSlide(
       offset: shouldShow ? Offset.zero : const Offset(0, 1),
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       child: ClipRect(
         child: BackdropFilter(

@@ -164,7 +164,8 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory<NavCubit>(() => NavCubit());
 
-  getIt.registerFactory<TransactionListCubit>(
+  // Tab cubit as singleton (survives page rebuilds for PageView)
+  getIt.registerLazySingleton<TransactionListCubit>(
     () => TransactionListCubit(
       getIt<TransactionRepository>(),
       getIt<CategoryRepository>(),
@@ -185,7 +186,8 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  getIt.registerFactory<DashboardCubit>(
+  // Tab cubit as singleton (survives page rebuilds for PageView)
+  getIt.registerLazySingleton<DashboardCubit>(
     () => DashboardCubit(
       getIt<BudgetRepository>(),
       getIt<AllocationRepository>(),
@@ -201,7 +203,8 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  getIt.registerFactory<BudgetListCubit>(
+  // Tab cubit as singleton (survives page rebuilds for PageView)
+  getIt.registerLazySingleton<BudgetListCubit>(
     () => BudgetListCubit(
       getIt<BudgetRepository>(),
       getIt<AllocationRepository>(),

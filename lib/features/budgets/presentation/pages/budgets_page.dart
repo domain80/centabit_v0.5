@@ -1,4 +1,3 @@
-import 'package:centabit/core/di/injection.dart';
 import 'package:centabit/core/theme/tabler_icons.dart';
 import 'package:centabit/core/theme/theme_extensions.dart';
 import 'package:centabit/features/budgets/presentation/cubits/budget_list_cubit.dart';
@@ -28,10 +27,8 @@ class BudgetsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<BudgetListCubit>(),
-      child: const _BudgetsView(),
-    );
+    // BudgetListCubit provided by CustomPageViewShell
+    return const _BudgetsView();
   }
 }
 
